@@ -50,4 +50,10 @@ Projet personnel de montée en compétences, mené selon des standards professio
 # npm install
 # npm run dev
 # npm run build
+
+# Infra (Docker Compose)
+# cp .env.example .env
+# docker compose up -d postgres api          # API sur http://localhost:5000, Postgres sur localhost:5432
+# docker compose --profile tools up -d pgadmin   # pgAdmin optionnel sur http://localhost:5050
+# docker compose down                         # arrête les conteneurs (conserve le volume postgres-data)
 ```

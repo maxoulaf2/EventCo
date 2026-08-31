@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/[Dd]ebug/
+**/[Rr]elease/
+client/node_modules/
+client/dist/
+client/.vite/
+.git/
+.vs/
+**/*.user
+docs/
