@@ -7,7 +7,7 @@ namespace EventCo.Domain.Tests.Auth;
 public class MagicLinkTokenTests
 {
     private static MagicLinkToken CreateToken(DateTime? expiresAt = null) =>
-        MagicLinkToken.Create(Email.Create("test@example.com"), "hashed-token", expiresAt ?? DateTime.UtcNow.AddMinutes(15));
+        MagicLinkToken.Create(Email.Create("test@example.com"), "hashed-token", expiresAt ?? DateTime.UtcNow.AddMinutes(15), DateTime.UtcNow);
 
     [Fact]
     public void Create_ExpiresAtInThePast_ThrowsMagicLinkTokenExpirationInThePastException()

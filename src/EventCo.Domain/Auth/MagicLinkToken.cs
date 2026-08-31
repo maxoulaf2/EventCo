@@ -24,12 +24,12 @@ public class MagicLinkToken : Entity
         ExpiresAt = expiresAt;
     }
 
-    public static MagicLinkToken Create(Email email, string tokenHash, DateTime expiresAt)
+    public static MagicLinkToken Create(Email email, string tokenHash, DateTime expiresAt, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
             throw new MagicLinkTokenHashEmptyException();
 
-        if (expiresAt <= DateTime.UtcNow)
+        if (expiresAt <= now)
             throw new MagicLinkTokenExpirationInThePastException(expiresAt);
 
         return new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt);

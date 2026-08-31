@@ -11,7 +11,7 @@ public class UserTests
     {
         var email = Email.Create("test@example.com");
 
-        var user = User.Create(email, "Alice");
+        var user = User.Create(email, "Alice", DateTime.UtcNow);
 
         Assert.Equal(email, user.Email);
         Assert.Equal("Alice", user.DisplayName);
@@ -24,13 +24,13 @@ public class UserTests
     {
         var email = Email.Create("test@example.com");
 
-        Assert.Throws<UserDisplayNameEmptyException>(() => User.Create(email, "  "));
+        Assert.Throws<UserDisplayNameEmptyException>(() => User.Create(email, "  ", DateTime.UtcNow));
     }
 
     [Fact]
     public void UpdateProfile_ValidData_UpdatesDisplayNameAndAvatar()
     {
-        var user = User.Create(Email.Create("test@example.com"), "Alice");
+        var user = User.Create(Email.Create("test@example.com"), "Alice", DateTime.UtcNow);
 
         user.UpdateProfile("Alice B.", "https://example.com/avatar.png");
 

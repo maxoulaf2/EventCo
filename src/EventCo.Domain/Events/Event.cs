@@ -35,12 +35,11 @@ public class Event : Entity
         CreatedAt = createdAt;
     }
 
-    public static Event Create(string title, string? description, DateTime eventDate, string? location, Guid createdByUserId)
+    public static Event Create(string title, string? description, DateTime eventDate, string? location, Guid createdByUserId, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException();
 
-        var now = DateTime.UtcNow;
         var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, createdByUserId, now);
 
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
@@ -65,17 +64,17 @@ public class Event : Entity
 
     public void Complete() => Status = EventStatus.Completed;
 
-    public EventParticipant InviteParticipant(Guid userId)
+    public EventParticipant InviteParticipant(Guid userId, DateTime now)
     {
         if (_participants.Any(p => p.UserId == userId))
             throw new ParticipantAlreadyInvitedException(Id, userId);
 
-        var participant = new EventParticipant(Id, userId, ParticipantRole.Participant, DateTime.UtcNow);
+        var participant = new EventParticipant(Id, userId, ParticipantRole.Participant, now);
         _participants.Add(participant);
         return participant;
     }
 
-    public void ConfirmParticipant(Guid userId) => GetParticipant(userId).Join(DateTime.UtcNow);
+    public void ConfirmParticipant(Guid userId, DateTime now) => GetParticipant(userId).Join(now);
 
     public void PromoteToOrganizer(Guid actingUserId, Guid targetUserId)
     {
@@ -103,9 +102,9 @@ public class Event : Entity
         _participants.Remove(GetParticipant(targetUserId));
     }
 
-    public EventTask AddTask(string title, TaskCategory category, string? quantity)
+    public EventTask AddTask(string title, TaskCategory category, string? quantity, DateTime now)
     {
-        var task = new EventTask(Id, title, category, quantity, DateTime.UtcNow);
+        var task = new EventTask(Id, title, category, quantity, now);
         _tasks.Add(task);
         return task;
     }

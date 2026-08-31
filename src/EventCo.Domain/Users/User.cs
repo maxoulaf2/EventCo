@@ -22,12 +22,12 @@ public class User : Entity
         CreatedAt = createdAt;
     }
 
-    public static User Create(Email email, string displayName)
+    public static User Create(Email email, string displayName, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(displayName))
             throw new UserDisplayNameEmptyException();
 
-        return new User(Guid.NewGuid(), email, displayName.Trim(), DateTime.UtcNow);
+        return new User(Guid.NewGuid(), email, displayName.Trim(), now);
     }
 
     public void UpdateProfile(string displayName, string? avatarUrl)
