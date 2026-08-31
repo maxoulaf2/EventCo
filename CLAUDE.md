@@ -41,10 +41,11 @@ Projet personnel de montée en compétences, mené selon des standards professio
 
 ```bash
 # Backend
-# dotnet build
-# dotnet run --project src/EventCo.Api
-# dotnet ef migrations add <NomMigration> --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
-# dotnet test
+dotnet build
+dotnet run --project src/EventCo.Api
+dotnet ef migrations add <NomMigration> --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
+dotnet ef database update --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
+dotnet test
 
 # Frontend
 # npm install
