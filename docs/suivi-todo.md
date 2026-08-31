@@ -15,7 +15,7 @@
 
 ## Lot 1 — Fondations
 
-- [ ] Initialisation de la solution .NET (Domain / Application / Infrastructure / Api) selon la structure définie dans `conventions-code.md`
+- [x] Initialisation de la solution .NET (Domain / Application / Infrastructure / Api) selon la structure définie dans `conventions-code.md`
 - [ ] Initialisation du projet React (Vite + TypeScript + Tailwind CSS)
 - [ ] Docker Compose : API + PostgreSQL (+ pgAdmin optionnel en dev)
 - [ ] Modèle de données : entités `User`, `MagicLinkToken`, `Event`, `EventParticipant`, `EventTask` (Domain)
@@ -78,4 +78,4 @@
 
 > Ajouter une ligne par tâche terminée, format : `- AAAA-MM-JJ — [Lot X] Description de la tâche — fichiers/composants principaux`
 
-- *(vide pour l'instant — le développement n'a pas encore commencé)*
+- 2026-08-31 — [Lot 1] Initialisation de la solution .NET (Domain / Application / Infrastructure / Api + projets de tests xUnit), câblage des références selon la règle de dépendance Clean Architecture, build et `dotnet test` vérifiés OK — `EventCo.slnx`, `src/EventCo.Domain`, `src/EventCo.Application`, `src/EventCo.Infrastructure`, `src/EventCo.Api`, `tests/EventCo.Domain.Tests`, `tests/EventCo.Application.Tests`, `tests/EventCo.Api.Tests`
