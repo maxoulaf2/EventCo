@@ -16,7 +16,7 @@
 ## Lot 1 — Fondations
 
 - [x] Initialisation de la solution .NET (Domain / Application / Infrastructure / Api) selon la structure définie dans `conventions-code.md`
-- [ ] Initialisation du projet React (Vite + TypeScript + Tailwind CSS)
+- [x] Initialisation du projet React (Vite + TypeScript + Tailwind CSS)
 - [ ] Docker Compose : API + PostgreSQL (+ pgAdmin optionnel en dev)
 - [ ] Modèle de données : entités `User`, `MagicLinkToken`, `Event`, `EventParticipant`, `EventTask` (Domain)
 - [ ] Configuration EF Core + première migration + `DbContext`
@@ -79,3 +79,4 @@
 > Ajouter une ligne par tâche terminée, format : `- AAAA-MM-JJ — [Lot X] Description de la tâche — fichiers/composants principaux`
 
 - 2026-08-31 — [Lot 1] Initialisation de la solution .NET (Domain / Application / Infrastructure / Api + projets de tests xUnit), câblage des références selon la règle de dépendance Clean Architecture, build et `dotnet test` vérifiés OK — `EventCo.slnx`, `src/EventCo.Domain`, `src/EventCo.Application`, `src/EventCo.Infrastructure`, `src/EventCo.Api`, `tests/EventCo.Domain.Tests`, `tests/EventCo.Application.Tests`, `tests/EventCo.Api.Tests`
+- 2026-08-31 — [Lot 1] Initialisation du projet React (Vite + TypeScript + Tailwind CSS v4 via `@tailwindcss/vite`), nettoyage du boilerplate Vite, page d'accueil minimale, build (`tsc -b && vite build`) et serveur de dev vérifiés OK — `client/` (structure feature-based à mettre en place au fur et à mesure des features du Lot 2), `client/vite.config.ts`, `client/src/index.css`, `client/src/App.tsx`, `.gitignore`
