@@ -1,3 +1,4 @@
+using EventCo.Domain.Auth.Exceptions;
 using EventCo.Domain.Common;
 using EventCo.Domain.ValueObjects;
 
@@ -26,10 +27,10 @@ public class MagicLinkToken : Entity
     public static MagicLinkToken Create(Email email, string tokenHash, DateTime expiresAt)
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
-            throw new DomainException("Le hash du token ne peut pas être vide.");
+            throw new MagicLinkTokenHashEmptyException();
 
         if (expiresAt <= DateTime.UtcNow)
-            throw new DomainException("La date d'expiration doit être dans le futur.");
+            throw new MagicLinkTokenExpirationInThePastException(expiresAt);
 
         return new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt);
     }
@@ -39,10 +40,10 @@ public class MagicLinkToken : Entity
     public void Consume(DateTime now)
     {
         if (IsConsumed)
-            throw new DomainException("Ce lien de connexion a déjà été utilisé.");
+            throw new MagicLinkTokenAlreadyConsumedException(Id, ConsumedAt);
 
         if (IsExpired(now))
-            throw new DomainException("Ce lien de connexion a expiré.");
+            throw new MagicLinkTokenExpiredException(Id, ExpiresAt, now);
 
         ConsumedAt = now;
     }

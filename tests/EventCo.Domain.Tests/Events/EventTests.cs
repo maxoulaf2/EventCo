@@ -1,5 +1,5 @@
-using EventCo.Domain.Common;
 using EventCo.Domain.Events;
+using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Domain.Tests.Events;
 
@@ -24,17 +24,17 @@ public class EventTests
     }
 
     [Fact]
-    public void Create_EmptyTitle_ThrowsDomainException()
+    public void Create_EmptyTitle_ThrowsEventTitleEmptyException()
     {
-        Assert.Throws<DomainException>(() => Event.Create(" ", null, DateTime.UtcNow, null, Guid.NewGuid()));
+        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, Guid.NewGuid()));
     }
 
     [Fact]
-    public void InviteParticipant_UserAlreadyInvited_ThrowsDomainException()
+    public void InviteParticipant_UserAlreadyInvited_ThrowsParticipantAlreadyInvitedException()
     {
         var @event = CreateEvent(out var creatorId);
 
-        Assert.Throws<DomainException>(() => @event.InviteParticipant(creatorId));
+        Assert.Throws<ParticipantAlreadyInvitedException>(() => @event.InviteParticipant(creatorId));
     }
 
     [Fact]
@@ -50,13 +50,13 @@ public class EventTests
     }
 
     [Fact]
-    public void PromoteToOrganizer_ActingUserNotCreator_ThrowsDomainException()
+    public void PromoteToOrganizer_ActingUserNotCreator_ThrowsUserNotEventCreatorException()
     {
         var @event = CreateEvent(out _);
         var invitedUserId = Guid.NewGuid();
         @event.InviteParticipant(invitedUserId);
 
-        Assert.Throws<DomainException>(() => @event.PromoteToOrganizer(invitedUserId, invitedUserId));
+        Assert.Throws<UserNotEventCreatorException>(() => @event.PromoteToOrganizer(invitedUserId, invitedUserId));
     }
 
     [Fact]
@@ -72,11 +72,11 @@ public class EventTests
     }
 
     [Fact]
-    public void RemoveParticipant_TargetIsCreator_ThrowsDomainException()
+    public void RemoveParticipant_TargetIsCreator_ThrowsEventCreatorCannotBeRemovedException()
     {
         var @event = CreateEvent(out var creatorId);
 
-        Assert.Throws<DomainException>(() => @event.RemoveParticipant(creatorId, creatorId));
+        Assert.Throws<EventCreatorCannotBeRemovedException>(() => @event.RemoveParticipant(creatorId, creatorId));
     }
 
     [Fact]
@@ -92,12 +92,12 @@ public class EventTests
     }
 
     [Fact]
-    public void AssignTask_UserNotParticipant_ThrowsDomainException()
+    public void AssignTask_UserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
     {
         var @event = CreateEvent(out _);
         var task = @event.AddTask("Bûche au chocolat", TaskCategory.Courses, "1");
 
-        Assert.Throws<DomainException>(() => @event.AssignTask(task.Id, Guid.NewGuid()));
+        Assert.Throws<TaskAssigneeNotParticipantException>(() => @event.AssignTask(task.Id, Guid.NewGuid()));
     }
 
     [Fact]
@@ -123,10 +123,10 @@ public class EventTests
     }
 
     [Fact]
-    public void RemoveTask_UnknownTaskId_ThrowsDomainException()
+    public void RemoveTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
     {
         var @event = CreateEvent(out _);
 
-        Assert.Throws<DomainException>(() => @event.RemoveTask(Guid.NewGuid()));
+        Assert.Throws<EventTaskNotFoundException>(() => @event.RemoveTask(Guid.NewGuid()));
     }
 }

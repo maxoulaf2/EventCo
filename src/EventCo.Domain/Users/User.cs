@@ -1,4 +1,5 @@
 using EventCo.Domain.Common;
+using EventCo.Domain.Users.Exceptions;
 using EventCo.Domain.ValueObjects;
 
 namespace EventCo.Domain.Users;
@@ -24,7 +25,7 @@ public class User : Entity
     public static User Create(Email email, string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName))
-            throw new DomainException("Le nom affiché ne peut pas être vide.");
+            throw new UserDisplayNameEmptyException();
 
         return new User(Guid.NewGuid(), email, displayName.Trim(), DateTime.UtcNow);
     }
@@ -32,7 +33,7 @@ public class User : Entity
     public void UpdateProfile(string displayName, string? avatarUrl)
     {
         if (string.IsNullOrWhiteSpace(displayName))
-            throw new DomainException("Le nom affiché ne peut pas être vide.");
+            throw new UserDisplayNameEmptyException(Id);
 
         DisplayName = displayName.Trim();
         AvatarUrl = avatarUrl;

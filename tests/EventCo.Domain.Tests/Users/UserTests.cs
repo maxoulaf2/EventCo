@@ -1,5 +1,5 @@
-using EventCo.Domain.Common;
 using EventCo.Domain.Users;
+using EventCo.Domain.Users.Exceptions;
 using EventCo.Domain.ValueObjects;
 
 namespace EventCo.Domain.Tests.Users;
@@ -20,11 +20,11 @@ public class UserTests
     }
 
     [Fact]
-    public void Create_EmptyDisplayName_ThrowsDomainException()
+    public void Create_EmptyDisplayName_ThrowsUserDisplayNameEmptyException()
     {
         var email = Email.Create("test@example.com");
 
-        Assert.Throws<DomainException>(() => User.Create(email, "  "));
+        Assert.Throws<UserDisplayNameEmptyException>(() => User.Create(email, "  "));
     }
 
     [Fact]

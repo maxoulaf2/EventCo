@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using EventCo.Domain.Common;
+using EventCo.Domain.ValueObjects.Exceptions;
 
 namespace EventCo.Domain.ValueObjects;
 
@@ -15,12 +15,12 @@ public sealed partial class Email : IEquatable<Email>
     public static Email Create(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
-            throw new DomainException("L'email ne peut pas être vide.");
+            throw new EmailEmptyException();
 
         var normalized = value.Trim().ToLowerInvariant();
 
         if (!EmailRegex().IsMatch(normalized))
-            throw new DomainException($"L'email '{value}' n'est pas valide.");
+            throw new EmailInvalidFormatException(value);
 
         return new Email(normalized);
     }

@@ -1,4 +1,5 @@
 using EventCo.Domain.Common;
+using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Domain.Events;
 
@@ -20,7 +21,7 @@ public class EventTask : Entity
         : base(Guid.NewGuid())
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Le titre de la tâche ne peut pas être vide.");
+            throw new EventTaskTitleEmptyException(eventId);
 
         EventId = eventId;
         Title = title.Trim();

@@ -1,4 +1,5 @@
 using EventCo.Domain.Common;
+using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Domain.Events;
 
@@ -37,7 +38,7 @@ public class Event : Entity
     public static Event Create(string title, string? description, DateTime eventDate, string? location, Guid createdByUserId)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Le titre de l'événement ne peut pas être vide.");
+            throw new EventTitleEmptyException();
 
         var now = DateTime.UtcNow;
         var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, createdByUserId, now);
@@ -52,7 +53,7 @@ public class Event : Entity
     public void UpdateDetails(string title, string? description, DateTime eventDate, string? location)
     {
         if (string.IsNullOrWhiteSpace(title))
-            throw new DomainException("Le titre de l'événement ne peut pas être vide.");
+            throw new EventTitleEmptyException(Id);
 
         Title = title.Trim();
         Description = description;
@@ -67,7 +68,7 @@ public class Event : Entity
     public EventParticipant InviteParticipant(Guid userId)
     {
         if (_participants.Any(p => p.UserId == userId))
-            throw new DomainException("Cet utilisateur est déjà invité à l'événement.");
+            throw new ParticipantAlreadyInvitedException(Id, userId);
 
         var participant = new EventParticipant(Id, userId, ParticipantRole.Participant, DateTime.UtcNow);
         _participants.Add(participant);
@@ -87,7 +88,7 @@ public class Event : Entity
         EnsureActingUserIsCreator(actingUserId);
 
         if (targetUserId == CreatedByUserId)
-            throw new DomainException("Le créateur de l'événement ne peut pas être rétrogradé.");
+            throw new EventCreatorCannotBeDemotedException(Id, targetUserId);
 
         GetParticipant(targetUserId).ChangeRole(ParticipantRole.Participant);
     }
@@ -97,7 +98,7 @@ public class Event : Entity
         EnsureActingUserIsCreator(actingUserId);
 
         if (targetUserId == CreatedByUserId)
-            throw new DomainException("Le créateur de l'événement ne peut pas être retiré.");
+            throw new EventCreatorCannotBeRemovedException(Id, targetUserId);
 
         _participants.Remove(GetParticipant(targetUserId));
     }
@@ -112,7 +113,7 @@ public class Event : Entity
     public void AssignTask(Guid taskId, Guid userId)
     {
         if (_participants.All(p => p.UserId != userId))
-            throw new DomainException("Impossible d'assigner la tâche à un utilisateur qui n'est pas participant.");
+            throw new TaskAssigneeNotParticipantException(Id, taskId, userId);
 
         GetTask(taskId).AssignTo(userId);
     }
@@ -128,14 +129,14 @@ public class Event : Entity
     private void EnsureActingUserIsCreator(Guid actingUserId)
     {
         if (actingUserId != CreatedByUserId)
-            throw new DomainException("Seul le créateur de l'événement peut effectuer cette action.");
+            throw new UserNotEventCreatorException(Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>
         _participants.FirstOrDefault(p => p.UserId == userId)
-        ?? throw new DomainException("Cet utilisateur ne participe pas à l'événement.");
+        ?? throw new ParticipantNotFoundException(Id, userId);
 
     private EventTask GetTask(Guid taskId) =>
         _tasks.FirstOrDefault(t => t.Id == taskId)
-        ?? throw new DomainException("Tâche introuvable pour cet événement.");
+        ?? throw new EventTaskNotFoundException(Id, taskId);
 }
