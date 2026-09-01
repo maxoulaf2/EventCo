@@ -56,6 +56,9 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 
+# Reqnroll (auto-généré à partir des .feature au build)
+*.feature.cs
+
 # Node / React (client)
 client/node_modules/
 client/dist/

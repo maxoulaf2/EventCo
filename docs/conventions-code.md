@@ -30,6 +30,7 @@ EventCo.sln
 - **Agrégats** : `Event` est l'agrégat racine pour `EventParticipant` et `EventTask`. Toute modification de ces sous-entités passe par l'agrégat `Event`, qui garantit la cohérence (ex: on ne peut pas assigner une tâche à un utilisateur qui n'est pas participant).
 - **Repositories** : interfaces définies dans `Domain` ou `Application` (ex: `IEventRepository`), implémentées dans `Infrastructure` avec EF Core. Un repository par agrégat racine (pas un repository générique par table).
 - **Use Cases explicites (CQRS léger)** : dans `Application`, chaque action métier est une classe dédiée (ex: `CreateEventCommand` / `CreateEventCommandHandler`, `GetEventByIdQuery` / `Handler`). MediatR est recommandé pour orchestrer ça proprement.
+  > **Note (2026-08-31)** : MediatR est désormais sous licence payante en production (Lucky Penny Software, depuis 2025). En attendant une décision définitive du développeur, l'orchestration est assurée par une abstraction maison (`EventCo.Application/Common/Messaging/` : `ICommand`, `ICommandHandler<T>`, `ICommandDispatcher`) qui reproduit le strict nécessaire de l'API MediatR sans dépendance externe. **Tous les Commands des lots suivants doivent suivre ce pattern** jusqu'à révision de cette note.
 - **Domain Events** (optionnel, à introduire si utile) : ex: `TaskAssignedDomainEvent` déclenché par l'agrégat, consommé ensuite pour notifier via SignalR ou envoyer un email, sans coupler le domaine à l'infrastructure.
 
 ### 1.3 Conventions de nommage (backend)
@@ -41,9 +42,12 @@ EventCo.sln
 
 ### 1.4 Tests
 - `Domain.Tests` : tests unitaires purs sur les règles métier des entités/agrégats (pas de mock nécessaire, pas de DB).
-- `Application.Tests` : tests unitaires des handlers de Commands/Queries, avec mocks des repositories (ex: via Moq ou NSubstitute).
+- `Application.Tests` : tests d'intégration des Commands/Queries écrits en **Gherkin** (fichiers `.feature`, en français, exécutés via **Reqnroll** — le fork open-source activement maintenu de SpecFlow, dont le développement communautaire s'est arrêté en 2024) plutôt que des tests unitaires avec mocks (Moq/NSubstitute).
+  > **Décision (2026-08-31)** : à la demande du développeur, pas de mocking de repositories — chaque Command/Query est testé de bout en bout via le vrai `ICommandDispatcher`/`CommandDispatcher`, la vraie validation FluentValidation, et un vrai `EventCoDbContext` (EF Core provider **InMemory**, pour la rapidité — cf. `tests/EventCo.Application.Tests/Support/ApplicationTestHostBuilder.cs`). Seuls les ports vers des systèmes externes (ex: `IEmailSender`, `IDateTimeProvider`) sont remplacés par de simples doublons de test (`tests/EventCo.Application.Tests/TestDoubles/`), pas par une librairie de mock. Un sous-ensemble de scénarios nominaux sera complété plus tard avec un vrai PostgreSQL (Testcontainers), en plus (pas en remplacement) de la majorité des tests en InMemory.
+  >
+  > Structure par feature : `Auth/RequestMagicLink/RequestMagicLink.feature` + `RequestMagicLinkSteps.cs` (classe `[Binding]`) à côté du Command testé. Les méthodes de step suivent le texte du Gherkin (pas la convention `MethodName_Scenario_ExpectedResult` ci-dessous, propre aux tests xUnit classiques).
 - `Api.Tests` : tests d'intégration bout-en-bout via `WebApplicationFactory`, avec une base PostgreSQL de test (Testcontainers recommandé).
-- Convention de nommage des tests : `MethodName_Scenario_ExpectedResult` (ex: `AssignTask_UserNotParticipant_ThrowsDomainException`).
+- Convention de nommage des tests xUnit classiques (`Domain.Tests`, `Api.Tests`) : `MethodName_Scenario_ExpectedResult` (ex: `AssignTask_UserNotParticipant_ThrowsDomainException`).
 
 ---
 
