@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
@@ -22,7 +21,7 @@ public sealed class RequestMagicLinkCommandHandler(
         var magicLinkOptions = options.Value;
 
         var rawToken = GenerateRawToken();
-        var tokenHash = HashToken(rawToken);
+        var tokenHash = MagicLinkTokenHasher.Hash(rawToken);
 
         var token = MagicLinkToken.Create(email, tokenHash, now.AddMinutes(magicLinkOptions.ExpiryMinutes), now);
 
@@ -45,11 +44,5 @@ public sealed class RequestMagicLinkCommandHandler(
             .Replace('+', '-')
             .Replace('/', '_')
             .TrimEnd('=');
-    }
-
-    private static string HashToken(string rawToken)
-    {
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(rawToken));
-        return Convert.ToHexString(hashBytes);
     }
 }

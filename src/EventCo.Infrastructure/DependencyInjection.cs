@@ -1,5 +1,6 @@
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Options;
+using EventCo.Infrastructure.Auth;
 using EventCo.Infrastructure.Common;
 using EventCo.Infrastructure.Emailing;
 using EventCo.Infrastructure.Persistence;
@@ -20,9 +21,12 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEmailSender, LoggingEmailSender>();
+        services.AddSingleton<ISessionTokenService, SessionTokenService>();
 
         services.Configure<MagicLinkOptions>(configuration.GetSection(MagicLinkOptions.SectionName));
+        services.Configure<SessionOptions>(configuration.GetSection(SessionOptions.SectionName));
 
         return services;
     }

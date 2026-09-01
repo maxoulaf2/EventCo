@@ -21,7 +21,7 @@
 - [x] Modèle de données : entités `User`, `MagicLinkToken`, `Event`, `EventParticipant`, `EventTask` (Domain)
 - [x] Configuration EF Core + première migration + `DbContext`
 - [x] Authentification passwordless — backend : génération et envoi du magic link (endpoint `POST /api/auth/request-link`)
-- [ ] Authentification passwordless — backend : validation du token et création de session (endpoint `POST /api/auth/verify`)
+- [x] Authentification passwordless — backend : validation du token et création de session (endpoint `POST /api/auth/verify`)
 - [ ] Authentification passwordless — frontend : formulaire de saisie d'email + page de confirmation
 - [ ] Middleware d'authentification (lecture du cookie de session, résolution de l'utilisateur courant)
 - [ ] Service d'envoi d'email configuré (Resend/SendGrid/Mailtrap en dev)
@@ -89,3 +89,8 @@
 - 2026-08-31 — [Lot 1] Remplacement des tests xUnit+Moq du Command `RequestMagicLink` par des tests Gherkin/Reqnroll (InMemory, sans mock de repository) — convention actée dans `conventions-code.md` §1.4
 - 2026-09-01 — [Lot 1] Premier test d'intégration bout-en-bout `EventCo.Api.Tests` pour `POST /api/auth/request-link`, contre un vrai PostgreSQL (Testcontainers)
 - 2026-09-01 — [Lot 1] Extension de l'approche Gherkin/Reqnroll à `EventCo.Api.Tests` — conteneur PostgreSQL et `WebApplicationFactory` désormais démarrés une seule fois pour tout le run
+- 2026-09-01 — [Lot 1] Authentification passwordless (backend) — validation du token et création de session, `POST /api/auth/verify` : token consommé (`MagicLinkToken.Consume`), compte `User` créé automatiquement à la première connexion (réutilisé sinon), cookie de session httpOnly déposé. **Décisions notables** :
+  - Abstraction `ICommand`/`ICommandHandler`/`ICommandDispatcher` étendue avec un pendant à réponse (`ICommand<TResponse>`/`ICommandHandler<TCommand,TResponse>`/`Send<TResponse>`), nécessaire dès ce premier Command qui doit renvoyer un résultat à l'API (utile aussi pour les futures Queries du lot 2). Les deux interfaces `ICommand`/`ICommand<TResponse>` sont volontairement indépendantes (pas d'héritage) pour éviter une ambiguïté de surcharge sur `Send` côté `CommandDispatcher`.
+  - Session = jeton signé maison (payload + signature HMAC-SHA256, même famille que le hash des magic links) plutôt qu'une dépendance JWT (`System.IdentityModel.Tokens.Jwt`) — le cadrage laisse le choix ("JWT ou identifiant de session") et ça évite d'introduire une nouvelle lib externe pour ce besoin (cf. prudence licences/maintenance actée précédemment). Secret + durée de vie configurables via la section `Session` (`appsettings.json`, à surcharger en production).
+  - Cookie posé en `SameSite=Lax`/`Secure`/`HttpOnly` ; **point à retrancher lors de la tâche frontend** : le frontend Vite (`:5173`) appelant l'API (`:5000`) en cross-origin en dev nécessitera CORS + `SameSite=None` (donc HTTPS même en dev) pour que le cookie soit accepté — non traité ici, hors périmètre backand seul.
+  - `EventCo.Api.Tests` : le port `IEmailSender` (jusqu'ici non substitué, seul `LoggingEmailSender` réel était utilisé) est désormais remplacé par un double observable (`RecordingEmailSender`) via `ConfigureTestServices` dans `ApiWebApplicationFactory`, seul moyen de récupérer le token brut du lien de connexion pour enchaîner sur la vérification dans un test bout-en-bout (le hash seul est stocké en base, par conception).

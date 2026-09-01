@@ -25,7 +25,8 @@ public static class DependencyInjection
             where !type.IsAbstract && !type.IsInterface
             from handlerInterface in type.GetInterfaces()
             where handlerInterface.IsGenericType
-                  && handlerInterface.GetGenericTypeDefinition() == typeof(ICommandHandler<>)
+                  && (handlerInterface.GetGenericTypeDefinition() == typeof(ICommandHandler<>)
+                      || handlerInterface.GetGenericTypeDefinition() == typeof(ICommandHandler<,>))
             select (Interface: handlerInterface, Implementation: type);
 
         foreach (var (handlerInterface, implementation) in handlerTypes)
