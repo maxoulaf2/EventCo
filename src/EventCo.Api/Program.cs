@@ -1,6 +1,9 @@
+using EventCo.Api.Auth;
 using EventCo.Api.ExceptionHandling;
 using EventCo.Application;
+using EventCo.Application.Common.Interfaces;
 using EventCo.Infrastructure;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +18,13 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, HttpContextCurrentUserService>();
+builder.Services
+    .AddAuthentication(SessionAuthenticationDefaults.AuthenticationScheme)
+    .AddScheme<AuthenticationSchemeOptions, SessionAuthenticationHandler>(
+        SessionAuthenticationDefaults.AuthenticationScheme, _ => { });
 // TODO mieux gérer les CORS
 builder.Services.AddCors(options =>
 {
@@ -41,6 +51,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(FrontendCorsPolicy);
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
