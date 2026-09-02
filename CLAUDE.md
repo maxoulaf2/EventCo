@@ -42,7 +42,7 @@ Projet personnel de montée en compétences, mené selon des standards professio
 ```bash
 # Backend
 dotnet build
-dotnet run --project src/EventCo.Api
+dotnet run --project src/EventCo.Api --launch-profile https
 dotnet ef migrations add <NomMigration> --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
 dotnet ef database update --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
 dotnet test
@@ -54,6 +54,7 @@ dotnet test
 
 # Infra (Docker Compose)
 # cp .env.example .env
+# docker compose up -d postgres
 # docker compose up -d postgres api          # API sur http://localhost:5000, Postgres sur localhost:5432
 # docker compose --profile tools up -d pgadmin   # pgAdmin optionnel sur http://localhost:5050
 # docker compose down                         # arrête les conteneurs (conserve le volume postgres-data)
