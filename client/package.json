@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:e2e": "bddgen --config tests/e2e/playwright.config.ts && playwright test --config tests/e2e/playwright.config.ts",
+    "test:visual": "bddgen --config tests/visual/playwright.config.ts && playwright test --config tests/visual/playwright.config.ts",
+    "test:visual:update": "bddgen --config tests/visual/playwright.config.ts && playwright test --config tests/visual/playwright.config.ts --update-snapshots"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.102.8",
@@ -16,14 +22,24 @@
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
+    "@amiceli/vitest-cucumber": "^7.0.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@vitejs/plugin-react": "^6.1.0",
+    "@vitest/ui": "^4.1.11",
+    "jsdom": "^30.0.1",
+    "msw": "^2.15.0",
     "oxlint": "^1.79.0",
+    "playwright-bdd": "^9.2.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   }
 }

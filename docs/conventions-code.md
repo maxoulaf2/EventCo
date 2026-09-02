@@ -90,6 +90,28 @@ On privilégie une organisation **par feature** plutôt que par type technique (
 - Styles : Tailwind CSS exclusivement, pas de CSS-in-JS ni de fichiers `.css` séparés sauf cas exceptionnel (ex: animations complexes).
 - Mobile-first : toute classe Tailwind responsive s'écrit du plus petit écran vers le plus grand (`class="text-sm md:text-base"`, jamais l'inverse).
 
+### 2.3 Tests frontend
+> **Décision (2026-09-02)** : à la demande du développeur, trois couches de tests distinctes, toutes écrites en **Gherkin** (`.feature` en français, `# language: fr`, même style que le backend §1.4), avec un outil différent par couche selon ce qu'elle vérifie.
+
+| Couche | Outil | Commande | Ce qu'elle vérifie |
+|---|---|---|---|
+| Comportement (back mocké) | **Vitest** + React Testing Library + **MSW**, Gherkin via `@amiceli/vitest-cucumber` | `npm test` / `npm run test:watch` | Le rendu et les interactions du client, indépendamment du back (appels réseau interceptés) |
+| Non-régression visuelle | **Playwright** (`toHaveScreenshot`) + **playwright-bdd** | `npm run test:visual` (`:update` pour régénérer les références) | L'apparence des pages à plusieurs tailles d'écran (projets `mobile`/`tablet`/`desktop`) |
+| E2E nominal | **Playwright** + **playwright-bdd**, contre une stack dédiée | `npm run test:e2e` (tout inclus, cf. ci-dessous) | Le parcours réel de bout en bout, sans mock |
+
+Structure : `.feature` + `.steps.tsx` colocalisés avec le composant testé pour la couche comportement (ex: `src/features/auth/RequestMagicLink.feature`) ; `tests/e2e/` et `tests/visual/` (chacun avec `features/`, `steps/`, `playwright.config.ts` propres) pour les deux couches Playwright, qui testent des parcours transverses plutôt qu'un composant isolé.
+
+**E2E nominal — stack dédiée, isolée de la base de dev.** `npm run test:e2e` ne suppose plus `docker compose up -d postgres api` démarré à la main : `globalSetup`/`globalTeardown` (`tests/e2e/global-setup.ts`/`global-teardown.ts`) démarrent et arrêtent automatiquement `docker-compose.e2e.yml` (services `postgres-e2e`/`api-e2e`, projet Compose `eventco-e2e`, ports `5433`/`5001`, volume jetable) autour de la suite.
+> **Décision (2026-09-02)** : à la demande du développeur, cette stack ne doit jamais interférer avec celle utilisée en dev (`docker compose up -d postgres api`, ports `5432`/`5000`) — ni la base de données, ni les conteneurs. D'où des noms de service, ports, `container_name` et **nom de projet Compose** (`name: eventco-e2e` en tête de fichier) tous distincts : sans ce `name` explicite, Compose dérive le nom de projet du nom du dossier et les deux fichiers (situés côte à côte) partageraient le même projet par défaut, au risque d'interactions entre les deux stacks. La base `eventco_e2e` étant neuve à chaque run, `globalSetup` la migre lui-même (`dotnet ef database update --project src/EventCo.Infrastructure --startup-project src/EventCo.Api --connection ...`, même commande que celle documentée dans CLAUDE.md pour la base de dev) plutôt que de faire migrer l'API elle-même à son démarrage : pas de branche « migre-toi » conditionnelle dans `Program.cs` pour un besoin qui n'appartient qu'aux tests — `Program.cs` reste identique quel que soit l'environnement qui le démarre. Le volume Postgres n'est pas nommé : `down -v` (en fin de run, y compris si les tests échouent) le supprime, donc chaque run repart d'une base vierge — vérifié en conditions réelles (stack de dev déjà démarrée en parallèle, restée intacte après le run e2e).
+
+Points d'attention (rencontrés en mettant en place ces trois couches, à ne pas re-découvrir) :
+- **`@amiceli/vitest-cucumber` : chaque étape Gherkin est un test Vitest à part entière** (pas juste chaque scénario). Un `afterEach(() => server.resetHandlers())` global (dans `src/test/setup.ts`) s'exécuterait donc *entre deux étapes* d'un même scénario et effacerait un `server.use(...)` avant l'étape qui en a besoin. Le reset des handlers MSW se fait par scénario via `AfterEachScenario` dans le fichier `.steps.tsx` lui-même, pas dans le setup global.
+- **`loadFeature(path)` résout `path` relativement au fichier appelant** (le `.steps.tsx`), pas au cwd — utiliser un chemin relatif du type `./MonFichier.feature`, pas `./src/...`.
+- **Les mots de liaison français (`que`, `qu'`) sont retirés du texte de l'étape par le parser** (`Etant donné que je suis sur la page de connexion` → l'étape à enregistrer est `'je suis sur la page de connexion'`, pas `'que je suis sur la page de connexion'`), aussi bien avec `vitest-cucumber` qu'avec `playwright-bdd`.
+- **`playwright-bdd`** : les fixtures Playwright (`page`, `testInfo`, ...) sont toutes destructurées d'un seul objet (`({ page, testInfo }) => ...`), jamais passées en second argument comme avec `test()` natif.
+- **Captures de référence (`toHaveScreenshot`)** : les fichiers `.feature.spec.js` sont générés (et régénérés) par `bddgen` dans `.features-gen/` (ignoré par git) — sans le configurer, les captures de référence y naîtraient aussi et seraient perdues à chaque régénération. `snapshotPathTemplate` dans `tests/visual/playwright.config.ts` les place hors de `.features-gen`, dans `tests/visual/__screenshots__/` (versionné).
+- **E2E nominal** : `VITE_API_URL` doit pointer vers `api-e2e` (`http://localhost:5001`), ni vers l'API de dev (`5000`) ni vers le profil https local (`.env`, `7166`) — fixé par défaut dans `webServer.env` de `tests/e2e/playwright.config.ts`, surchargeable via variable d'environnement.
+
 ---
 
 ## 3. Conventions transverses

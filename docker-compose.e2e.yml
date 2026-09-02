@@ -1,0 +1,32 @@
+name: eventco-e2e
+
+services:
+  postgres-e2e:
+    image: postgres:16-alpine
+    container_name: eventco-postgres-e2e
+    environment:
+      POSTGRES_DB: eventco_e2e
+      POSTGRES_USER: eventco
+      POSTGRES_PASSWORD: eventco
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventco -d eventco_e2e"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api-e2e:
+    build:
+      context: .
+      dockerfile: src/EventCo.Api/Dockerfile
+    container_name: eventco-api-e2e
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: Host=postgres-e2e;Port=5432;Database=eventco_e2e;Username=eventco;Password=eventco
+    ports:
+      - "5001:8080"
+    depends_on:
+      postgres-e2e:
+        condition: service_healthy

@@ -7,15 +7,22 @@ import { routes } from './shared/lib/routes'
 
 const queryClient = new QueryClient()
 
+/** Arbre de routes seul, sans provider ni router — réutilisé tel quel par les tests. */
+export function AppRoutes() {
+  return (
+    <Routes>
+      <Route path={routes.login} element={<LoginPage />} />
+      <Route path={routes.checkEmail} element={<CheckEmailPage />} />
+      <Route path={routes.verifyMagicLink} element={<VerifyMagicLinkPage />} />
+    </Routes>
+  )
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <Routes>
-          <Route path={routes.login} element={<LoginPage />} />
-          <Route path={routes.checkEmail} element={<CheckEmailPage />} />
-          <Route path={routes.verifyMagicLink} element={<VerifyMagicLinkPage />} />
-        </Routes>
+        <AppRoutes />
       </BrowserRouter>
     </QueryClientProvider>
   )
