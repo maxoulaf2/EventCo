@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { defineConfig } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 
@@ -15,7 +16,11 @@ const testDir = defineBddConfig({
 export default defineConfig({
   testDir,
   fullyParallel: true,
-  reporter: 'html',
+  // Chemins explicites (plutôt que la résolution par défaut de Playwright, pas toujours
+  // relative au dossier du config) : la CI (.github/workflows/ci.yml) remonte ces dossiers
+  // en artefact téléchargeable quand ce job échoue, elle a besoin d'un emplacement fiable.
+  outputDir: path.join(import.meta.dirname, 'test-results'),
+  reporter: [['html', { outputFolder: path.join(import.meta.dirname, 'playwright-report') }]],
   // Les specs sont générées (et régénérées) dans testDir (.features-gen, ignoré par git) :
   // les captures de référence doivent donc vivre en dehors, dans un dossier versionné stable.
   snapshotPathTemplate: '{testDir}/../__screenshots__/{testFileName}/{arg}-{projectName}{ext}',

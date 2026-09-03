@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { defineConfig, devices } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 
@@ -18,7 +19,11 @@ const apiUrl = process.env.VITE_API_URL ?? 'http://localhost:5001'
 export default defineConfig({
   testDir,
   fullyParallel: true,
-  reporter: 'html',
+  // Chemins explicites (plutôt que la résolution par défaut de Playwright, pas toujours
+  // relative au dossier du config) : la CI (.github/workflows/ci.yml) remonte ces dossiers
+  // en artefact téléchargeable quand ce job échoue, elle a besoin d'un emplacement fiable.
+  outputDir: path.join(import.meta.dirname, 'test-results'),
+  reporter: [['html', { outputFolder: path.join(import.meta.dirname, 'playwright-report') }]],
   globalSetup: './global-setup.ts',
   globalTeardown: './global-teardown.ts',
   use: {
