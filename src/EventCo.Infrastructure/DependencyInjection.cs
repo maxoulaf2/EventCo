@@ -8,6 +8,7 @@ using EventCo.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace EventCo.Infrastructure;
 
@@ -22,11 +23,21 @@ public static class DependencyInjection
 
         services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IEmailSender, LoggingEmailSender>();
         services.AddSingleton<ISessionTokenService, SessionTokenService>();
+
+        services.AddScoped<LoggingEmailSender>();
+        services.AddScoped<SmtpEmailSender>();
+        services.AddScoped<IEmailSender>(sp =>
+        {
+            var emailOptions = sp.GetRequiredService<IOptions<EmailOptions>>().Value;
+            return string.IsNullOrWhiteSpace(emailOptions.Smtp.Host)
+                ? sp.GetRequiredService<LoggingEmailSender>()
+                : sp.GetRequiredService<SmtpEmailSender>();
+        });
 
         services.Configure<MagicLinkOptions>(configuration.GetSection(MagicLinkOptions.SectionName));
         services.Configure<SessionOptions>(configuration.GetSection(SessionOptions.SectionName));
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
 
         return services;
     }

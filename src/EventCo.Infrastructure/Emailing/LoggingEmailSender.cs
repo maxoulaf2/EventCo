@@ -3,13 +3,14 @@ using Microsoft.Extensions.Logging;
 
 namespace EventCo.Infrastructure.Emailing;
 
-// Provisoire : journalise l'email au lieu de l'envoyer, en attendant un vrai fournisseur (suivi-todo.md, lot 1).
+// Fallback quand aucun serveur SMTP n'est configuré (Email:Smtp:Host vide) : journalise l'email
+// au lieu de l'envoyer, utile en dev tant qu'un compte Mailtrap/Resend/SendGrid n'est pas renseigné.
 internal sealed class LoggingEmailSender(ILogger<LoggingEmailSender> logger) : IEmailSender
 {
     public Task SendAsync(string toEmail, string subject, string htmlBody, CancellationToken cancellationToken)
     {
         logger.LogInformation(
-            "Email (non envoyé, fournisseur non configuré) à {ToEmail} — Sujet : {Subject}\n{Body}",
+            "Email (non envoyé, aucun serveur SMTP configuré) à {ToEmail} — Sujet : {Subject}\n{Body}",
             toEmail,
             subject,
             htmlBody);

@@ -28,7 +28,7 @@
 - [x] Infrastructure de tests frontend en Gherkin (comportement avec back mocké, non-régression visuelle multi-tailles, E2E nominal)
   > Tâche identifiée en cours de route (rule 5), à la demande explicite du développeur.
 - [x] Middleware d'authentification (lecture du cookie de session, résolution de l'utilisateur courant)
-- [ ] Service d'envoi d'email configuré (Resend/SendGrid/Mailtrap en dev)
+- [x] Service d'envoi d'email configuré (Resend/SendGrid/Mailtrap en dev)
 
 
 ## Lot 2 — Gestion des événements
@@ -121,3 +121,8 @@
   - Ajout de `ICurrentUserService` (`EventCo.Application.Common.Interfaces`, implémenté côté Api via `HttpContextAccessor`/claims) : c'est le point d'accès à l'utilisateur courant dont les Commands du lot 2 auront besoin pour les règles d'autorisation créateur/co-organisateur/participant.
   - **Tâche manquante ajoutée et traitée** (rule 5) : endpoint `GET /api/auth/me` (`[Authorize]`, Query `GetCurrentUserQuery` suivant le pattern `ICommand<TResponse>`/`ICommandDispatcher` existant) — nécessaire à la fois pour vérifier le middleware de bout en bout (aucun endpoint protégé n'existait encore) et pour le besoin réel du frontend de restaurer une session existante au chargement de l'app (le cookie étant httpOnly, le frontend ne peut pas savoir seul si une session valide existe). `IUserRepository` complété avec `GetByIdAsync`.
   - Tests Gherkin/Reqnroll ajoutés dans `EventCo.Api.Tests` (`Auth/CurrentUser/`, même pattern que `Auth/Verify/`) : cookie de session valide (200 + email attendu), absence de cookie (401), cookie falsifié (401).
+- 2026-09-02 — [Lot 1] Service d'envoi d'email configuré : `SmtpEmailSender` (`src/EventCo.Infrastructure/Emailing/`), un seul sender SMTP générique plutôt qu'un SDK par fournisseur — Mailtrap (dev), Resend et SendGrid exposent tous un relais SMTP standard, donc le même code fonctionne avec les trois selon la config (`Email:Smtp:*`, nouvelle section `EmailOptions`/`SmtpOptions`). **Décisions notables** :
+  - Lib retenue : **MailKit** (MIT, activement maintenu par jstedfast) — vérifié avant adoption conformément à la prudence licences/maintenance actée après l'épisode MediatR.
+  - Sélection à l'exécution entre `SmtpEmailSender` et l'existant `LoggingEmailSender` selon que `Email:Smtp:Host` est renseigné ou non (`DependencyInjection.AddInfrastructure`) : par défaut (`Host` vide dans `appsettings.json`), les emails restent seulement loggés — aucun risque d'envoi accidentel tant qu'un compte n'est pas explicitement configuré.
+  - Les identifiants ne sont jamais commités : `UserSecretsId` initialisé sur `EventCo.Api` (`dotnet user-secrets init`), section `Email:Smtp` à renseigner en local via `dotnet user-secrets set` (commandes ajoutées dans `CLAUDE.md`) pour un compte Mailtrap, en production via variables d'environnement (Resend/SendGrid), même approche que `Session:Secret`.
+  - Pas de tests dédiés à `SmtpEmailSender` : comme `LoggingEmailSender`, c'est une implémentation fine d'un port externe (`IEmailSender`), déjà substituée par `RecordingEmailSender` dans `Application.Tests`/`Api.Tests` — cohérent avec l'approche existante (`conventions-code.md` §1.4).

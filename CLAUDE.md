@@ -47,6 +47,12 @@ dotnet ef migrations add <NomMigration> --project src/EventCo.Infrastructure --s
 dotnet ef database update --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
 dotnet test
 
+# Envoi d'email en dev (optionnel — sans ça, les emails sont juste loggés, cf. LoggingEmailSender)
+# Renseigner un compte Mailtrap (sandbox) via user-secrets, jamais dans appsettings.json :
+dotnet user-secrets set "Email:Smtp:Host" "sandbox.smtp.mailtrap.io" --project src/EventCo.Api
+dotnet user-secrets set "Email:Smtp:Username" "<user-mailtrap>" --project src/EventCo.Api
+dotnet user-secrets set "Email:Smtp:Password" "<password-mailtrap>" --project src/EventCo.Api
+
 # Frontend
 # npm install
 # npm run dev
