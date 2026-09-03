@@ -150,3 +150,77 @@ jobs:
       - name: Ensure e2e stack is stopped
         if: always()
         run: docker compose -f docker-compose.e2e.yml down -v
+
+  # Publie les rapports Playwright en échec sur GitHub Pages, consultables directement dans
+  # le navigateur (pas de zip à télécharger). Le site est republié en entier à chaque run où
+  # au moins un des deux jobs échoue : un job qui n'échoue pas cette fois-ci ne fournit pas de
+  # rapport, donc son ancien rapport disparaît du site — comportement voulu (pas d'historique
+  # à conserver, un seul développeur qui consulte au fil de l'eau).
+  publish-reports:
+    name: Publier les rapports Playwright (GitHub Pages)
+    needs: [frontend-visual-tests, frontend-e2e-tests]
+    if: always() && (needs.frontend-visual-tests.result == 'failure' || needs.frontend-e2e-tests.result == 'failure')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - name: Download visual regression report
+        if: needs.frontend-visual-tests.result == 'failure'
+        uses: actions/download-artifact@v8
+        with:
+          name: visual-tests-report
+          path: downloaded/visual
+
+      - name: Download E2E report
+        if: needs.frontend-e2e-tests.result == 'failure'
+        uses: actions/download-artifact@v8
+        with:
+          name: e2e-tests-report
+          path: downloaded/e2e
+
+      - name: Assemble site
+        run: |
+          mkdir -p site
+          links=""
+
+          if [ -d "downloaded/visual/playwright-report" ]; then
+            mv downloaded/visual/playwright-report site/visual
+            links="$links<li><a href=\"visual/\">Non-régression visuelle</a></li>"
+          fi
+
+          if [ -d "downloaded/e2e/playwright-report" ]; then
+            mv downloaded/e2e/playwright-report site/e2e
+            links="$links<li><a href=\"e2e/\">E2E nominal</a></li>"
+          fi
+
+          cat > site/index.html <<HTML
+          <!doctype html>
+          <html lang="fr">
+          <head><meta charset="utf-8"><title>Rapports de tests EventCo en échec</title></head>
+          <body>
+            <h1>Derniers rapports de tests en échec</h1>
+            <p>Run : <a href="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}">#${GITHUB_RUN_NUMBER}</a></p>
+            <ul>${links}</ul>
+          </body>
+          </html>
+          HTML
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

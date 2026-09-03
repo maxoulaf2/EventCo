@@ -9,6 +9,7 @@
   },
   "cucumber.glue": [ // sets the location of the step definition classes
     "tests/**/*Steps.cs",
+    "client/tests/**/*.steps.ts"
   ],
   "cucumber.features": [ // sets the location of the feature files
     "**/*.feature",
