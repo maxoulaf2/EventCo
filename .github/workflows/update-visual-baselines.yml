@@ -1,0 +1,32 @@
+name: Update visual baselines
+
+# Déclenchement manuel uniquement : régénère les captures de référence de la
+# non-régression visuelle dans le même environnement Docker (Linux) que la CI,
+# jamais en local (cf. client/docs conventions §2.3 — le rendu des fonts diffère
+# selon l'OS). Le résultat est un artefact à télécharger et valider avant de
+# remplacer client/tests/visual/__screenshots__/ dans un commit.
+on:
+  workflow_dispatch: {}
+
+jobs:
+  update-visual-baselines:
+    name: Régénère les captures de référence
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.62.1-jammy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Regenerate screenshots
+        working-directory: client
+        run: npm run test:visual:update
+
+      - name: Upload updated screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines
+          path: client/tests/visual/__screenshots__/
+          retention-days: 15

@@ -96,7 +96,7 @@ On privilégie une organisation **par feature** plutôt que par type technique (
 | Couche | Outil | Commande | Ce qu'elle vérifie |
 |---|---|---|---|
 | Comportement (back mocké) | **Vitest** + React Testing Library + **MSW**, Gherkin via `@amiceli/vitest-cucumber` | `npm test` / `npm run test:watch` | Le rendu et les interactions du client, indépendamment du back (appels réseau interceptés) |
-| Non-régression visuelle | **Playwright** (`toHaveScreenshot`) + **playwright-bdd** | `npm run test:visual` (`:update` pour régénérer les références) | L'apparence des pages à plusieurs tailles d'écran (projets `mobile`/`tablet`/`desktop`) |
+| Non-régression visuelle | **Playwright** (`toHaveScreenshot`) + **playwright-bdd** | `npm run test:visual` (cf. note CI ci-dessous pour `:update`) | L'apparence des pages à plusieurs tailles d'écran (projets `mobile`/`tablet`/`desktop`) |
 | E2E nominal | **Playwright** + **playwright-bdd**, contre une stack dédiée | `npm run test:e2e` (tout inclus, cf. ci-dessous) | Le parcours réel de bout en bout, sans mock |
 
 Structure : `.feature` + `.steps.tsx` colocalisés avec le composant testé pour la couche comportement (ex: `src/features/auth/RequestMagicLink.feature`) ; `tests/e2e/` et `tests/visual/` (chacun avec `features/`, `steps/`, `playwright.config.ts` propres) pour les deux couches Playwright, qui testent des parcours transverses plutôt qu'un composant isolé.
@@ -111,6 +111,9 @@ Points d'attention (rencontrés en mettant en place ces trois couches, à ne pas
 - **`playwright-bdd`** : les fixtures Playwright (`page`, `testInfo`, ...) sont toutes destructurées d'un seul objet (`({ page, testInfo }) => ...`), jamais passées en second argument comme avec `test()` natif.
 - **Captures de référence (`toHaveScreenshot`)** : les fichiers `.feature.spec.js` sont générés (et régénérés) par `bddgen` dans `.features-gen/` (ignoré par git) — sans le configurer, les captures de référence y naîtraient aussi et seraient perdues à chaque régénération. `snapshotPathTemplate` dans `tests/visual/playwright.config.ts` les place hors de `.features-gen`, dans `tests/visual/__screenshots__/` (versionné).
 - **E2E nominal** : `VITE_API_URL` doit pointer vers `api-e2e` (`http://localhost:5001`), ni vers l'API de dev (`5000`) ni vers le profil https local (`.env`, `7166`) — fixé par défaut dans `webServer.env` de `tests/e2e/playwright.config.ts`, surchargeable via variable d'environnement.
+
+**Captures de référence (non-régression visuelle) — CI uniquement.**
+> **Décision (2026-09-03)** : à la demande du développeur, `npm run test:visual:update` ne doit plus être exécuté en local pour committer de nouvelles références — le rendu des fonts diffère selon l'OS (le poste de dev est sous Windows) et casserait la comparaison une fois exécutée en CI sous Linux. La régénération se fait exclusivement via le workflow GitHub Actions `update-visual-baselines` (déclenchement manuel, `workflow_dispatch`), qui tourne dans la même image Docker Playwright (`mcr.microsoft.com/playwright:vX.Y.Z-jammy`, tag aligné sur la version de `@playwright/test`) que la CI (`.github/workflows/ci.yml`, job `frontend-visual-tests`). Il produit un artefact téléchargeable (`tests/visual/__screenshots__/`) : le développeur le récupère, compare visuellement les changements, puis committe lui-même s'ils sont valides — pas de commit automatique, la validation reste un geste humain explicite. En cas d'échec du job `frontend-visual-tests` en CI, le rapport Playwright (captures attendue/obtenue/diff) est lui aussi remonté en artefact pour permettre cette comparaison depuis la pipeline.
 
 ---
 

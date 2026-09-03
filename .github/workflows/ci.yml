@@ -1,0 +1,147 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  backend-tests:
+    name: Backend (Domain / Application / Api.Tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # Api.Tests démarre son propre PostgreSQL via Testcontainers : le daemon Docker
+      # des runners ubuntu-latest suffit, aucune configuration supplémentaire.
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: ignore
+          retention-days: 15
+
+  frontend-unit-tests:
+    name: Frontend (comportement, back mocké)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Run tests
+        working-directory: client
+        run: npm test
+
+  frontend-visual-tests:
+    name: Frontend (non-régression visuelle)
+    runs-on: ubuntu-latest
+    # Image Docker officielle Playwright, dont le tag doit rester aligné sur la version
+    # de @playwright/test dans client/package.json : les captures de référence versionnées
+    # sont générées et comparées dans cet environnement (Linux) exclusivement, plus jamais
+    # en local (le rendu des fonts diffère selon l'OS et casserait la comparaison).
+    container: mcr.microsoft.com/playwright:v1.62.1-jammy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Run visual regression tests
+        working-directory: client
+        run: npm run test:visual
+
+      # En cas d'échec, ce rapport (captures attendue/obtenue/diff) permet de comparer
+      # manuellement les différences depuis la pipeline avant de valider un changement
+      # d'apparence (via le workflow "Update visual baselines").
+      - name: Upload visual regression report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-tests-report
+          path: |
+            client/tests/visual/playwright-report
+            client/tests/visual/test-results
+          if-no-files-found: ignore
+          retention-days: 15
+
+  frontend-e2e-tests:
+    name: Frontend (E2E nominal)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # dotnet-ef n'est pas un outil local (pas de manifest committé) : installé globalement
+      # ici, comme documenté pour le poste de dev dans CLAUDE.md. Version alignée sur
+      # Microsoft.EntityFrameworkCore.Design (src/EventCo.Infrastructure/EventCo.Infrastructure.csproj).
+      - name: Install dotnet-ef
+        run: |
+          dotnet tool install --global dotnet-ef --version 10.0.4
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: client
+        run: npx playwright install --with-deps chromium
+
+      # global-setup.ts démarre docker-compose.e2e.yml (build de l'image API + Postgres
+      # dédiés, ports 5433/5001) et migre la base avant de lancer les tests ; global-teardown.ts
+      # l'arrête. Le daemon Docker des runners ubuntu-latest suffit.
+      - name: Run E2E tests
+        working-directory: client
+        run: npm run test:e2e
+
+      - name: Upload E2E report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-tests-report
+          path: |
+            client/tests/e2e/playwright-report
+            client/tests/e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 15
+
+      - name: Ensure e2e stack is stopped
+        if: always()
+        run: docker compose -f docker-compose.e2e.yml down -v
