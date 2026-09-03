@@ -17,6 +17,4 @@ When('je saisis un email valide et je valide le formulaire', async ({ page }) =>
 
 Then("je vois la page de confirmation d'envoi", async ({ page }) => {
   await expect(page.getByRole('heading', { name: /vérifiez votre boîte mail/i })).toBeVisible()
-  // Test pour la génération du rapport
-  await expect(page.getByRole('heading', { name: /vérifiez votre boîte mail/i })).toBeHidden();
 })
