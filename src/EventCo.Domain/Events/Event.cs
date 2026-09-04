@@ -102,6 +102,8 @@ public class Event : Entity
         _participants.Remove(GetParticipant(targetUserId));
     }
 
+    public void EnsureCanBeDeletedBy(Guid actingUserId) => EnsureActingUserIsCreator(actingUserId);
+
     public EventTask AddTask(string title, TaskCategory category, string? quantity, DateTime now)
     {
         var task = new EventTask(Id, title, category, quantity, now);

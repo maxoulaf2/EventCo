@@ -92,6 +92,26 @@ public class EventTests
     }
 
     [Fact]
+    public void EnsureCanBeDeletedBy_ActingUserNotCreator_ThrowsUserNotEventCreatorException()
+    {
+        var @event = CreateEvent(out _);
+        var invitedUserId = Guid.NewGuid();
+        @event.InviteParticipant(invitedUserId, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventCreatorException>(() => @event.EnsureCanBeDeletedBy(invitedUserId));
+    }
+
+    [Fact]
+    public void EnsureCanBeDeletedBy_ActingUserIsCreator_DoesNotThrow()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        var exception = Record.Exception(() => @event.EnsureCanBeDeletedBy(creatorId));
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
     public void AssignTask_UserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
     {
         var @event = CreateEvent(out _);

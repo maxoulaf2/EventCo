@@ -21,6 +21,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             EventNotFoundException notFoundException => (
                 StatusCodes.Status404NotFound,
                 new ProblemDetails { Title = "Ressource introuvable", Detail = notFoundException.Message }),
+            UserNotEventCreatorException forbiddenException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenException.Message }),
             DomainException domainException => (
                 StatusCodes.Status400BadRequest,
                 new ProblemDetails { Title = "Règle métier violée", Detail = domainException.Message }),

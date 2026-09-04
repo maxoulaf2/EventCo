@@ -1,6 +1,7 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.CreateEvent;
+using EventCo.Application.Events.DeleteEvent;
 using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.UpdateEvent;
@@ -88,5 +89,13 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.CreatedAt);
 
         return Ok(response);
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new DeleteEventCommand(id), cancellationToken);
+
+        return NoContent();
     }
 }

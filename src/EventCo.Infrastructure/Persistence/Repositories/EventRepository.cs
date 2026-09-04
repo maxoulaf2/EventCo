@@ -15,6 +15,24 @@ internal sealed class EventRepository(EventCoDbContext dbContext) : IEventReposi
     public Task UpdateAsync(Event @event, CancellationToken cancellationToken) =>
         dbContext.SaveChangesAsync(cancellationToken);
 
+    public async Task DeleteAsync(Event @event, CancellationToken cancellationToken)
+    {
+        // Les FK EventParticipants/EventTasks -> Events sont en Restrict (pas de cascade DB) :
+        // les enfants doivent être supprimés explicitement avant le parent.
+        var participants = await dbContext.Set<EventParticipant>()
+            .Where(p => p.EventId == @event.Id)
+            .ToListAsync(cancellationToken);
+        dbContext.RemoveRange(participants);
+
+        var tasks = await dbContext.Set<EventTask>()
+            .Where(t => t.EventId == @event.Id)
+            .ToListAsync(cancellationToken);
+        dbContext.RemoveRange(tasks);
+
+        dbContext.Events.Remove(@event);
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         dbContext.Events.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
