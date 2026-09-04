@@ -7,34 +7,16 @@ using Reqnroll;
 namespace EventCo.Api.Tests.Events.GetById;
 
 [Binding]
-public sealed class GetByIdSteps(SessionContext sessionContext)
+public sealed class GetByIdSteps(SessionContext sessionContext, EventContext eventContext)
 {
     private static readonly WebApplicationFactoryClientOptions ClientOptions = new() { HandleCookies = false };
 
-    private Guid? _existingEventId;
     private HttpResponseMessage? _response;
     private EventResponse? _consultedEvent;
 
-    [Given(@"un événement ""(.*)"" créé via l'API")]
-    public async Task EtantDonneUnEvenementCreeViaLapi(string title)
-    {
-        var client = Hooks.Factory.CreateClient(ClientOptions);
-        var request = new CreateEventRequest(title, "Chez Alice", new DateTime(2026, 12, 24, 0, 0, 0, DateTimeKind.Utc), "Chez Alice");
-
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "/api/events")
-        {
-            Content = JsonContent.Create(request),
-        };
-        httpRequest.Headers.Add("Cookie", sessionContext.Cookie!);
-
-        var response = await client.SendAsync(httpRequest);
-        var createdEvent = await response.Content.ReadFromJsonAsync<EventResponse>();
-        _existingEventId = createdEvent!.Id;
-    }
-
     [When(@"je consulte cet événement via l'API")]
     public async Task QuandJeConsulteCetEvenementViaLapi() =>
-        await AppelerAvecCookie(_existingEventId!.Value, sessionContext.Cookie);
+        await AppelerAvecCookie(eventContext.EventId!.Value, sessionContext.Cookie);
 
     [When(@"je consulte un événement inexistant via l'API")]
     public async Task QuandJeConsulteUnEvenementInexistantViaLapi() =>

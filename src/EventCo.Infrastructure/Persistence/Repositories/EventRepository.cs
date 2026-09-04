@@ -12,6 +12,9 @@ internal sealed class EventRepository(EventCoDbContext dbContext) : IEventReposi
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public Task UpdateAsync(Event @event, CancellationToken cancellationToken) =>
+        dbContext.SaveChangesAsync(cancellationToken);
+
     public Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         dbContext.Events.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
