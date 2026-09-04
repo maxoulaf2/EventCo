@@ -3,10 +3,10 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
-import { server } from '../../test/mocks/server'
-import { renderApp } from '../../test/render'
+import { server } from '../../../../src/test/mocks/server'
+import { renderApp } from '../../../../src/test/render'
 
-const feature = await loadFeature('./RequestMagicLink.feature', { language: 'fr' })
+const feature = await loadFeature('tests/behavior/features/auth/RequestMagicLink.feature', { language: 'fr' })
 
 describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
   AfterEachScenario(() => {

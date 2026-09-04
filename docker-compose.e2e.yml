@@ -16,6 +16,23 @@ services:
       timeout: 5s
       retries: 10
 
+  # Faux serveur SMTP : capture les emails envoyés par SmtpEmailSender (au lieu du fallback
+  # LoggingEmailSender, cf. Email__Smtp__Host ci-dessous) et les expose via une API HTTP
+  # interrogeable depuis les tests E2E pour en extraire le lien de connexion — plus robuste que
+  # parser les logs de l'API (pas de corrélation fragile entre scénarios exécutés en parallèle).
+  # L'image embarque son propre HEALTHCHECK (`mailpit readyz`), repris par `depends_on` ci-dessous ;
+  # global-setup.ts sonde en plus son API HTTP avant de lancer les tests.
+  mailpit-e2e:
+    image: axllent/mailpit:latest
+    container_name: eventco-mailpit-e2e
+    ports:
+      - "8025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   api-e2e:
     build:
       context: .
@@ -25,8 +42,12 @@ services:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Default: Host=postgres-e2e;Port=5432;Database=eventco_e2e;Username=eventco;Password=eventco
+      Email__Smtp__Host: mailpit-e2e
+      Email__Smtp__Port: "1025"
     ports:
       - "5001:8080"
     depends_on:
       postgres-e2e:
+        condition: service_healthy
+      mailpit-e2e:
         condition: service_healthy

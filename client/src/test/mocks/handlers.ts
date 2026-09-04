@@ -14,4 +14,29 @@ export const handlers = [
       displayName: 'Test',
     }),
   ),
+
+  http.get('*/api/events', () =>
+    HttpResponse.json([
+      {
+        id: 'event-1',
+        title: 'Repas de Noël',
+        eventDate: '2026-12-24T00:00:00Z',
+        location: 'Chez Alice',
+        createdByUserId: 'user-1',
+        status: 'Planned',
+        role: 'Organizer',
+        hasJoined: true,
+      },
+      {
+        id: 'event-2',
+        title: 'Weekend au ski',
+        eventDate: '2027-01-10T00:00:00Z',
+        location: null,
+        createdByUserId: 'user-2',
+        status: 'Planned',
+        role: 'Participant',
+        hasJoined: false,
+      },
+    ]),
+  ),
 ]

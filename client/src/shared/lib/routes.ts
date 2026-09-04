@@ -7,6 +7,7 @@ export const routes = {
   login: '/',
   checkEmail: '/auth/check-email',
   verifyMagicLink: '/auth/verify',
+  events: '/events',
 } as const
 
 /**

@@ -5,3 +5,4 @@ Ce document est une liste de notes que le développeur se fait à lui même pour
 # Notes
 
 - Scoper le dbcontext à une requete et faire le SaveChangesAsync à la fin de la requête plutôt que dans les repository
+- Dans les tests back : virer le "Via l'API" dans les steps de test

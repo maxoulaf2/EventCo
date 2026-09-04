@@ -129,8 +129,8 @@ jobs:
         working-directory: client
         run: npx playwright install --with-deps chromium
 
-      # global-setup.ts démarre docker-compose.e2e.yml (build de l'image API + Postgres
-      # dédiés, ports 5433/5001) et migre la base avant de lancer les tests ; global-teardown.ts
+      # global-setup.ts démarre docker-compose.e2e.yml (build de l'image API + Postgres + Mailpit
+      # dédiés, ports 5433/5001/8025) et migre la base avant de lancer les tests ; global-teardown.ts
       # l'arrête. Le daemon Docker des runners ubuntu-latest suffit.
       - name: Run E2E tests
         working-directory: client

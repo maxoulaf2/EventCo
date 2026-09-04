@@ -4,12 +4,14 @@ import path from 'node:path'
 const repoRoot = path.resolve(import.meta.dirname, '../../..')
 const composeFile = path.join(repoRoot, 'docker-compose.e2e.yml')
 const apiUrl = process.env.VITE_API_URL ?? 'http://localhost:5001'
+const mailpitUrl = process.env.MAILPIT_URL ?? 'http://localhost:8025'
 const e2eConnectionString =
   'Host=localhost;Port=5433;Database=eventco_e2e;Username=eventco;Password=eventco'
 
 /**
- * Démarre une stack dédiée (postgres-e2e + api-e2e, ports et volume propres) avant l'E2E,
- * pour ne jamais toucher à la base de dev (`docker compose up -d postgres api`). `--build`
+ * Démarre une stack dédiée (postgres-e2e + mailpit-e2e + api-e2e, ports et volume propres)
+ * avant l'E2E, pour ne jamais toucher à la base de dev (`docker compose up -d postgres api`).
+ * `--build`
  * garantit une image API à jour (piège rencontré manuellement en mettant en place l'E2E :
  * une image obsolète répond 404 sur des routes pourtant existantes dans le code).
  *
@@ -25,10 +27,11 @@ export default async function globalSetup() {
     `dotnet ef database update --project src/EventCo.Infrastructure --startup-project src/EventCo.Api --connection "${e2eConnectionString}"`,
     { cwd: repoRoot, stdio: 'inherit' },
   )
-  await waitForApi(apiUrl)
+  await waitForHttp(apiUrl)
+  await waitForHttp(mailpitUrl)
 }
 
-async function waitForApi(baseUrl: string, timeoutMs = 30000) {
+async function waitForHttp(baseUrl: string, timeoutMs = 30000) {
   const deadline = Date.now() + timeoutMs
   while (Date.now() < deadline) {
     try {
@@ -38,5 +41,5 @@ async function waitForApi(baseUrl: string, timeoutMs = 30000) {
       await new Promise((resolve) => setTimeout(resolve, 500))
     }
   }
-  throw new Error(`L'API e2e (${baseUrl}) n'a pas répondu dans le délai imparti.`)
+  throw new Error(`${baseUrl} n'a pas répondu dans le délai imparti.`)
 }

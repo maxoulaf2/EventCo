@@ -13,5 +13,6 @@ export function useAppNavigate() {
     toLogin: () => navigate(routes.login),
     toCheckEmail: (state: CheckEmailNavigationState) => navigate(routes.checkEmail, { state }),
     toVerifyMagicLink: () => navigate(routes.verifyMagicLink),
+    toEvents: () => navigate(routes.events),
   }
 }

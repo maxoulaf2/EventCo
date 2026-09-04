@@ -8,8 +8,12 @@ export default mergeConfig(
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
       css: true,
-      include: ['**/*.{test,spec}.?(c|m)[jt]s?(x)', 'src/**/*.steps.{ts,tsx}'],
-      exclude: ['**/node_modules/**', '**/dist/**', 'tests/**'],
+      include: [
+        '**/*.{test,spec}.?(c|m)[jt]s?(x)',
+        'src/**/*.steps.{ts,tsx}',
+        'tests/behavior/**/*.steps.{ts,tsx}',
+      ],
+      exclude: ['**/node_modules/**', '**/dist/**', 'tests/e2e/**', 'tests/visual/**'],
     },
   }),
 )

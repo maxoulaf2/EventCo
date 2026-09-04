@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useAppNavigate } from '../../../shared/hooks/useAppNavigate'
 import { routes } from '../../../shared/lib/routes'
 import { useVerifyMagicLink } from '../hooks/useVerifyMagicLink'
 
@@ -7,14 +8,21 @@ export function VerifyMagicLinkPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const { mutate, isPending, isSuccess, isError, data } = useVerifyMagicLink()
+  const { toEvents } = useAppNavigate()
   const hasRequested = useRef(false)
 
   useEffect(() => {
     if (!token || hasRequested.current) return
-    
+
     hasRequested.current = true
     mutate(token)
   }, [token, mutate])
+
+  useEffect(() => {
+    if (isSuccess) {
+      toEvents()
+    }
+  }, [isSuccess, toEvents])
 
   if (!token) {
     return (
