@@ -2,6 +2,7 @@ using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.GetEventById;
+using EventCo.Application.Events.GetMyEvents;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,24 @@ namespace EventCo.Api.Controllers;
 [Route("api/events")]
 public sealed class EventsController(ICommandDispatcher commandDispatcher) : ControllerBase
 {
+    [HttpGet]
+    public async Task<IActionResult> GetMine(CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new GetMyEventsQuery(), cancellationToken);
+
+        var response = result.Events.Select(e => new EventSummaryResponse(
+            e.EventId,
+            e.Title,
+            e.EventDate,
+            e.Location,
+            e.CreatedByUserId,
+            e.Status,
+            e.Role,
+            e.HasJoined));
+
+        return Ok(response);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(CreateEventRequest request, CancellationToken cancellationToken)
     {

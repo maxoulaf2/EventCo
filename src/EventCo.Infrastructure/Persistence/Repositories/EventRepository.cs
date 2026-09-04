@@ -14,4 +14,11 @@ internal sealed class EventRepository(EventCoDbContext dbContext) : IEventReposi
 
     public Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         dbContext.Events.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
+    public async Task<IReadOnlyList<Event>> GetByParticipantUserIdAsync(Guid userId, CancellationToken cancellationToken) =>
+        await dbContext.Events
+            .Include(e => e.Participants)
+            .Where(e => e.Participants.Any(p => p.UserId == userId))
+            .OrderBy(e => e.EventDate)
+            .ToListAsync(cancellationToken);
 }
