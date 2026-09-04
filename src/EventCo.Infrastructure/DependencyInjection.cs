@@ -23,6 +23,7 @@ public static class DependencyInjection
 
         services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IEventRepository, EventRepository>();
         services.AddSingleton<ISessionTokenService, SessionTokenService>();
 
         services.AddScoped<LoggingEmailSender>();
