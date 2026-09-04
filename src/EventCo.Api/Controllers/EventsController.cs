@@ -1,6 +1,7 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.CreateEvent;
+using EventCo.Application.Events.GetEventById;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,5 +30,23 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.CreatedAt);
 
         return Created($"api/events/{result.EventId}", response);
+    }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new GetEventByIdQuery(id), cancellationToken);
+
+        var response = new EventResponse(
+            result.EventId,
+            result.Title,
+            result.Description,
+            result.EventDate,
+            result.Location,
+            result.CreatedByUserId,
+            result.Status,
+            result.CreatedAt);
+
+        return Ok(response);
     }
 }

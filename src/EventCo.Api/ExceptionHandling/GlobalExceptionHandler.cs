@@ -1,4 +1,5 @@
 using EventCo.Domain.Common;
+using EventCo.Domain.Events.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
@@ -17,6 +18,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
                     validationException.Errors
                         .GroupBy(e => e.PropertyName)
                         .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray()))),
+            EventNotFoundException notFoundException => (
+                StatusCodes.Status404NotFound,
+                new ProblemDetails { Title = "Ressource introuvable", Detail = notFoundException.Message }),
             DomainException domainException => (
                 StatusCodes.Status400BadRequest,
                 new ProblemDetails { Title = "Règle métier violée", Detail = domainException.Message }),
