@@ -26,14 +26,14 @@ public sealed class InviteParticipantSteps
     private InviteParticipantResult? _lastResult;
     private Exception? _thrownException;
 
-    public InviteParticipantSteps()
+    public InviteParticipantSteps(CurrentUserContext currentUserContext)
     {
         var builder = new ApplicationTestHostBuilder();
 
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
-        builder.Services.AddScoped<ICurrentUserService>(_ => new FixedCurrentUserService(Guid.NewGuid()));
+        builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
 
         _serviceProvider = builder.Build();
         _dbContext = _serviceProvider.GetRequiredService<EventCoDbContext>();
@@ -100,6 +100,10 @@ public sealed class InviteParticipantSteps
     [Then(@"l'invitation échoue avec une erreur d'événement introuvable")]
     public void AlorsLinvitationEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"l'invitation échoue avec une erreur d'autorisation")]
+    public void AlorsLinvitationEchoueAvecUneErreurDautorisation() =>
+        Assert.IsType<UserNotEventOrganizerException>(_thrownException);
 
     [Then(@"la personne invitée a le rôle ""(.*)""")]
     public void AlorsLaPersonneInviteeALeRole(string role) => Assert.Equal(role, _lastResult!.Role);

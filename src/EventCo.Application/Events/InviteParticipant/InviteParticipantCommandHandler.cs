@@ -6,9 +6,8 @@ using EventCo.Domain.ValueObjects;
 
 namespace EventCo.Application.Events.InviteParticipant;
 
-// Pas de vérification d'autorisation par rôle ici, même choix délibéré qu'à GetEventById/UpdateEvent :
-// la tâche dédiée (distinction créateur/co-organisateur/participant) n'est pas encore traitée.
 public sealed class InviteParticipantCommandHandler(
+    ICurrentUserService currentUserService,
     IEventRepository eventRepository,
     IUserRepository userRepository,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<InviteParticipantCommand, InviteParticipantResult>
@@ -28,7 +27,7 @@ public sealed class InviteParticipantCommandHandler(
             await userRepository.AddAsync(user, cancellationToken);
         }
 
-        var participant = @event.InviteParticipant(user.Id, now);
+        var participant = @event.InviteParticipant(currentUserService.UserId!.Value, user.Id, now);
 
         await eventRepository.UpdateAsync(@event, cancellationToken);
 

@@ -23,3 +23,10 @@ Fonctionnalité: Invitation d'un participant via l'API
     Et un événement "Repas de Noël" créé via l'API
     Quand j'invite "pas-un-email" à cet événement via l'API
     Alors la réponse d'invitation a le statut 400
+
+  Scénario: Invitation par un utilisateur qui n'est ni créateur ni co-organisateur
+    Etant donné une session ouverte via l'API pour "invite-event-creator-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une session ouverte via l'API pour "invite-event-other-user-api-test@example.com"
+    Quand j'invite "invite-guest-api-test@example.com" à cet événement via l'API
+    Alors la réponse d'invitation a le statut 403

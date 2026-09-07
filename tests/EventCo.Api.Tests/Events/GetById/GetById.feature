@@ -18,3 +18,10 @@ Fonctionnalité: Consultation d'un événement via l'API
   Scénario: Consultation sans cookie de session
     Quand je consulte un événement inexistant via l'API sans cookie de session
     Alors la réponse de consultation d'événement a le statut 401
+
+  Scénario: Consultation par un utilisateur qui n'est pas participant
+    Etant donné une session ouverte via l'API pour "get-event-creator-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une session ouverte via l'API pour "get-event-other-user-api-test@example.com"
+    Quand je consulte cet événement via l'API
+    Alors la réponse de consultation d'événement a le statut 403

@@ -16,19 +16,18 @@ namespace EventCo.Application.Tests.Events.DeleteEvent;
 public sealed class DeleteEventSteps
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly FixedCurrentUserService _currentUserService = new(Guid.NewGuid());
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     private Guid? _existingEventId;
     private Exception? _thrownException;
 
-    public DeleteEventSteps()
+    public DeleteEventSteps(CurrentUserContext currentUserContext)
     {
         var builder = new ApplicationTestHostBuilder();
 
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
-        builder.Services.AddScoped<ICurrentUserService>(_ => _currentUserService);
+        builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
 
         _serviceProvider = builder.Build();
     }
@@ -43,9 +42,6 @@ public sealed class DeleteEventSteps
 
         _existingEventId = createResult.EventId;
     }
-
-    [Given(@"je change d'utilisateur courant")]
-    public void EtantDonneJeChangeDutilisateurCourant() => _currentUserService.UserId = Guid.NewGuid();
 
     [When(@"je supprime cet événement")]
     public async Task QuandJeSupprimeCetEvenement() => await Supprimer(_existingEventId!.Value);

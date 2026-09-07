@@ -32,3 +32,9 @@ Fonctionnalité: Invitation d'un participant par email
   Scénario: Invitation sur un événement inexistant
     Quand j'invite "ami@example.com" à un événement inexistant
     Alors l'invitation échoue avec une erreur d'événement introuvable
+
+  Scénario: Invitation par un utilisateur qui n'est ni créateur ni co-organisateur
+    Etant donné un événement ouvert aux invitations "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
+    Et je change d'utilisateur courant
+    Quand j'invite "amie@example.com" à cet événement
+    Alors l'invitation échoue avec une erreur d'autorisation

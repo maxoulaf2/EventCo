@@ -55,8 +55,9 @@ public sealed class GetMyEventsSteps
     [Given(@"un événement ""(.*)"" créé par un autre utilisateur qui m'y a invité sans que j'aie rejoint")]
     public async Task EtantDonneUnEvenementCreeParUnAutreUtilisateurQuiMyAInviteSansQueJaieRejoint(string title)
     {
-        var @event = Event.Create(title, null, _now.AddDays(1), null, Guid.NewGuid(), _now);
-        @event.InviteParticipant(_currentUserId, _now);
+        var creatorId = Guid.NewGuid();
+        var @event = Event.Create(title, null, _now.AddDays(1), null, creatorId, _now);
+        @event.InviteParticipant(creatorId, _currentUserId, _now);
         _dbContext.Events.Add(EventMapper.ToEntity(@event));
         await _dbContext.SaveChangesAsync();
     }

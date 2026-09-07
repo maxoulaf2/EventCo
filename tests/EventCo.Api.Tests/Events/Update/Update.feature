@@ -18,3 +18,10 @@ Fonctionnalité: Modification d'un événement via l'API
   Scénario: Modification sans cookie de session
     Quand je modifie un événement inexistant via l'API avec le titre "Réveillon de Noël" au lieu "Chez Bob" sans cookie de session
     Alors la réponse de modification d'événement a le statut 401
+
+  Scénario: Modification par un utilisateur qui n'est ni créateur ni co-organisateur
+    Etant donné une session ouverte via l'API pour "update-event-creator-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une session ouverte via l'API pour "update-event-other-user-api-test@example.com"
+    Quand je modifie cet événement via l'API avec le titre "Réveillon de Noël" au lieu "Chez Bob"
+    Alors la réponse de modification d'événement a le statut 403

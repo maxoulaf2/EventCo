@@ -34,27 +34,51 @@ public class EventTests
     {
         var @event = CreateEvent(out var creatorId);
 
-        Assert.Throws<ParticipantAlreadyInvitedException>(() => @event.InviteParticipant(creatorId, DateTime.UtcNow));
+        Assert.Throws<ParticipantAlreadyInvitedException>(() => @event.InviteParticipant(creatorId, creatorId, DateTime.UtcNow));
     }
 
     [Fact]
     public void InviteParticipant_NewUser_AddsParticipantNotYetJoined()
     {
-        var @event = CreateEvent(out _);
+        var @event = CreateEvent(out var creatorId);
         var invitedUserId = Guid.NewGuid();
 
-        var participant = @event.InviteParticipant(invitedUserId, DateTime.UtcNow);
+        var participant = @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
         Assert.Equal(ParticipantRole.Participant, participant.Role);
         Assert.False(participant.HasJoined);
     }
 
     [Fact]
+    public void InviteParticipant_ActingUserNotCreatorNorOrganizer_ThrowsUserNotEventOrganizerException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventOrganizerException>(
+            () => @event.InviteParticipant(regularParticipantId, Guid.NewGuid(), DateTime.UtcNow));
+    }
+
+    [Fact]
+    public void InviteParticipant_ActingUserIsOrganizer_AddsParticipant()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var organizerId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, organizerId, DateTime.UtcNow);
+        @event.PromoteToOrganizer(creatorId, organizerId);
+
+        var participant = @event.InviteParticipant(organizerId, Guid.NewGuid(), DateTime.UtcNow);
+
+        Assert.Equal(ParticipantRole.Participant, participant.Role);
+    }
+
+    [Fact]
     public void PromoteToOrganizer_ActingUserNotCreator_ThrowsUserNotEventCreatorException()
     {
-        var @event = CreateEvent(out _);
+        var @event = CreateEvent(out var creatorId);
         var invitedUserId = Guid.NewGuid();
-        @event.InviteParticipant(invitedUserId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
         Assert.Throws<UserNotEventCreatorException>(() => @event.PromoteToOrganizer(invitedUserId, invitedUserId));
     }
@@ -64,7 +88,7 @@ public class EventTests
     {
         var @event = CreateEvent(out var creatorId);
         var invitedUserId = Guid.NewGuid();
-        var participant = @event.InviteParticipant(invitedUserId, DateTime.UtcNow);
+        var participant = @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
         @event.PromoteToOrganizer(creatorId, invitedUserId);
 
@@ -84,7 +108,7 @@ public class EventTests
     {
         var @event = CreateEvent(out var creatorId);
         var invitedUserId = Guid.NewGuid();
-        @event.InviteParticipant(invitedUserId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
         @event.RemoveParticipant(creatorId, invitedUserId);
 
@@ -94,9 +118,9 @@ public class EventTests
     [Fact]
     public void EnsureCanBeDeletedBy_ActingUserNotCreator_ThrowsUserNotEventCreatorException()
     {
-        var @event = CreateEvent(out _);
+        var @event = CreateEvent(out var creatorId);
         var invitedUserId = Guid.NewGuid();
-        @event.InviteParticipant(invitedUserId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
         Assert.Throws<UserNotEventCreatorException>(() => @event.EnsureCanBeDeletedBy(invitedUserId));
     }
@@ -109,6 +133,50 @@ public class EventTests
         var exception = Record.Exception(() => @event.EnsureCanBeDeletedBy(creatorId));
 
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void EnsureCanBeViewedBy_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out _);
+
+        Assert.Throws<UserNotEventParticipantException>(() => @event.EnsureCanBeViewedBy(Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void EnsureCanBeViewedBy_ActingUserIsParticipant_DoesNotThrow()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var invitedUserId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
+
+        var exception = Record.Exception(() => @event.EnsureCanBeViewedBy(invitedUserId));
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void UpdateDetails_ActingUserNotCreatorNorOrganizer_ThrowsUserNotEventOrganizerException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var invitedUserId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventOrganizerException>(
+            () => @event.UpdateDetails(invitedUserId, "Réveillon de Noël", null, DateTime.UtcNow.AddDays(31), "Lyon"));
+    }
+
+    [Fact]
+    public void UpdateDetails_ActingUserIsOrganizer_UpdatesDetails()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var organizerId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, organizerId, DateTime.UtcNow);
+        @event.PromoteToOrganizer(creatorId, organizerId);
+
+        @event.UpdateDetails(organizerId, "Réveillon de Noël", null, DateTime.UtcNow.AddDays(31), "Lyon");
+
+        Assert.Equal("Réveillon de Noël", @event.Title);
     }
 
     [Fact]

@@ -24,6 +24,12 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             UserNotEventCreatorException forbiddenException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenException.Message }),
+            UserNotEventOrganizerException forbiddenOrganizerException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenOrganizerException.Message }),
+            UserNotEventParticipantException forbiddenParticipantException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenParticipantException.Message }),
             DomainException domainException => (
                 StatusCodes.Status400BadRequest,
                 new ProblemDetails { Title = "Règle métier violée", Detail = domainException.Message }),

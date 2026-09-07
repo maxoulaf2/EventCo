@@ -21,13 +21,13 @@ public sealed class GetEventByIdSteps
     private GetEventByIdResult? _lastResult;
     private Exception? _thrownException;
 
-    public GetEventByIdSteps()
+    public GetEventByIdSteps(CurrentUserContext currentUserContext)
     {
         var builder = new ApplicationTestHostBuilder();
 
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
-        builder.Services.AddScoped<ICurrentUserService>(_ => new FixedCurrentUserService(Guid.NewGuid()));
+        builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
 
         _serviceProvider = builder.Build();
     }
@@ -79,6 +79,10 @@ public sealed class GetEventByIdSteps
     [Then(@"la consultation échoue avec une erreur d'événement introuvable")]
     public void AlorsLaConsultationEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"la consultation échoue avec une erreur d'autorisation")]
+    public void AlorsLaConsultationEchoueAvecUneErreurDautorisation() =>
+        Assert.IsType<UserNotEventParticipantException>(_thrownException);
 
     [Then(@"l'événement consulté a pour titre ""(.*)""")]
     public void AlorsLevenementConsulteAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);

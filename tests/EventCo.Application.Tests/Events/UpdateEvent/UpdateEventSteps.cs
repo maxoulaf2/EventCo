@@ -22,13 +22,13 @@ public sealed class UpdateEventSteps
     private UpdateEventResult? _lastResult;
     private Exception? _thrownException;
 
-    public UpdateEventSteps()
+    public UpdateEventSteps(CurrentUserContext currentUserContext)
     {
         var builder = new ApplicationTestHostBuilder();
 
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
-        builder.Services.AddScoped<ICurrentUserService>(_ => new FixedCurrentUserService(Guid.NewGuid()));
+        builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
 
         _serviceProvider = builder.Build();
     }
@@ -78,6 +78,10 @@ public sealed class UpdateEventSteps
     [Then(@"la modification échoue avec une erreur d'événement introuvable")]
     public void AlorsLaModificationEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"la modification échoue avec une erreur d'autorisation")]
+    public void AlorsLaModificationEchoueAvecUneErreurDautorisation() =>
+        Assert.IsType<UserNotEventOrganizerException>(_thrownException);
 
     [Then(@"l'événement modifié a pour titre ""(.*)""")]
     public void AlorsLevenementModifieAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);

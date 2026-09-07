@@ -19,3 +19,9 @@ Fonctionnalité: Modification d'un événement
   Scénario: Modification d'un événement inexistant
     Quand je modifie un événement inexistant avec le titre "Réveillon de Noël" prévu le "2026-12-25" au lieu "Chez Bob"
     Alors la modification échoue avec une erreur d'événement introuvable
+
+  Scénario: Modification par un utilisateur qui n'est ni créateur ni co-organisateur
+    Etant donné un événement existant "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
+    Et je change d'utilisateur courant
+    Quand je modifie cet événement avec le titre "Réveillon de Noël" prévu le "2026-12-25" au lieu "Chez Bob"
+    Alors la modification échoue avec une erreur d'autorisation

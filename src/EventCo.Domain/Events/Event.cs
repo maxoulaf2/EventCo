@@ -56,8 +56,10 @@ public class Event : Entity
         return @event;
     }
 
-    public void UpdateDetails(string title, string? description, DateTime eventDate, string? location)
+    public void UpdateDetails(Guid actingUserId, string title, string? description, DateTime eventDate, string? location)
     {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException(Id);
 
@@ -71,8 +73,10 @@ public class Event : Entity
 
     public void Complete() => Status = EventStatus.Completed;
 
-    public EventParticipant InviteParticipant(Guid userId, DateTime now)
+    public EventParticipant InviteParticipant(Guid actingUserId, Guid userId, DateTime now)
     {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+
         if (_participants.Any(p => p.UserId == userId))
             throw new ParticipantAlreadyInvitedException(Id, userId);
 
@@ -111,6 +115,12 @@ public class Event : Entity
 
     public void EnsureCanBeDeletedBy(Guid actingUserId) => EnsureActingUserIsCreator(actingUserId);
 
+    public void EnsureCanBeViewedBy(Guid actingUserId)
+    {
+        if (_participants.All(p => p.UserId != actingUserId))
+            throw new UserNotEventParticipantException(Id, actingUserId);
+    }
+
     public EventTask AddTask(string title, TaskCategory category, string? quantity, DateTime now)
     {
         var task = new EventTask(Id, title, category, quantity, now);
@@ -138,6 +148,15 @@ public class Event : Entity
     {
         if (actingUserId != CreatedByUserId)
             throw new UserNotEventCreatorException(Id, actingUserId);
+    }
+
+    // Le créateur possède toujours une entrée EventParticipant avec Role = Organizer (cf. Create),
+    // donc cette seule vérification de rôle couvre à la fois le créateur et les co-organisateurs.
+    private void EnsureActingUserIsCreatorOrOrganizer(Guid actingUserId)
+    {
+        var participant = _participants.FirstOrDefault(p => p.UserId == actingUserId);
+        if (participant is null || participant.Role != ParticipantRole.Organizer)
+            throw new UserNotEventOrganizerException(Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>

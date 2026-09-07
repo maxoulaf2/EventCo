@@ -4,7 +4,7 @@ using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Application.Events.UpdateEvent;
 
-public sealed class UpdateEventCommandHandler(IEventRepository eventRepository)
+public sealed class UpdateEventCommandHandler(ICurrentUserService currentUserService, IEventRepository eventRepository)
     : ICommandHandler<UpdateEventCommand, UpdateEventResult>
 {
     public async Task<UpdateEventResult> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
@@ -12,7 +12,7 @@ public sealed class UpdateEventCommandHandler(IEventRepository eventRepository)
         var @event = await eventRepository.GetByIdAsync(request.EventId, cancellationToken)
             ?? throw new EventNotFoundException(request.EventId);
 
-        @event.UpdateDetails(request.Title, request.Description, request.EventDate, request.Location);
+        @event.UpdateDetails(currentUserService.UserId!.Value, request.Title, request.Description, request.EventDate, request.Location);
 
         await eventRepository.UpdateAsync(@event, cancellationToken);
 
