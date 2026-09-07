@@ -4,6 +4,7 @@ using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.DeleteEvent;
 using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.GetMyEvents;
+using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.UpdateEvent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -97,5 +98,24 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
         await commandDispatcher.Send(new DeleteEventCommand(id), cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/participants")]
+    public async Task<IActionResult> InviteParticipant(Guid id, InviteParticipantRequest request, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(
+            new InviteParticipantCommand(id, request.Email),
+            cancellationToken);
+
+        var response = new EventParticipantResponse(
+            result.EventId,
+            result.UserId,
+            result.Email,
+            result.DisplayName,
+            result.Role,
+            result.InvitedAt,
+            result.HasJoined);
+
+        return Created($"api/events/{id}", response);
     }
 }

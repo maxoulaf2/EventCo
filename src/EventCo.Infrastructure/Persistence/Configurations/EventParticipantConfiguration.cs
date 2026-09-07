@@ -12,6 +12,12 @@ public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParti
 
         builder.HasKey(p => p.Id);
 
+        // Id généré côté Domain (Guid.NewGuid()), jamais par la base : sans ce ValueGeneratedNever, EF Core ne sait
+        // pas distinguer "nouvelle entité" d'"entité existante modifiée" quand elle est ajoutée à la collection
+        // d'un agrégat déjà suivi par le ChangeTracker (ex: EventRepository.UpdateAsync après Event.InviteParticipant)
+        // et la marque à tort Modified, ce qui fait échouer SaveChanges (DbUpdateConcurrencyException).
+        builder.Property(p => p.Id).ValueGeneratedNever();
+
         builder.Property(p => p.Role)
             .HasConversion<string>()
             .HasMaxLength(20)

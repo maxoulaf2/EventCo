@@ -12,6 +12,9 @@ public class EventTaskConfiguration : IEntityTypeConfiguration<EventTaskEntity>
 
         builder.HasKey(t => t.Id);
 
+        // Cf. EventParticipantConfiguration : même piège EF Core anticipé ici pour le lot 3 (AddTask sur un Event chargé).
+        builder.Property(t => t.Id).ValueGeneratedNever();
+
         builder.Property(t => t.Title)
             .HasMaxLength(200)
             .IsRequired();

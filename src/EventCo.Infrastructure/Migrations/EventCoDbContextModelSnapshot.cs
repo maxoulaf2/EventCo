@@ -65,7 +65,6 @@ namespace EventCo.Infrastructure.Migrations
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventParticipantEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("EventId")
@@ -98,7 +97,6 @@ namespace EventCo.Infrastructure.Migrations
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventTaskEntity", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<Guid?>("AssignedToUserId")

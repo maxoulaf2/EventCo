@@ -3,7 +3,7 @@ using EventCo.Domain.ValueObjects.Exceptions;
 
 namespace EventCo.Domain.ValueObjects;
 
-public sealed partial class Email : IEquatable<Email>
+public sealed partial record Email
 {
     public string Value { get; }
 
@@ -24,12 +24,6 @@ public sealed partial class Email : IEquatable<Email>
 
         return new Email(normalized);
     }
-
-    public bool Equals(Email? other) => other is not null && Value == other.Value;
-
-    public override bool Equals(object? obj) => Equals(obj as Email);
-
-    public override int GetHashCode() => Value.GetHashCode();
 
     public override string ToString() => Value;
 
