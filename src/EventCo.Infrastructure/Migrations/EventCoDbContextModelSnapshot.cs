@@ -22,39 +22,7 @@ namespace EventCo.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("EventCo.Domain.Auth.MagicLinkToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ConsumedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(320)
-                        .HasColumnType("character varying(320)");
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email");
-
-                    b.HasIndex("TokenHash")
-                        .IsUnique();
-
-                    b.ToTable("MagicLinkTokens", (string)null);
-                });
-
-            modelBuilder.Entity("EventCo.Domain.Events.Event", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,7 +62,7 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("Events", (string)null);
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Events.EventParticipant", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventParticipantEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -127,7 +95,7 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("EventParticipants", (string)null);
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Events.EventTask", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventTaskEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -168,7 +136,39 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("EventTasks", (string)null);
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Users.User", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.MagicLinkTokenEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("ConsumedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("character varying(320)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("MagicLinkTokens", (string)null);
+                });
+
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.UserEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -199,45 +199,45 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Events.Event", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
-                    b.HasOne("EventCo.Domain.Users.User", null)
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Events.EventParticipant", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventParticipantEntity", b =>
                 {
-                    b.HasOne("EventCo.Domain.Events.Event", null)
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventEntity", null)
                         .WithMany("Participants")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("EventCo.Domain.Users.User", null)
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Events.EventTask", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventTaskEntity", b =>
                 {
-                    b.HasOne("EventCo.Domain.Users.User", null)
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
                         .WithMany()
                         .HasForeignKey("AssignedToUserId")
                         .OnDelete(DeleteBehavior.SetNull);
 
-                    b.HasOne("EventCo.Domain.Events.Event", null)
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventEntity", null)
                         .WithMany("Tasks")
                         .HasForeignKey("EventId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventCo.Domain.Events.Event", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
                     b.Navigation("Participants");
 

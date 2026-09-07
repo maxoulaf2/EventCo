@@ -12,10 +12,6 @@ public abstract class Entity
         Id = id;
     }
 
-    protected Entity()
-    {
-    }
-
     public override bool Equals(object? obj)
     {
         if (obj is not Entity other || other.GetType() != GetType())

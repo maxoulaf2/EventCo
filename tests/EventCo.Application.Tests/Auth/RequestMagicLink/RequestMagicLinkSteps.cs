@@ -70,10 +70,10 @@ public sealed class RequestMagicLinkSteps
     [Then(@"un token de connexion est enregistré pour ""(.*)"" expirant dans (\d+) minutes")]
     public void AlorsUnTokenEstEnregistrePourExpirantDans(string email, int minutes)
     {
-        var token = _dbContext.MagicLinkTokens.Single(t => t.Email.Value == email.ToLowerInvariant());
+        var token = _dbContext.MagicLinkTokens.Single(t => t.Email == email.ToLowerInvariant());
 
         Assert.Equal(_now.AddMinutes(minutes), token.ExpiresAt);
-        Assert.False(token.IsConsumed);
+        Assert.Null(token.ConsumedAt);
     }
 
     [Then(@"un email est envoyé à ""(.*)"" contenant un lien de vérification")]

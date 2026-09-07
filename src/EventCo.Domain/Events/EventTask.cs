@@ -13,10 +13,6 @@ public class EventTask : Entity
     public bool IsDone { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    private EventTask()
-    {
-    }
-
     internal EventTask(Guid eventId, string title, TaskCategory category, string? quantity, DateTime createdAt)
         : base(Guid.NewGuid())
     {
@@ -29,6 +25,21 @@ public class EventTask : Entity
         Quantity = quantity;
         CreatedAt = createdAt;
     }
+
+    private EventTask(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, DateTime createdAt)
+        : base(id)
+    {
+        EventId = eventId;
+        Title = title;
+        Category = category;
+        Quantity = quantity;
+        AssignedToUserId = assignedToUserId;
+        IsDone = isDone;
+        CreatedAt = createdAt;
+    }
+
+    internal static EventTask Reconstitute(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, DateTime createdAt) =>
+        new(id, eventId, title, category, quantity, assignedToUserId, isDone, createdAt);
 
     internal void AssignTo(Guid userId) => AssignedToUserId = userId;
 

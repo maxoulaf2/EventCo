@@ -99,14 +99,14 @@ public sealed class VerifyMagicLinkSteps
     [Then(@"un compte est créé pour ""(.*)""")]
     public void AlorsUnCompteEstCreePour(string email)
     {
-        var user = _dbContext.Users.Single(u => u.Email.Value == email.ToLowerInvariant());
+        var user = _dbContext.Users.Single(u => u.Email == email.ToLowerInvariant());
         Assert.Equal(_lastResult!.UserId, user.Id);
     }
 
     [Then(@"un seul compte existe pour ""(.*)""")]
     public void AlorsUnSeulCompteExistePour(string email)
     {
-        var users = _dbContext.Users.Where(u => u.Email.Value == email.ToLowerInvariant()).ToList();
+        var users = _dbContext.Users.Where(u => u.Email == email.ToLowerInvariant()).ToList();
         Assert.Single(users);
     }
 
@@ -121,8 +121,8 @@ public sealed class VerifyMagicLinkSteps
     [Then(@"le lien de connexion pour ""(.*)"" est marqué comme utilisé")]
     public void AlorsLeLienDeConnexionPourEstMarqueCommeUtilise(string email)
     {
-        var token = _dbContext.MagicLinkTokens.Single(t => t.Email.Value == email.ToLowerInvariant());
-        Assert.True(token.IsConsumed);
+        var token = _dbContext.MagicLinkTokens.Single(t => t.Email == email.ToLowerInvariant());
+        Assert.NotNull(token.ConsumedAt);
     }
 
     private async Task ValiderToken(string token)

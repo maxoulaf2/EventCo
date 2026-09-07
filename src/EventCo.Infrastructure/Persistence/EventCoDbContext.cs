@@ -1,15 +1,13 @@
-using EventCo.Domain.Auth;
-using EventCo.Domain.Events;
-using EventCo.Domain.Users;
+using EventCo.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventCo.Infrastructure.Persistence;
 
 public class EventCoDbContext(DbContextOptions<EventCoDbContext> options) : DbContext(options)
 {
-    public DbSet<User> Users => Set<User>();
-    public DbSet<MagicLinkToken> MagicLinkTokens => Set<MagicLinkToken>();
-    public DbSet<Event> Events => Set<Event>();
+    public DbSet<UserEntity> Users => Set<UserEntity>();
+    public DbSet<MagicLinkTokenEntity> MagicLinkTokens => Set<MagicLinkTokenEntity>();
+    public DbSet<EventEntity> Events => Set<EventEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

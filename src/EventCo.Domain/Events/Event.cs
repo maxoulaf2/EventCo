@@ -19,11 +19,7 @@ public class Event : Entity
     public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
     public IReadOnlyCollection<EventTask> Tasks => _tasks.AsReadOnly();
 
-    private Event()
-    {
-    }
-
-    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, Guid createdByUserId, DateTime createdAt)
+    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, Guid createdByUserId, EventStatus status, DateTime createdAt)
         : base(id)
     {
         Title = title;
@@ -31,7 +27,7 @@ public class Event : Entity
         EventDate = eventDate;
         Location = location;
         CreatedByUserId = createdByUserId;
-        Status = EventStatus.Planned;
+        Status = status;
         CreatedAt = createdAt;
     }
 
@@ -40,12 +36,23 @@ public class Event : Entity
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException();
 
-        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, createdByUserId, now);
+        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, createdByUserId, EventStatus.Planned, now);
 
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
         creatorParticipant.Join(now);
         @event._participants.Add(creatorParticipant);
 
+        return @event;
+    }
+
+    internal static Event Reconstitute(
+        Guid id, string title, string? description, DateTime eventDate, string? location,
+        Guid createdByUserId, EventStatus status, DateTime createdAt,
+        IEnumerable<EventParticipant> participants, IEnumerable<EventTask> tasks)
+    {
+        var @event = new Event(id, title, description, eventDate, location, createdByUserId, status, createdAt);
+        @event._participants.AddRange(participants);
+        @event._tasks.AddRange(tasks);
         return @event;
     }
 

@@ -1,20 +1,18 @@
-using EventCo.Domain.Auth;
-using EventCo.Domain.ValueObjects;
+using EventCo.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventCo.Infrastructure.Persistence.Configurations;
 
-public class MagicLinkTokenConfiguration : IEntityTypeConfiguration<MagicLinkToken>
+public class MagicLinkTokenConfiguration : IEntityTypeConfiguration<MagicLinkTokenEntity>
 {
-    public void Configure(EntityTypeBuilder<MagicLinkToken> builder)
+    public void Configure(EntityTypeBuilder<MagicLinkTokenEntity> builder)
     {
         builder.ToTable("MagicLinkTokens");
 
         builder.HasKey(t => t.Id);
 
         builder.Property(t => t.Email)
-            .HasConversion(email => email.Value, value => Email.Create(value))
             .HasMaxLength(320)
             .IsRequired();
 

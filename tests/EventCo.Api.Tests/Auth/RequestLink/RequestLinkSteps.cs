@@ -33,6 +33,6 @@ public sealed class RequestLinkSteps
         var dbContext = scope.ServiceProvider.GetRequiredService<EventCoDbContext>();
         var tokens = await dbContext.MagicLinkTokens.ToListAsync();
 
-        Assert.Contains(tokens, token => token.Email.Value == email);
+        Assert.Contains(tokens, token => token.Email == email);
     }
 }

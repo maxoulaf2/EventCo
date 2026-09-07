@@ -1,13 +1,12 @@
-using EventCo.Domain.Events;
-using EventCo.Domain.Users;
+using EventCo.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventCo.Infrastructure.Persistence.Configurations;
 
-public class EventConfiguration : IEntityTypeConfiguration<Event>
+public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
 {
-    public void Configure(EntityTypeBuilder<Event> builder)
+    public void Configure(EntityTypeBuilder<EventEntity> builder)
     {
         builder.ToTable("Events");
 
@@ -32,7 +31,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
 
         builder.Property(e => e.CreatedAt).IsRequired();
 
-        builder.HasOne<User>()
+        builder.HasOne<UserEntity>()
             .WithMany()
             .HasForeignKey(e => e.CreatedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
@@ -42,17 +41,9 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             .HasForeignKey(p => p.EventId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Navigation(e => e.Participants)
-            .HasField("_participants")
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
-
         builder.HasMany(e => e.Tasks)
             .WithOne()
             .HasForeignKey(t => t.EventId)
             .OnDelete(DeleteBehavior.Restrict);
-
-        builder.Navigation(e => e.Tasks)
-            .HasField("_tasks")
-            .UsePropertyAccessMode(PropertyAccessMode.Field);
     }
 }

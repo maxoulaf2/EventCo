@@ -1,20 +1,18 @@
-using EventCo.Domain.Users;
-using EventCo.Domain.ValueObjects;
+using EventCo.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventCo.Infrastructure.Persistence.Configurations;
 
-public class UserConfiguration : IEntityTypeConfiguration<User>
+public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
 {
-    public void Configure(EntityTypeBuilder<User> builder)
+    public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
         builder.ToTable("Users");
 
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Email)
-            .HasConversion(email => email.Value, value => Email.Create(value))
             .HasMaxLength(320)
             .IsRequired();
 

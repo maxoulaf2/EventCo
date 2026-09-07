@@ -1,0 +1,20 @@
+using EventCo.Domain.Users;
+using EventCo.Domain.ValueObjects;
+using EventCo.Infrastructure.Persistence.Entities;
+
+namespace EventCo.Infrastructure.Persistence.Mapping;
+
+internal static class UserMapper
+{
+    public static User ToDomain(UserEntity entity) =>
+        User.Reconstitute(entity.Id, Email.Create(entity.Email), entity.DisplayName, entity.AvatarUrl, entity.CreatedAt);
+
+    public static UserEntity ToEntity(User domain) => new()
+    {
+        Id = domain.Id,
+        Email = domain.Email.Value,
+        DisplayName = domain.DisplayName,
+        AvatarUrl = domain.AvatarUrl,
+        CreatedAt = domain.CreatedAt,
+    };
+}

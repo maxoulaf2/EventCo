@@ -12,10 +12,6 @@ public class EventParticipant : Entity
 
     public bool HasJoined => JoinedAt is not null;
 
-    private EventParticipant()
-    {
-    }
-
     internal EventParticipant(Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt)
         : base(Guid.NewGuid())
     {
@@ -24,6 +20,19 @@ public class EventParticipant : Entity
         Role = role;
         InvitedAt = invitedAt;
     }
+
+    private EventParticipant(Guid id, Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt, DateTime? joinedAt)
+        : base(id)
+    {
+        EventId = eventId;
+        UserId = userId;
+        Role = role;
+        InvitedAt = invitedAt;
+        JoinedAt = joinedAt;
+    }
+
+    internal static EventParticipant Reconstitute(Guid id, Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt, DateTime? joinedAt) =>
+        new(id, eventId, userId, role, invitedAt, joinedAt);
 
     internal void Join(DateTime joinedAt) => JoinedAt = joinedAt;
 

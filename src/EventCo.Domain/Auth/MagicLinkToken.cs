@@ -13,10 +13,6 @@ public class MagicLinkToken : Entity
 
     public bool IsConsumed => ConsumedAt is not null;
 
-    private MagicLinkToken()
-    {
-    }
-
     private MagicLinkToken(Guid id, Email email, string tokenHash, DateTime expiresAt) : base(id)
     {
         Email = email;
@@ -34,6 +30,9 @@ public class MagicLinkToken : Entity
 
         return new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt);
     }
+
+    internal static MagicLinkToken Reconstitute(Guid id, Email email, string tokenHash, DateTime expiresAt, DateTime? consumedAt) =>
+        new(id, email, tokenHash, expiresAt) { ConsumedAt = consumedAt };
 
     public bool IsExpired(DateTime now) => now >= ExpiresAt;
 

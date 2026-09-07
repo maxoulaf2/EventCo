@@ -6,6 +6,7 @@ using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
 using EventCo.Domain.Events;
 using EventCo.Infrastructure.Persistence;
+using EventCo.Infrastructure.Persistence.Mapping;
 using EventCo.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,7 +48,7 @@ public sealed class GetMyEventsSteps
     public async Task EtantDonneUnEvenementCreeParUnAutreUtilisateurAuquelJeNeParticipePas(string title)
     {
         var @event = Event.Create(title, null, _now.AddDays(1), null, Guid.NewGuid(), _now);
-        _dbContext.Events.Add(@event);
+        _dbContext.Events.Add(EventMapper.ToEntity(@event));
         await _dbContext.SaveChangesAsync();
     }
 
@@ -56,7 +57,7 @@ public sealed class GetMyEventsSteps
     {
         var @event = Event.Create(title, null, _now.AddDays(1), null, Guid.NewGuid(), _now);
         @event.InviteParticipant(_currentUserId, _now);
-        _dbContext.Events.Add(@event);
+        _dbContext.Events.Add(EventMapper.ToEntity(@event));
         await _dbContext.SaveChangesAsync();
     }
 

@@ -62,7 +62,7 @@ public sealed class VerifySteps
         var dbContext = scope.ServiceProvider.GetRequiredService<EventCoDbContext>();
         var users = await dbContext.Users.ToListAsync();
 
-        Assert.Contains(users, u => u.Email.Value == email);
+        Assert.Contains(users, u => u.Email == email);
     }
 
     private static string ExtractRawToken(string emailHtmlBody)

@@ -11,10 +11,6 @@ public class User : Entity
     public string? AvatarUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    private User()
-    {
-    }
-
     private User(Guid id, Email email, string displayName, DateTime createdAt) : base(id)
     {
         Email = email;
@@ -29,6 +25,9 @@ public class User : Entity
 
         return new User(Guid.NewGuid(), email, displayName.Trim(), now);
     }
+
+    internal static User Reconstitute(Guid id, Email email, string displayName, string? avatarUrl, DateTime createdAt) =>
+        new(id, email, displayName, createdAt) { AvatarUrl = avatarUrl };
 
     public void UpdateProfile(string displayName, string? avatarUrl)
     {

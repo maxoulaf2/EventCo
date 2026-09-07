@@ -1,13 +1,12 @@
-using EventCo.Domain.Events;
-using EventCo.Domain.Users;
+using EventCo.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventCo.Infrastructure.Persistence.Configurations;
 
-public class EventTaskConfiguration : IEntityTypeConfiguration<EventTask>
+public class EventTaskConfiguration : IEntityTypeConfiguration<EventTaskEntity>
 {
-    public void Configure(EntityTypeBuilder<EventTask> builder)
+    public void Configure(EntityTypeBuilder<EventTaskEntity> builder)
     {
         builder.ToTable("EventTasks");
 
@@ -29,7 +28,7 @@ public class EventTaskConfiguration : IEntityTypeConfiguration<EventTask>
 
         builder.Property(t => t.CreatedAt).IsRequired();
 
-        builder.HasOne<User>()
+        builder.HasOne<UserEntity>()
             .WithMany()
             .HasForeignKey(t => t.AssignedToUserId)
             .OnDelete(DeleteBehavior.SetNull);

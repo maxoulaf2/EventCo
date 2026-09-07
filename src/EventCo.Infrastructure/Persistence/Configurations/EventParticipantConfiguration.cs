@@ -1,13 +1,12 @@
-using EventCo.Domain.Events;
-using EventCo.Domain.Users;
+using EventCo.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace EventCo.Infrastructure.Persistence.Configurations;
 
-public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParticipant>
+public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParticipantEntity>
 {
-    public void Configure(EntityTypeBuilder<EventParticipant> builder)
+    public void Configure(EntityTypeBuilder<EventParticipantEntity> builder)
     {
         builder.ToTable("EventParticipants");
 
@@ -24,7 +23,7 @@ public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParti
 
         builder.HasIndex(p => new { p.EventId, p.UserId }).IsUnique();
 
-        builder.HasOne<User>()
+        builder.HasOne<UserEntity>()
             .WithMany()
             .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Restrict);
