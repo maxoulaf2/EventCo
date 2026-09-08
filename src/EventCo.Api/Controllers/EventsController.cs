@@ -1,6 +1,7 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.AssignTask;
+using EventCo.Application.Events.CompleteTask;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateTask;
 using EventCo.Application.Events.DeleteEvent;
@@ -9,6 +10,7 @@ using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.PromoteToOrganizer;
+using EventCo.Application.Events.ReopenTask;
 using EventCo.Application.Events.UpdateEvent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -155,6 +157,22 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> AssignTask(Guid id, Guid taskId, Guid userId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new AssignTaskCommand(id, taskId, userId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/tasks/{taskId:guid}/complete")]
+    public async Task<IActionResult> CompleteTask(Guid id, Guid taskId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new CompleteTaskCommand(id, taskId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/tasks/{taskId:guid}/reopen")]
+    public async Task<IActionResult> ReopenTask(Guid id, Guid taskId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new ReopenTaskCommand(id, taskId), cancellationToken);
 
         return NoContent();
     }

@@ -316,14 +316,85 @@ public class EventTests
     }
 
     [Fact]
-    public void CompleteTask_ExistingTask_SetsIsDoneTrue()
+    public void CompleteTask_ActingUserIsOrganizer_SetsIsDoneTrue()
     {
         var @event = CreateEvent(out var creatorId);
         var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
-        @event.CompleteTask(task.Id);
+        @event.CompleteTask(creatorId, task.Id);
 
         Assert.True(task.IsDone);
+    }
+
+    [Fact]
+    public void CompleteTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventParticipantException>(() => @event.CompleteTask(Guid.NewGuid(), task.Id));
+    }
+
+    [Fact]
+    public void CompleteTask_ActingUserIsAssignedParticipant_SetsIsDoneTrue()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.AssignTask(creatorId, task.Id, regularParticipantId);
+
+        @event.CompleteTask(regularParticipantId, task.Id);
+
+        Assert.True(task.IsDone);
+    }
+
+    [Fact]
+    public void CompleteTask_ActingUserIsParticipantNotAssigned_ThrowsParticipantCannotToggleOthersTaskException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Throws<ParticipantCannotToggleOthersTaskException>(() => @event.CompleteTask(regularParticipantId, task.Id));
+    }
+
+    [Fact]
+    public void ReopenTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.CompleteTask(creatorId, task.Id);
+
+        Assert.Throws<UserNotEventParticipantException>(() => @event.ReopenTask(Guid.NewGuid(), task.Id));
+    }
+
+    [Fact]
+    public void ReopenTask_ActingUserIsAssignedParticipant_SetsIsDoneFalse()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.AssignTask(creatorId, task.Id, regularParticipantId);
+        @event.CompleteTask(regularParticipantId, task.Id);
+
+        @event.ReopenTask(regularParticipantId, task.Id);
+
+        Assert.False(task.IsDone);
+    }
+
+    [Fact]
+    public void ReopenTask_ActingUserIsParticipantNotAssigned_ThrowsParticipantCannotToggleOthersTaskException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.CompleteTask(creatorId, task.Id);
+
+        Assert.Throws<ParticipantCannotToggleOthersTaskException>(() => @event.ReopenTask(regularParticipantId, task.Id));
     }
 
     [Fact]

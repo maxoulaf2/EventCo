@@ -141,9 +141,19 @@ public class Event : Entity
 
     public void UnassignTask(Guid taskId) => GetTask(taskId).Unassign();
 
-    public void CompleteTask(Guid taskId) => GetTask(taskId).MarkDone();
+    public void CompleteTask(Guid actingUserId, Guid taskId)
+    {
+        var task = GetTask(taskId);
+        EnsureActingUserCanToggleTaskDone(actingUserId, task);
+        task.MarkDone();
+    }
 
-    public void ReopenTask(Guid taskId) => GetTask(taskId).MarkNotDone();
+    public void ReopenTask(Guid actingUserId, Guid taskId)
+    {
+        var task = GetTask(taskId);
+        EnsureActingUserCanToggleTaskDone(actingUserId, task);
+        task.MarkNotDone();
+    }
 
     public void RemoveTask(Guid taskId) => _tasks.Remove(GetTask(taskId));
 
@@ -168,6 +178,14 @@ public class Event : Entity
     {
         if (_participants.All(p => p.UserId != actingUserId))
             throw new UserNotEventParticipantException(Id, actingUserId);
+    }
+
+    private void EnsureActingUserCanToggleTaskDone(Guid actingUserId, EventTask task)
+    {
+        EnsureActingUserIsParticipant(actingUserId);
+
+        if (task.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotToggleOthersTaskException(Id, task.Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>
