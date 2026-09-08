@@ -11,9 +11,10 @@ public class EventTask : Entity
     public string? Quantity { get; private set; }
     public Guid? AssignedToUserId { get; private set; }
     public bool IsDone { get; private set; }
+    public Guid CreatedByUserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    internal EventTask(Guid eventId, string title, TaskCategory category, string? quantity, DateTime createdAt)
+    internal EventTask(Guid eventId, string title, TaskCategory category, string? quantity, Guid createdByUserId, DateTime createdAt)
         : base(Guid.NewGuid())
     {
         if (string.IsNullOrWhiteSpace(title))
@@ -23,10 +24,11 @@ public class EventTask : Entity
         Title = title.Trim();
         Category = category;
         Quantity = quantity;
+        CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    private EventTask(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, DateTime createdAt)
+    private EventTask(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, Guid createdByUserId, DateTime createdAt)
         : base(id)
     {
         EventId = eventId;
@@ -35,11 +37,12 @@ public class EventTask : Entity
         Quantity = quantity;
         AssignedToUserId = assignedToUserId;
         IsDone = isDone;
+        CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    internal static EventTask Reconstitute(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, DateTime createdAt) =>
-        new(id, eventId, title, category, quantity, assignedToUserId, isDone, createdAt);
+    internal static EventTask Reconstitute(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, Guid createdByUserId, DateTime createdAt) =>
+        new(id, eventId, title, category, quantity, assignedToUserId, isDone, createdByUserId, createdAt);
 
     internal void AssignTo(Guid userId) => AssignedToUserId = userId;
 

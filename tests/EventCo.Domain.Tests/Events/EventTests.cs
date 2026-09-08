@@ -400,8 +400,56 @@ public class EventTests
     [Fact]
     public void RemoveTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
     {
-        var @event = CreateEvent(out _);
+        var @event = CreateEvent(out var creatorId);
 
-        Assert.Throws<EventTaskNotFoundException>(() => @event.RemoveTask(Guid.NewGuid()));
+        Assert.Throws<EventTaskNotFoundException>(() => @event.RemoveTask(creatorId, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void RemoveTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventParticipantException>(() => @event.RemoveTask(Guid.NewGuid(), task.Id));
+    }
+
+    [Fact]
+    public void RemoveTask_ActingUserIsTaskCreator_RemovesFromCollection()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        @event.RemoveTask(regularParticipantId, task.Id);
+
+        Assert.DoesNotContain(@event.Tasks, t => t.Id == task.Id);
+    }
+
+    [Fact]
+    public void RemoveTask_ActingUserIsCreatorOrOrganizer_RemovesTaskCreatedByAnotherParticipant()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        @event.RemoveTask(creatorId, task.Id);
+
+        Assert.DoesNotContain(@event.Tasks, t => t.Id == task.Id);
+    }
+
+    [Fact]
+    public void RemoveTask_ActingUserIsParticipantNotTaskCreatorNorOrganizer_ThrowsParticipantCannotDeleteOthersTaskException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var taskCreatorId = Guid.NewGuid();
+        var otherParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, taskCreatorId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(taskCreatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Throws<ParticipantCannotDeleteOthersTaskException>(() => @event.RemoveTask(otherParticipantId, task.Id));
     }
 }

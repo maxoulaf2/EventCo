@@ -29,11 +29,18 @@ public class EventTaskConfiguration : IEntityTypeConfiguration<EventTaskEntity>
 
         builder.Property(t => t.IsDone).IsRequired();
 
+        builder.Property(t => t.CreatedByUserId).IsRequired();
+
         builder.Property(t => t.CreatedAt).IsRequired();
 
         builder.HasOne<UserEntity>()
             .WithMany()
             .HasForeignKey(t => t.AssignedToUserId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne<UserEntity>()
+            .WithMany()
+            .HasForeignKey(t => t.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

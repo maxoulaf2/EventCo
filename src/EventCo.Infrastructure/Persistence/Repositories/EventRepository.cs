@@ -22,7 +22,8 @@ internal sealed class EventRepository(EventCoDbContext dbContext) : IEventReposi
             .Include(e => e.Tasks)
             .FirstAsync(e => e.Id == @event.Id, cancellationToken);
 
-        EventMapper.ApplyToEntity(@event, entity);
+        var removedChildren = EventMapper.ApplyToEntity(@event, entity);
+        dbContext.RemoveRange(removedChildren);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 

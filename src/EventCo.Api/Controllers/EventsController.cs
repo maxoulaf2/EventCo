@@ -5,6 +5,7 @@ using EventCo.Application.Events.CompleteTask;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateTask;
 using EventCo.Application.Events.DeleteEvent;
+using EventCo.Application.Events.DeleteTask;
 using EventCo.Application.Events.DemoteToParticipant;
 using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.GetMyEvents;
@@ -173,6 +174,14 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> ReopenTask(Guid id, Guid taskId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new ReopenTaskCommand(id, taskId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}/tasks/{taskId:guid}")]
+    public async Task<IActionResult> DeleteTask(Guid id, Guid taskId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new DeleteTaskCommand(id, taskId), cancellationToken);
 
         return NoContent();
     }

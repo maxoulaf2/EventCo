@@ -11,7 +11,7 @@ internal static class EventMapper
             EventParticipant.Reconstitute(p.Id, p.EventId, p.UserId, p.Role, p.InvitedAt, p.JoinedAt));
 
         var tasks = entity.Tasks.Select(t =>
-            EventTask.Reconstitute(t.Id, t.EventId, t.Title, t.Category, t.Quantity, t.AssignedToUserId, t.IsDone, t.CreatedAt));
+            EventTask.Reconstitute(t.Id, t.EventId, t.Title, t.Category, t.Quantity, t.AssignedToUserId, t.IsDone, t.CreatedByUserId, t.CreatedAt));
 
         return Event.Reconstitute(
             entity.Id, entity.Title, entity.Description, entity.EventDate, entity.Location,
@@ -38,7 +38,11 @@ internal static class EventMapper
         return entity;
     }
 
-    public static void ApplyToEntity(Event domain, EventEntity entity)
+    // Retourne les entités enfants retirées des collections (Participants/Tasks), à supprimer explicitement
+    // du DbContext par l'appelant : les FK EventParticipants/EventTasks -> Events sont en Restrict (pas de
+    // cascade DB, cf. EventRepository.DeleteAsync), donc les retirer de la liste en mémoire ne suffit pas
+    // (EF lève une InvalidOperationException sur la relation "severed" sans ce retrait explicite).
+    public static IReadOnlyList<object> ApplyToEntity(Event domain, EventEntity entity)
     {
         entity.Title = domain.Title;
         entity.Description = domain.Description;
@@ -46,7 +50,7 @@ internal static class EventMapper
         entity.Location = domain.Location;
         entity.Status = domain.Status;
 
-        SyncChildren(domain.Participants, entity.Participants,
+        var removedParticipants = SyncChildren(domain.Participants, entity.Participants,
             d => d.Id, e => e.Id,
             (d, e) =>
             {
@@ -55,7 +59,7 @@ internal static class EventMapper
             },
             d => ToEntity(d));
 
-        SyncChildren(domain.Tasks, entity.Tasks,
+        var removedTasks = SyncChildren(domain.Tasks, entity.Tasks,
             d => d.Id, e => e.Id,
             (d, e) =>
             {
@@ -66,6 +70,8 @@ internal static class EventMapper
                 e.IsDone = d.IsDone;
             },
             d => ToEntity(d));
+
+        return removedParticipants.Cast<object>().Concat(removedTasks.Cast<object>()).ToList();
     }
 
     private static EventParticipantEntity ToEntity(EventParticipant domain) => new()
@@ -87,10 +93,11 @@ internal static class EventMapper
         Quantity = domain.Quantity,
         AssignedToUserId = domain.AssignedToUserId,
         IsDone = domain.IsDone,
+        CreatedByUserId = domain.CreatedByUserId,
         CreatedAt = domain.CreatedAt,
     };
 
-    private static void SyncChildren<TDomain, TEntity>(
+    private static List<TEntity> SyncChildren<TDomain, TEntity>(
         IReadOnlyCollection<TDomain> domainItems,
         List<TEntity> entityItems,
         Func<TDomain, Guid> domainId,
@@ -98,7 +105,9 @@ internal static class EventMapper
         Action<TDomain, TEntity> updateExisting,
         Func<TDomain, TEntity> createNew)
     {
-        entityItems.RemoveAll(e => domainItems.All(d => domainId(d) != entityId(e)));
+        var removed = entityItems.Where(e => domainItems.All(d => domainId(d) != entityId(e))).ToList();
+        foreach (var entity in removed)
+            entityItems.Remove(entity);
 
         foreach (var domainItem in domainItems)
         {
@@ -108,5 +117,7 @@ internal static class EventMapper
             else
                 entityItems.Add(createNew(domainItem));
         }
+
+        return removed;
     }
 }

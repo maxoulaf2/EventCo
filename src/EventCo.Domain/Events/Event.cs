@@ -121,7 +121,7 @@ public class Event : Entity
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        var task = new EventTask(Id, title, category, quantity, now);
+        var task = new EventTask(Id, title, category, quantity, actingUserId, now);
         _tasks.Add(task);
         return task;
     }
@@ -155,7 +155,12 @@ public class Event : Entity
         task.MarkNotDone();
     }
 
-    public void RemoveTask(Guid taskId) => _tasks.Remove(GetTask(taskId));
+    public void RemoveTask(Guid actingUserId, Guid taskId)
+    {
+        var task = GetTask(taskId);
+        EnsureActingUserCanDeleteTask(actingUserId, task);
+        _tasks.Remove(task);
+    }
 
     private void EnsureActingUserIsCreator(Guid actingUserId)
     {
@@ -186,6 +191,14 @@ public class Event : Entity
 
         if (task.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
             throw new ParticipantCannotToggleOthersTaskException(Id, task.Id, actingUserId);
+    }
+
+    private void EnsureActingUserCanDeleteTask(Guid actingUserId, EventTask task)
+    {
+        EnsureActingUserIsParticipant(actingUserId);
+
+        if (task.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotDeleteOthersTaskException(Id, task.Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>
