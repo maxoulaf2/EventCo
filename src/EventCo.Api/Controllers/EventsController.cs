@@ -1,5 +1,6 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
+using EventCo.Application.Events.AssignTask;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateTask;
 using EventCo.Application.Events.DeleteEvent;
@@ -148,6 +149,14 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.CreatedAt);
 
         return Created($"api/events/{id}/tasks/{result.TaskId}", response);
+    }
+
+    [HttpPost("{id:guid}/tasks/{taskId:guid}/assign/{userId:guid}")]
+    public async Task<IActionResult> AssignTask(Guid id, Guid taskId, Guid userId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new AssignTaskCommand(id, taskId, userId), cancellationToken);
+
+        return NoContent();
     }
 
     [HttpPost("{id:guid}/participants/{userId:guid}/promote")]

@@ -126,10 +126,15 @@ public class Event : Entity
         return task;
     }
 
-    public void AssignTask(Guid taskId, Guid userId)
+    public void AssignTask(Guid actingUserId, Guid taskId, Guid userId)
     {
+        EnsureActingUserIsParticipant(actingUserId);
+
         if (_participants.All(p => p.UserId != userId))
             throw new TaskAssigneeNotParticipantException(Id, taskId, userId);
+
+        if (userId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotAssignTaskToOthersException(Id, taskId, actingUserId, userId);
 
         GetTask(taskId).AssignTo(userId);
     }
@@ -152,10 +157,12 @@ public class Event : Entity
     // donc cette seule vérification de rôle couvre à la fois le créateur et les co-organisateurs.
     private void EnsureActingUserIsCreatorOrOrganizer(Guid actingUserId)
     {
-        var participant = _participants.FirstOrDefault(p => p.UserId == actingUserId);
-        if (participant is null || participant.Role != ParticipantRole.Organizer)
+        if (!IsCreatorOrOrganizer(actingUserId))
             throw new UserNotEventOrganizerException(Id, actingUserId);
     }
+
+    private bool IsCreatorOrOrganizer(Guid userId) =>
+        _participants.Any(p => p.UserId == userId && p.Role == ParticipantRole.Organizer);
 
     private void EnsureActingUserIsParticipant(Guid actingUserId)
     {

@@ -258,23 +258,61 @@ public class EventTests
     }
 
     [Fact]
-    public void AssignTask_UserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
+    public void AssignTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
         var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
-        Assert.Throws<TaskAssigneeNotParticipantException>(() => @event.AssignTask(task.Id, Guid.NewGuid()));
+        Assert.Throws<UserNotEventParticipantException>(() => @event.AssignTask(Guid.NewGuid(), task.Id, creatorId));
     }
 
     [Fact]
-    public void AssignTask_UserIsParticipant_AssignsTask()
+    public void AssignTask_TargetUserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
         var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
-        @event.AssignTask(task.Id, creatorId);
+        Assert.Throws<TaskAssigneeNotParticipantException>(() => @event.AssignTask(creatorId, task.Id, Guid.NewGuid()));
+    }
 
-        Assert.Equal(creatorId, task.AssignedToUserId);
+    [Fact]
+    public void AssignTask_CreatorAssignsToAnotherParticipant_AssignsTask()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        @event.AssignTask(creatorId, task.Id, regularParticipantId);
+
+        Assert.Equal(regularParticipantId, task.AssignedToUserId);
+    }
+
+    [Fact]
+    public void AssignTask_SimpleParticipantAssignsToSelf_AssignsTask()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        @event.AssignTask(regularParticipantId, task.Id, regularParticipantId);
+
+        Assert.Equal(regularParticipantId, task.AssignedToUserId);
+    }
+
+    [Fact]
+    public void AssignTask_SimpleParticipantAssignsToAnotherParticipant_ThrowsParticipantCannotAssignTaskToOthersException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        var otherParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Throws<ParticipantCannotAssignTaskToOthersException>(
+            () => @event.AssignTask(regularParticipantId, task.Id, otherParticipantId));
     }
 
     [Fact]

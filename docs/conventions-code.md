@@ -25,7 +25,7 @@ EventCo.sln
 
 ### 1.2 Concepts DDD appliqués
 
-- **Entités riches** : les entités du `Domain` (ex: `Event`, `EventTask`) encapsulent leurs règles métier via des méthodes (ex: `event.AssignTask(taskId, userId)`) plutôt que d'exposer des setters publics sur toutes les propriétés. On évite le modèle "anemic domain model".
+- **Entités riches** : les entités du `Domain` (ex: `Event`, `EventTask`) encapsulent leurs règles métier via des méthodes (ex: `event.AssignTask(actingUserId, taskId, userId)`) plutôt que d'exposer des setters publics sur toutes les propriétés. On évite le modèle "anemic domain model".
 - **Value Objects** quand c'est pertinent (ex: `Email` comme Value Object avec validation de format, plutôt qu'un simple `string`).
 - **Agrégats** : `Event` est l'agrégat racine pour `EventParticipant` et `EventTask`. Toute modification de ces sous-entités passe par l'agrégat `Event`, qui garantit la cohérence (ex: on ne peut pas assigner une tâche à un utilisateur qui n'est pas participant).
 - **Repositories** : interfaces définies dans `Domain` ou `Application` (ex: `IEventRepository`), implémentées dans `Infrastructure` avec EF Core. Un repository par agrégat racine (pas un repository générique par table).
