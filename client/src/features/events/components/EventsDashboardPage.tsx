@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { ApiError } from '../../../shared/lib/api'
 import { routes } from '../../../shared/lib/routes'
 import { useMyEvents } from '../hooks/useMyEvents'
@@ -12,7 +12,15 @@ export function EventsDashboardPage() {
 
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-4">
-      <h1 className="text-xl font-semibold md:text-2xl">Mes événements</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-xl font-semibold md:text-2xl">Mes événements</h1>
+        <Link
+          to={routes.createEvent}
+          className="shrink-0 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white"
+        >
+          Nouvel événement
+        </Link>
+      </div>
 
       {isPending && <p className="text-sm text-gray-600">Chargement…</p>}
 

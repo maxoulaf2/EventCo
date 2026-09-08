@@ -39,4 +39,20 @@ export const handlers = [
       },
     ]),
   ),
+
+  http.post('*/api/events', () =>
+    HttpResponse.json(
+      {
+        id: 'event-new',
+        title: 'Nouvel événement',
+        description: null,
+        eventDate: '2026-12-24T00:00:00Z',
+        location: null,
+        createdByUserId: 'user-1',
+        status: 'Draft',
+        createdAt: '2026-09-08T00:00:00Z',
+      },
+      { status: 201 },
+    ),
+  ),
 ]

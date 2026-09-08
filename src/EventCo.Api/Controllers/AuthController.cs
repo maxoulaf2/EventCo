@@ -30,7 +30,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher) : Contr
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Lax,
+            SameSite = SameSiteMode.None,
             Expires = result.SessionExpiresAt,
         });
 

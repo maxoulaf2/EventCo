@@ -8,6 +8,7 @@ export const routes = {
   checkEmail: '/auth/check-email',
   verifyMagicLink: '/auth/verify',
   events: '/events',
+  createEvent: '/events/new',
 } as const
 
 /**

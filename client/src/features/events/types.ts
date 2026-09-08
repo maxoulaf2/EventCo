@@ -10,3 +10,10 @@ export interface MyEvent {
   role: 'Organizer' | 'Participant'
   hasJoined: boolean
 }
+
+export interface CreateEventInput {
+  title: string
+  description?: string
+  eventDate: string
+  location?: string
+}
