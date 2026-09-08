@@ -96,6 +96,54 @@ public class EventTests
     }
 
     [Fact]
+    public void PromoteToOrganizer_TargetNotParticipant_ThrowsParticipantNotFoundException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<ParticipantNotFoundException>(() => @event.PromoteToOrganizer(creatorId, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void DemoteToParticipant_ActingUserNotCreator_ThrowsUserNotEventCreatorException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var invitedUserId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventCreatorException>(() => @event.DemoteToParticipant(invitedUserId, invitedUserId));
+    }
+
+    [Fact]
+    public void DemoteToParticipant_TargetIsCreator_ThrowsEventCreatorCannotBeDemotedException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventCreatorCannotBeDemotedException>(() => @event.DemoteToParticipant(creatorId, creatorId));
+    }
+
+    [Fact]
+    public void DemoteToParticipant_TargetNotParticipant_ThrowsParticipantNotFoundException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<ParticipantNotFoundException>(() => @event.DemoteToParticipant(creatorId, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void DemoteToParticipant_ActingUserIsCreator_ChangesRole()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var organizerId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, organizerId, DateTime.UtcNow);
+        @event.PromoteToOrganizer(creatorId, organizerId);
+        var participant = @event.Participants.Single(p => p.UserId == organizerId);
+
+        @event.DemoteToParticipant(creatorId, organizerId);
+
+        Assert.Equal(ParticipantRole.Participant, participant.Role);
+    }
+
+    [Fact]
     public void RemoveParticipant_TargetIsCreator_ThrowsEventCreatorCannotBeRemovedException()
     {
         var @event = CreateEvent(out var creatorId);

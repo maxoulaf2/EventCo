@@ -25,5 +25,6 @@ public sealed class ExistingEventSteps(SessionContext sessionContext, EventConte
         var response = await client.SendAsync(httpRequest);
         var createdEvent = await response.Content.ReadFromJsonAsync<EventResponse>();
         eventContext.EventId = createdEvent!.Id;
+        eventContext.CreatedByUserId = createdEvent.CreatedByUserId;
     }
 }

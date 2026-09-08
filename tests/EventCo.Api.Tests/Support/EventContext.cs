@@ -5,4 +5,6 @@ namespace EventCo.Api.Tests.Support;
 public sealed class EventContext
 {
     public Guid? EventId { get; set; }
+
+    public Guid? CreatedByUserId { get; set; }
 }

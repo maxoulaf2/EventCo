@@ -2,9 +2,11 @@ using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.DeleteEvent;
+using EventCo.Application.Events.DemoteToParticipant;
 using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.InviteParticipant;
+using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.UpdateEvent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -117,5 +119,21 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.HasJoined);
 
         return Created($"api/events/{id}", response);
+    }
+
+    [HttpPost("{id:guid}/participants/{userId:guid}/promote")]
+    public async Task<IActionResult> PromoteParticipant(Guid id, Guid userId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new PromoteToOrganizerCommand(id, userId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/participants/{userId:guid}/demote")]
+    public async Task<IActionResult> DemoteParticipant(Guid id, Guid userId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new DemoteToParticipantCommand(id, userId), cancellationToken);
+
+        return NoContent();
     }
 }
