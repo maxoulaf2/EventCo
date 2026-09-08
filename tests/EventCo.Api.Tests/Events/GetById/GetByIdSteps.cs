@@ -12,7 +12,7 @@ public sealed class GetByIdSteps(SessionContext sessionContext, EventContext eve
     private static readonly WebApplicationFactoryClientOptions ClientOptions = new() { HandleCookies = false };
 
     private HttpResponseMessage? _response;
-    private EventResponse? _consultedEvent;
+    private EventDetailResponse? _consultedEvent;
 
     [When(@"je consulte cet événement via l'API")]
     public async Task QuandJeConsulteCetEvenementViaLapi() =>
@@ -38,7 +38,7 @@ public sealed class GetByIdSteps(SessionContext sessionContext, EventContext eve
         _response = await client.SendAsync(request);
         if (_response.IsSuccessStatusCode)
         {
-            _consultedEvent = await _response.Content.ReadFromJsonAsync<EventResponse>();
+            _consultedEvent = await _response.Content.ReadFromJsonAsync<EventDetailResponse>();
         }
     }
 
@@ -49,4 +49,15 @@ public sealed class GetByIdSteps(SessionContext sessionContext, EventContext eve
     [Then(@"l'événement consulté retourné a pour titre ""(.*)""")]
     public void AlorsLevenementConsulteRetourneAPourTitre(string title) =>
         Assert.Equal(title, _consultedEvent!.Title);
+
+    [Then(@"l'événement consulté retourné a (\d+) participants?")]
+    public void AlorsLevenementConsulteRetourneAParticipants(int count) =>
+        Assert.Equal(count, _consultedEvent!.Participants.Count);
+
+    [Then(@"l'événement consulté retourné a un participant ""(.*)"" avec le rôle ""(.*)""")]
+    public void AlorsLevenementConsulteRetourneAUnParticipantAvecLeRole(string email, string role)
+    {
+        var participant = Assert.Single(_consultedEvent!.Participants, p => p.Email == email.ToLowerInvariant());
+        Assert.Equal(role, participant.Role);
+    }
 }

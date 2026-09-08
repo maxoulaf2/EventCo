@@ -4,7 +4,10 @@ using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Application.Events.GetEventById;
 
-public sealed class GetEventByIdQueryHandler(ICurrentUserService currentUserService, IEventRepository eventRepository)
+public sealed class GetEventByIdQueryHandler(
+    ICurrentUserService currentUserService,
+    IEventRepository eventRepository,
+    IUserRepository userRepository)
     : ICommandHandler<GetEventByIdQuery, GetEventByIdResult>
 {
     public async Task<GetEventByIdResult> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
@@ -14,6 +17,24 @@ public sealed class GetEventByIdQueryHandler(ICurrentUserService currentUserServ
 
         @event.EnsureCanBeViewedBy(currentUserService.UserId!.Value);
 
+        var userIds = @event.Participants.Select(p => p.UserId).ToList();
+        var users = await userRepository.GetByIdsAsync(userIds, cancellationToken);
+        var usersById = users.ToDictionary(u => u.Id);
+
+        var participants = @event.Participants
+            .Select(participant =>
+            {
+                var user = usersById[participant.UserId];
+                return new EventParticipantSummary(
+                    user.Id,
+                    user.Email.Value,
+                    user.DisplayName,
+                    participant.Role.ToString(),
+                    participant.InvitedAt,
+                    participant.HasJoined);
+            })
+            .ToList();
+
         return new GetEventByIdResult(
             @event.Id,
             @event.Title,
@@ -22,6 +43,7 @@ public sealed class GetEventByIdQueryHandler(ICurrentUserService currentUserServ
             @event.Location,
             @event.CreatedByUserId,
             @event.Status.ToString(),
-            @event.CreatedAt);
+            @event.CreatedAt,
+            participants);
     }
 }

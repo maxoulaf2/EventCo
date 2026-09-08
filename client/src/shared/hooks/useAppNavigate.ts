@@ -15,5 +15,6 @@ export function useAppNavigate() {
     toVerifyMagicLink: () => navigate(routes.verifyMagicLink),
     toEvents: () => navigate(routes.events),
     toCreateEvent: () => navigate(routes.createEvent),
+    toEventDetail: (eventId: string) => navigate(routes.eventDetail(eventId)),
   }
 }

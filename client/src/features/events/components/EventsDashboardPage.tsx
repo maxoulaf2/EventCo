@@ -35,26 +35,28 @@ export function EventsDashboardPage() {
       {events && events.length > 0 && (
         <ul className="flex flex-col gap-3">
           {events.map((event) => (
-            <li
-              key={event.id}
-              className="flex flex-col gap-1 rounded-lg border border-gray-200 p-4"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-medium text-gray-900">{event.title}</span>
-                {!event.hasJoined && (
-                  <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
-                    Invitation en attente
-                  </span>
-                )}
-              </div>
-              <span className="text-sm text-gray-600">
-                {new Date(event.eventDate).toLocaleDateString('fr-FR', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                })}
-                {event.location ? ` · ${event.location}` : ''}
-              </span>
+            <li key={event.id}>
+              <Link
+                to={routes.eventDetail(event.id)}
+                className="flex flex-col gap-1 rounded-lg border border-gray-200 p-4"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-medium text-gray-900">{event.title}</span>
+                  {!event.hasJoined && (
+                    <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                      Invitation en attente
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm text-gray-600">
+                  {new Date(event.eventDate).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                  {event.location ? ` · ${event.location}` : ''}
+                </span>
+              </Link>
             </li>
           ))}
         </ul>

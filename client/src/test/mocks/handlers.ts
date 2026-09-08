@@ -15,6 +15,14 @@ export const handlers = [
     }),
   ),
 
+  http.get('*/api/auth/me', () =>
+    HttpResponse.json({
+      userId: 'user-1',
+      email: 'test@example.com',
+      displayName: 'Test',
+    }),
+  ),
+
   http.get('*/api/events', () =>
     HttpResponse.json([
       {
@@ -54,5 +62,36 @@ export const handlers = [
       },
       { status: 201 },
     ),
+  ),
+
+  http.get('*/api/events/:id', ({ params }) =>
+    HttpResponse.json({
+      id: params.id,
+      title: 'Repas de Noël',
+      description: 'Un bon repas de fêtes entre amis.',
+      eventDate: '2026-12-24T00:00:00Z',
+      location: 'Chez Alice',
+      createdByUserId: 'user-1',
+      status: 'Planned',
+      createdAt: '2026-09-01T00:00:00Z',
+      participants: [
+        {
+          userId: 'user-1',
+          email: 'test@example.com',
+          displayName: 'Test',
+          role: 'Organizer',
+          invitedAt: '2026-09-01T00:00:00Z',
+          hasJoined: true,
+        },
+        {
+          userId: 'user-2',
+          email: 'ami@example.com',
+          displayName: 'Ami',
+          role: 'Participant',
+          invitedAt: '2026-09-02T00:00:00Z',
+          hasJoined: false,
+        },
+      ],
+    }),
   ),
 ]

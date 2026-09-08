@@ -20,6 +20,12 @@ internal sealed class UserRepository(EventCoDbContext dbContext) : IUserReposito
         return entity is null ? null : UserMapper.ToDomain(entity);
     }
 
+    public async Task<IReadOnlyList<User>> GetByIdsAsync(IReadOnlyCollection<Guid> ids, CancellationToken cancellationToken)
+    {
+        var entities = await dbContext.Users.Where(u => ids.Contains(u.Id)).ToListAsync(cancellationToken);
+        return entities.Select(UserMapper.ToDomain).ToList();
+    }
+
     public async Task AddAsync(User user, CancellationToken cancellationToken)
     {
         var entity = UserMapper.ToEntity(user);

@@ -18,3 +18,11 @@ Fonctionnalité: Consultation d'un événement
     Et je change d'utilisateur courant
     Quand je consulte cet événement
     Alors la consultation échoue avec une erreur d'autorisation
+
+  Scénario: Consultation d'un événement avec ses participants
+    Etant donné un événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
+    Et "ami@example.com" est invité à cet événement
+    Quand je consulte cet événement
+    Alors la consultation réussit
+    Et l'événement consulté a 2 participants
+    Et l'événement consulté a un participant "ami@example.com" avec le rôle "Participant" n'ayant pas encore rejoint

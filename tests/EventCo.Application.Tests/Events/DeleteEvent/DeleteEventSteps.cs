@@ -26,6 +26,7 @@ public sealed class DeleteEventSteps
         var builder = new ApplicationTestHostBuilder();
 
         builder.Services.AddScoped<IEventRepository, EventRepository>();
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
 

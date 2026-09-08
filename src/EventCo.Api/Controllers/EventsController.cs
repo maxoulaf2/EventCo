@@ -61,7 +61,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     {
         var result = await commandDispatcher.Send(new GetEventByIdQuery(id), cancellationToken);
 
-        var response = new EventResponse(
+        var response = new EventDetailResponse(
             result.EventId,
             result.Title,
             result.Description,
@@ -69,7 +69,15 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.Location,
             result.CreatedByUserId,
             result.Status,
-            result.CreatedAt);
+            result.CreatedAt,
+            result.Participants.Select(p => new EventParticipantResponse(
+                id,
+                p.UserId,
+                p.Email,
+                p.DisplayName,
+                p.Role,
+                p.InvitedAt,
+                p.HasJoined)).ToList());
 
         return Ok(response);
     }

@@ -8,4 +8,13 @@ public sealed record GetEventByIdResult(
     string? Location,
     Guid CreatedByUserId,
     string Status,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    IReadOnlyList<EventParticipantSummary> Participants);
+
+public sealed record EventParticipantSummary(
+    Guid UserId,
+    string Email,
+    string DisplayName,
+    string Role,
+    DateTime InvitedAt,
+    bool HasJoined);

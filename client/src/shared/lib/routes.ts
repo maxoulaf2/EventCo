@@ -9,6 +9,7 @@ export const routes = {
   verifyMagicLink: '/auth/verify',
   events: '/events',
   createEvent: '/events/new',
+  eventDetail: (eventId: string) => `/events/${eventId}`,
 } as const
 
 /**

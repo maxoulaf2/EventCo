@@ -3,3 +3,9 @@ export interface VerifyMagicLinkResult {
   email: string
   displayName: string
 }
+
+export interface CurrentUser {
+  userId: string
+  email: string
+  displayName: string
+}

@@ -17,3 +17,26 @@ export interface CreateEventInput {
   eventDate: string
   location?: string
 }
+
+export type ParticipantRole = 'Organizer' | 'Participant'
+
+export interface EventParticipant {
+  userId: string
+  email: string
+  displayName: string
+  role: ParticipantRole
+  invitedAt: string
+  hasJoined: boolean
+}
+
+export interface EventDetail {
+  id: string
+  title: string
+  description: string | null
+  eventDate: string
+  location: string | null
+  createdByUserId: string
+  status: EventStatus
+  createdAt: string
+  participants: EventParticipant[]
+}

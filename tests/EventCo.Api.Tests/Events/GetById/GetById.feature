@@ -25,3 +25,13 @@ Fonctionnalité: Consultation d'un événement via l'API
     Et une session ouverte via l'API pour "get-event-other-user-api-test@example.com"
     Quand je consulte cet événement via l'API
     Alors la réponse de consultation d'événement a le statut 403
+
+  Scénario: Consultation d'un événement avec ses participants
+    Etant donné une session ouverte via l'API pour "get-event-participants-creator-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et "get-event-participants-guest-api-test@example.com" invité à cet événement via l'API
+    Quand je consulte cet événement via l'API
+    Alors la réponse de consultation d'événement a le statut 200
+    Et l'événement consulté retourné a 2 participants
+    Et l'événement consulté retourné a un participant "get-event-participants-creator-api-test@example.com" avec le rôle "Organizer"
+    Et l'événement consulté retourné a un participant "get-event-participants-guest-api-test@example.com" avec le rôle "Participant"
