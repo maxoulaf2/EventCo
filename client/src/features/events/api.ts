@@ -23,3 +23,10 @@ export function promoteParticipant(eventId: string, userId: string): Promise<voi
 export function demoteParticipant(eventId: string, userId: string): Promise<void> {
   return apiFetch(`/api/events/${eventId}/participants/${userId}/demote`, { method: 'POST' })
 }
+
+export function inviteParticipant(eventId: string, email: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/participants`, {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  })
+}

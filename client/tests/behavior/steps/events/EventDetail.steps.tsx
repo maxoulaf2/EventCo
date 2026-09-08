@@ -39,6 +39,31 @@ function eventDetailHandlers(participants: MockParticipant[]) {
       }
       return new HttpResponse(null, { status: 204 })
     }),
+    http.post('*/api/events/:id/participants', async ({ request, params }) => {
+      const { email } = (await request.json()) as { email: string }
+
+      if (participants.some((p) => p.email === email)) {
+        return HttpResponse.json(
+          { title: 'Cette personne est déjà invitée à cet événement.' },
+          { status: 400 },
+        )
+      }
+
+      const newParticipant: MockParticipant = {
+        userId: `user-${participants.length + 1}`,
+        email,
+        displayName: email.slice(0, email.indexOf('@')),
+        role: 'Participant',
+        invitedAt: '2026-09-03T00:00:00Z',
+        hasJoined: false,
+      }
+      participants.push(newParticipant)
+
+      return HttpResponse.json(
+        { eventId: params.id, ...newParticipant },
+        { status: 201 },
+      )
+    }),
   ]
 }
 
@@ -132,6 +157,85 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     Then('je ne vois aucun bouton pour promouvoir ou rétrograder un participant', async () => {
       await screen.findByText('Ami')
       expect(screen.queryByRole('button', { name: /promouvoir|rétrograder/i })).not.toBeInTheDocument()
+    })
+  })
+
+  Scenario('Le créateur invite un nouveau participant', ({ When, And, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('j\'invite "nouveau@example.com" comme participant', async () => {
+      await screen.findByLabelText('Inviter un participant')
+      const user = userEvent.setup()
+      await user.type(screen.getByLabelText('Inviter un participant'), 'nouveau@example.com')
+      await user.click(screen.getByRole('button', { name: 'Inviter' }))
+    })
+
+    Then(
+      'je vois le participant "nouveau" avec le rôle "Participant" et un badge d\'invitation en attente',
+      async () => {
+        await waitFor(() => {
+          const row = participantRow('nouveau')
+          expect(row).toHaveTextContent('Participant')
+          expect(row).toHaveTextContent('Invitation en attente')
+        })
+      },
+    )
+  })
+
+  Scenario('Invitation d\'une personne déjà invitée', ({ When, And, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('j\'invite "ami@example.com" comme participant', async () => {
+      await screen.findByLabelText('Inviter un participant')
+      const user = userEvent.setup()
+      await user.type(screen.getByLabelText('Inviter un participant'), 'ami@example.com')
+      await user.click(screen.getByRole('button', { name: 'Inviter' }))
+    })
+
+    Then('je vois un message d\'erreur pour l\'invitation', async () => {
+      await screen.findByText('Cette personne est déjà invitée à cet événement.')
+    })
+  })
+
+  Scenario('Un co-organisateur non créateur peut aussi inviter un participant', ({ Given, When, Then }) => {
+    Given('je suis un co-organisateur non créateur de cet événement', () => {
+      participants[1].role = 'Organizer'
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je vois le formulaire d\'invitation', async () => {
+      await screen.findByLabelText('Inviter un participant')
+    })
+  })
+
+  Scenario('Un simple participant ne voit pas le formulaire d\'invitation', ({ Given, When, Then }) => {
+    Given('je ne suis pas le créateur de cet événement', () => {
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas de formulaire d\'invitation', async () => {
+      await screen.findByText('Ami')
+      expect(screen.queryByLabelText('Inviter un participant')).not.toBeInTheDocument()
     })
   })
 

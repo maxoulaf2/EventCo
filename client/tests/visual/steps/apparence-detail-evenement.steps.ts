@@ -57,3 +57,17 @@ Given("je suis sur le détail d'un événement en tant que simple participant", 
   await page.goto('/events/event-1')
   await expect(page.getByText('Ami', { exact: true })).toBeVisible()
 })
+
+Given("je suis sur le détail d'un événement avec une erreur d'invitation", async ({ page }) => {
+  await mockEventDetail(page)
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
+  )
+  await page.route('**/api/events/event-1/participants', (route) =>
+    route.fulfill({ status: 400, json: { detail: 'Cette personne est déjà invitée à cet événement.' } }),
+  )
+  await page.goto('/events/event-1')
+  await page.getByLabel('Inviter un participant').fill('ami@example.com')
+  await page.getByRole('button', { name: 'Inviter' }).click()
+  await expect(page.getByText('Cette personne est déjà invitée à cet événement.')).toBeVisible()
+})

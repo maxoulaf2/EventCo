@@ -20,6 +20,26 @@ Fonctionnalité: Détail d'un événement
     Quand j'arrive sur le détail de l'événement
     Alors je ne vois aucun bouton pour promouvoir ou rétrograder un participant
 
+  Scénario: Le créateur invite un nouveau participant
+    Quand j'arrive sur le détail de l'événement
+    Et j'invite "nouveau@example.com" comme participant
+    Alors je vois le participant "nouveau" avec le rôle "Participant" et un badge d'invitation en attente
+
+  Scénario: Invitation d'une personne déjà invitée
+    Quand j'arrive sur le détail de l'événement
+    Et j'invite "ami@example.com" comme participant
+    Alors je vois un message d'erreur pour l'invitation
+
+  Scénario: Un co-organisateur non créateur peut aussi inviter un participant
+    Etant donné que je suis un co-organisateur non créateur de cet événement
+    Quand j'arrive sur le détail de l'événement
+    Alors je vois le formulaire d'invitation
+
+  Scénario: Un simple participant ne voit pas le formulaire d'invitation
+    Etant donné que je ne suis pas le créateur de cet événement
+    Quand j'arrive sur le détail de l'événement
+    Alors je ne vois pas de formulaire d'invitation
+
   Scénario: Session expirée
     Etant donné que ma session a expiré
     Quand j'arrive sur le détail de l'événement

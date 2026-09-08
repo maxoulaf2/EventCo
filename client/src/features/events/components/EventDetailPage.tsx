@@ -5,6 +5,7 @@ import { routes } from '../../../shared/lib/routes'
 import { useDemoteParticipant } from '../hooks/useDemoteParticipant'
 import { useEventDetail } from '../hooks/useEventDetail'
 import { usePromoteParticipant } from '../hooks/usePromoteParticipant'
+import { InviteParticipantForm } from './InviteParticipantForm'
 import type { EventParticipant } from '../types'
 
 export function EventDetailPage() {
@@ -19,6 +20,8 @@ export function EventDetailPage() {
   }
 
   const isCreator = event !== undefined && currentUser !== undefined && event.createdByUserId === currentUser.userId
+  const currentParticipant = event?.participants.find((p) => p.userId === currentUser?.userId)
+  const canInvite = isCreator || currentParticipant?.role === 'Organizer'
 
   function renderParticipantAction(participant: EventParticipant) {
     if (!isCreator || participant.userId === event!.createdByUserId) {
@@ -106,6 +109,8 @@ export function EventDetailPage() {
               ))}
             </ul>
           </div>
+
+          {canInvite && <InviteParticipantForm eventId={eventId!} />}
         </>
       )}
     </main>
