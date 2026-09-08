@@ -3,6 +3,7 @@ using EventCo.Api.ExceptionHandling;
 using EventCo.Application;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Infrastructure;
+using EventCo.Infrastructure.Realtime;
 using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,6 +56,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<EventHub>("/hubs/events");
 
 app.Run();
 

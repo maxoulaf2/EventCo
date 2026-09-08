@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.SignalR;
 
 namespace EventCo.Infrastructure;
 
@@ -25,6 +26,8 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddSingleton<ISessionTokenService, SessionTokenService>();
+
+        services.AddSignalR();
 
         services.AddScoped<LoggingEmailSender>();
         services.AddScoped<SmtpEmailSender>();
