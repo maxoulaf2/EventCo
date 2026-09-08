@@ -5,7 +5,10 @@ using EventCo.Domain.Events.Exceptions;
 namespace EventCo.Application.Events.AssignTask;
 
 // Le userId courant est garanti non nul par [Authorize] sur l'endpoint appelant.
-public sealed class AssignTaskCommandHandler(ICurrentUserService currentUserService, IEventRepository eventRepository)
+public sealed class AssignTaskCommandHandler(
+    ICurrentUserService currentUserService,
+    IEventRepository eventRepository,
+    ITaskRealtimeNotifier taskRealtimeNotifier)
     : ICommandHandler<AssignTaskCommand>
 {
     public async Task Handle(AssignTaskCommand command, CancellationToken cancellationToken)
@@ -16,5 +19,8 @@ public sealed class AssignTaskCommandHandler(ICurrentUserService currentUserServ
         @event.AssignTask(currentUserService.UserId!.Value, command.TaskId, command.UserId);
 
         await eventRepository.UpdateAsync(@event, cancellationToken);
+
+        var task = @event.Tasks.Single(t => t.Id == command.TaskId);
+        await taskRealtimeNotifier.NotifyTaskAssigned(TaskRealtimeDto.FromTask(task), cancellationToken);
     }
 }

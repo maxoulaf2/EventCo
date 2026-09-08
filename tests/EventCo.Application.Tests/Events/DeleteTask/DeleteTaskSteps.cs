@@ -19,6 +19,7 @@ public sealed class DeleteTaskSteps
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly CurrentUserContext _currentUserContext;
+    private readonly RecordingTaskRealtimeNotifier _taskRealtimeNotifier = new();
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     private Guid? _existingEventId;
@@ -38,6 +39,7 @@ public sealed class DeleteTaskSteps
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
+        builder.Services.AddSingleton<ITaskRealtimeNotifier>(_taskRealtimeNotifier);
 
         _serviceProvider = builder.Build();
     }
@@ -125,5 +127,13 @@ public sealed class DeleteTaskSteps
         var @event = await eventRepository.GetByIdAsync(_existingEventId!.Value, CancellationToken.None);
 
         Assert.DoesNotContain(@event!.Tasks, t => t.Id == _existingTaskId!.Value);
+    }
+
+    [Then(@"une notification temps réel de suppression de tâche est diffusée")]
+    public void AlorsUneNotificationTempsReelDeSuppressionDeTacheEstDiffusee()
+    {
+        var notification = Assert.Single(_taskRealtimeNotifier.TaskDeletedNotifications);
+        Assert.Equal(_existingTaskId!.Value, notification.TaskId);
+        Assert.Equal(_existingEventId!.Value, notification.EventId);
     }
 }

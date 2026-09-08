@@ -18,6 +18,7 @@ public sealed class CreateTaskSteps
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly CurrentUserContext _currentUserContext;
+    private readonly RecordingTaskRealtimeNotifier _taskRealtimeNotifier = new();
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     private Guid? _existingEventId;
@@ -35,6 +36,7 @@ public sealed class CreateTaskSteps
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
+        builder.Services.AddSingleton<ITaskRealtimeNotifier>(_taskRealtimeNotifier);
 
         _serviceProvider = builder.Build();
     }
@@ -110,4 +112,12 @@ public sealed class CreateTaskSteps
 
     [Then(@"la tâche créée n'est pas encore faite")]
     public void AlorsLaTacheCreeeNestPasEncoreFaite() => Assert.False(_lastResult!.IsDone);
+
+    [Then(@"une notification temps réel de création de tâche est diffusée")]
+    public void AlorsUneNotificationTempsReelDeCreationDeTacheEstDiffusee()
+    {
+        var notification = Assert.Single(_taskRealtimeNotifier.TaskCreatedNotifications);
+        Assert.Equal(_lastResult!.TaskId, notification.TaskId);
+        Assert.Equal(_existingEventId!.Value, notification.EventId);
+    }
 }

@@ -9,12 +9,14 @@ Fonctionnalité: Marquage d'une tâche comme non faite
     Quand je marque cette tâche comme non faite
     Alors la réouverture réussit
     Et la tâche est marquée comme non faite
+    Et une notification temps réel de tâche marquée comme non faite est diffusée
 
   Scénario: Le créateur rouvre une tâche non assignée
     Etant donné un événement "Repas de Noël" avec une tâche non assignée déjà marquée comme faite "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
     Quand je marque cette tâche comme non faite
     Alors la réouverture réussit
     Et la tâche est marquée comme non faite
+    Et une notification temps réel de tâche marquée comme non faite est diffusée
 
   Scénario: Un participant simple rouvre la tâche assignée à un autre participant
     Etant donné un événement "Repas de Noël" avec une tâche assignée déjà marquée comme faite "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"

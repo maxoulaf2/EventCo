@@ -5,6 +5,7 @@ using EventCo.Infrastructure.Common;
 using EventCo.Infrastructure.Emailing;
 using EventCo.Infrastructure.Persistence;
 using EventCo.Infrastructure.Persistence.Repositories;
+using EventCo.Infrastructure.Realtime;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddSingleton<ISessionTokenService, SessionTokenService>();
 
         services.AddSignalR();
+        services.AddSingleton<ITaskRealtimeNotifier, TaskRealtimeNotifier>();
 
         services.AddScoped<LoggingEmailSender>();
         services.AddScoped<SmtpEmailSender>();

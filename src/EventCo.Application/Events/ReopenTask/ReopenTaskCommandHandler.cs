@@ -5,7 +5,10 @@ using EventCo.Domain.Events.Exceptions;
 namespace EventCo.Application.Events.ReopenTask;
 
 // Le userId courant est garanti non nul par [Authorize] sur l'endpoint appelant.
-public sealed class ReopenTaskCommandHandler(ICurrentUserService currentUserService, IEventRepository eventRepository)
+public sealed class ReopenTaskCommandHandler(
+    ICurrentUserService currentUserService,
+    IEventRepository eventRepository,
+    ITaskRealtimeNotifier taskRealtimeNotifier)
     : ICommandHandler<ReopenTaskCommand>
 {
     public async Task Handle(ReopenTaskCommand command, CancellationToken cancellationToken)
@@ -16,5 +19,8 @@ public sealed class ReopenTaskCommandHandler(ICurrentUserService currentUserServ
         @event.ReopenTask(currentUserService.UserId!.Value, command.TaskId);
 
         await eventRepository.UpdateAsync(@event, cancellationToken);
+
+        var task = @event.Tasks.Single(t => t.Id == command.TaskId);
+        await taskRealtimeNotifier.NotifyTaskStatusChanged(TaskRealtimeDto.FromTask(task), cancellationToken);
     }
 }

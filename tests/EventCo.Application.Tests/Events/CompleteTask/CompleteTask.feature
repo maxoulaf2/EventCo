@@ -9,12 +9,14 @@ Fonctionnalité: Marquage d'une tâche comme faite
     Quand je marque cette tâche comme faite
     Alors le marquage réussit
     Et la tâche est marquée comme faite
+    Et une notification temps réel de tâche marquée comme faite est diffusée
 
   Scénario: Le créateur marque une tâche non assignée comme faite
     Etant donné un événement "Repas de Noël" avec une tâche non assignée "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
     Quand je marque cette tâche comme faite
     Alors le marquage réussit
     Et la tâche est marquée comme faite
+    Et une notification temps réel de tâche marquée comme faite est diffusée
 
   Scénario: Un participant simple marque la tâche assignée à un autre participant comme faite
     Etant donné un événement "Repas de Noël" avec une tâche assignée "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"

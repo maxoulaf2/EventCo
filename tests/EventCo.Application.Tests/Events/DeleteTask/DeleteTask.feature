@@ -8,6 +8,7 @@ Fonctionnalité: Suppression d'une tâche
     Quand je supprime cette tâche
     Alors la suppression de la tâche réussit
     Et la tâche n'existe plus
+    Et une notification temps réel de suppression de tâche est diffusée
 
   Scénario: Le créateur de l'événement supprime une tâche créée par un autre participant
     Etant donné un événement "Repas de Noël" avec une tâche créée par un participant invité "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
@@ -15,6 +16,7 @@ Fonctionnalité: Suppression d'une tâche
     Quand je supprime cette tâche
     Alors la suppression de la tâche réussit
     Et la tâche n'existe plus
+    Et une notification temps réel de suppression de tâche est diffusée
 
   Scénario: Un participant simple tente de supprimer la tâche créée par un autre participant
     Etant donné un événement "Repas de Noël" avec une tâche créée par un participant invité "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"

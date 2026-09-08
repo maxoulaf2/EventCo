@@ -20,6 +20,7 @@ public sealed class CompleteTaskSteps
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly CurrentUserContext _currentUserContext;
+    private readonly RecordingTaskRealtimeNotifier _taskRealtimeNotifier = new();
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     private Guid? _existingEventId;
@@ -37,6 +38,7 @@ public sealed class CompleteTaskSteps
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
+        builder.Services.AddSingleton<ITaskRealtimeNotifier>(_taskRealtimeNotifier);
 
         _serviceProvider = builder.Build();
     }
@@ -139,5 +141,13 @@ public sealed class CompleteTaskSteps
         var task = @event!.Tasks.Single(t => t.Id == _existingTaskId!.Value);
 
         Assert.True(task.IsDone);
+    }
+
+    [Then(@"une notification temps réel de tâche marquée comme faite est diffusée")]
+    public void AlorsUneNotificationTempsReelDeTacheMarqueeCommeFaiteEstDiffusee()
+    {
+        var notification = Assert.Single(_taskRealtimeNotifier.TaskStatusChangedNotifications);
+        Assert.Equal(_existingTaskId!.Value, notification.TaskId);
+        Assert.True(notification.IsDone);
     }
 }

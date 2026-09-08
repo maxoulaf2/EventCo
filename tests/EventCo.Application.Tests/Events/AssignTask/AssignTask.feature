@@ -10,6 +10,7 @@ Fonctionnalité: Assignation d'une tâche à un participant
     Quand j'assigne cette tâche à moi-même
     Alors l'assignation réussit
     Et la tâche est assignée à ce participant
+    Et une notification temps réel d'assignation de tâche est diffusée
 
   Scénario: Assignation par le créateur à un autre participant
     Etant donné un événement "Repas de Noël" avec une tâche "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
@@ -17,6 +18,7 @@ Fonctionnalité: Assignation d'une tâche à un participant
     Quand j'assigne cette tâche à ce participant
     Alors l'assignation réussit
     Et la tâche est assignée à ce participant
+    Et une notification temps réel d'assignation de tâche est diffusée
 
   Scénario: Assignation par un participant simple à un autre participant
     Etant donné un événement "Repas de Noël" avec une tâche "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
