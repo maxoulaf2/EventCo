@@ -115,14 +115,12 @@ public class Event : Entity
 
     public void EnsureCanBeDeletedBy(Guid actingUserId) => EnsureActingUserIsCreator(actingUserId);
 
-    public void EnsureCanBeViewedBy(Guid actingUserId)
-    {
-        if (_participants.All(p => p.UserId != actingUserId))
-            throw new UserNotEventParticipantException(Id, actingUserId);
-    }
+    public void EnsureCanBeViewedBy(Guid actingUserId) => EnsureActingUserIsParticipant(actingUserId);
 
-    public EventTask AddTask(string title, TaskCategory category, string? quantity, DateTime now)
+    public EventTask AddTask(Guid actingUserId, string title, TaskCategory category, string? quantity, DateTime now)
     {
+        EnsureActingUserIsParticipant(actingUserId);
+
         var task = new EventTask(Id, title, category, quantity, now);
         _tasks.Add(task);
         return task;
@@ -157,6 +155,12 @@ public class Event : Entity
         var participant = _participants.FirstOrDefault(p => p.UserId == actingUserId);
         if (participant is null || participant.Role != ParticipantRole.Organizer)
             throw new UserNotEventOrganizerException(Id, actingUserId);
+    }
+
+    private void EnsureActingUserIsParticipant(Guid actingUserId)
+    {
+        if (_participants.All(p => p.UserId != actingUserId))
+            throw new UserNotEventParticipantException(Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>

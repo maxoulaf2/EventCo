@@ -228,10 +228,40 @@ public class EventTests
     }
 
     [Fact]
-    public void AssignTask_UserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
+    public void AddTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out _);
-        var task = @event.AddTask("Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventParticipantException>(
+            () => @event.AddTask(Guid.NewGuid(), "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow));
+    }
+
+    [Fact]
+    public void AddTask_ActingUserIsParticipantNotOrganizer_AddsTask()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+
+        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+
+        Assert.Contains(task, @event.Tasks);
+    }
+
+    [Fact]
+    public void AddTask_EmptyTitle_ThrowsEventTaskTitleEmptyException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventTaskTitleEmptyException>(
+            () => @event.AddTask(creatorId, " ", TaskCategory.Courses, "1", DateTime.UtcNow));
+    }
+
+    [Fact]
+    public void AssignTask_UserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
         Assert.Throws<TaskAssigneeNotParticipantException>(() => @event.AssignTask(task.Id, Guid.NewGuid()));
     }
@@ -240,7 +270,7 @@ public class EventTests
     public void AssignTask_UserIsParticipant_AssignsTask()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask("Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
         @event.AssignTask(task.Id, creatorId);
 
@@ -250,8 +280,8 @@ public class EventTests
     [Fact]
     public void CompleteTask_ExistingTask_SetsIsDoneTrue()
     {
-        var @event = CreateEvent(out _);
-        var task = @event.AddTask("Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var @event = CreateEvent(out var creatorId);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
         @event.CompleteTask(task.Id);
 
