@@ -8,8 +8,7 @@ namespace EventCo.Application.Events.CreateTask;
 public sealed class CreateTaskCommandHandler(
     ICurrentUserService currentUserService,
     IEventRepository eventRepository,
-    IDateTimeProvider dateTimeProvider,
-    ITaskRealtimeNotifier taskRealtimeNotifier) : ICommandHandler<CreateTaskCommand, CreateTaskResult>
+    IDateTimeProvider dateTimeProvider) : ICommandHandler<CreateTaskCommand, CreateTaskResult>
 {
     public async Task<CreateTaskResult> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
@@ -21,8 +20,7 @@ public sealed class CreateTaskCommandHandler(
 
         var task = @event.AddTask(currentUserService.UserId!.Value, request.Title, category, request.Quantity, now);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
-        await taskRealtimeNotifier.NotifyTaskCreated(TaskRealtimeDto.FromTask(task), cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
 
         return new CreateTaskResult(
             task.Id,

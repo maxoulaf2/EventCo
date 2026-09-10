@@ -15,6 +15,6 @@ public sealed class DemoteToParticipantCommandHandler(ICurrentUserService curren
 
         @event.DemoteToParticipant(currentUserService.UserId!.Value, command.TargetUserId);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
     }
 }

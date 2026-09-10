@@ -14,7 +14,7 @@ public sealed class UpdateEventCommandHandler(ICurrentUserService currentUserSer
 
         @event.UpdateDetails(currentUserService.UserId!.Value, request.Title, request.Description, request.EventDate, request.Location);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
 
         return new UpdateEventResult(
             @event.Id,

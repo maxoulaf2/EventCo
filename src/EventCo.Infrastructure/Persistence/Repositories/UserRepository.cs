@@ -1,12 +1,14 @@
 using EventCo.Application.Common.Interfaces;
+using EventCo.Application.Common.Messaging;
 using EventCo.Domain.Users;
+using EventCo.Domain.Users.DomainEvents;
 using EventCo.Domain.ValueObjects;
 using EventCo.Infrastructure.Persistence.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventCo.Infrastructure.Persistence.Repositories;
 
-internal sealed class UserRepository(EventCoDbContext dbContext) : IUserRepository
+internal sealed class UserRepository(EventCoDbContext dbContext, DomainEventCollector domainEventCollector) : IUserRepository
 {
     public async Task<User?> GetByEmailAsync(Email email, CancellationToken cancellationToken)
     {
@@ -26,10 +28,37 @@ internal sealed class UserRepository(EventCoDbContext dbContext) : IUserReposito
         return entities.Select(UserMapper.ToDomain).ToList();
     }
 
-    public async Task AddAsync(User user, CancellationToken cancellationToken)
+    public async Task ApplyAsync(User user, CancellationToken cancellationToken)
+    {
+        foreach (var domainEvent in user.DomainEvents)
+        {
+            switch (domainEvent)
+            {
+                case UserCreatedDomainEvent:
+                    await InsertUser(user, cancellationToken);
+                    break;
+                case UserProfileUpdatedDomainEvent:
+                    await UpdateUserProfile(user, cancellationToken);
+                    break;
+                default:
+                    throw new InvalidOperationException(
+                        $"Domain event non géré par {nameof(UserRepository)} : {domainEvent.GetType().Name}.");
+            }
+        }
+
+        domainEventCollector.Collect(user);
+    }
+
+    private async Task InsertUser(User user, CancellationToken cancellationToken)
     {
         var entity = UserMapper.ToEntity(user);
         await dbContext.Users.AddAsync(entity, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task UpdateUserProfile(User user, CancellationToken cancellationToken)
+    {
+        var entity = await dbContext.Users.FindAsync([user.Id], cancellationToken)
+            ?? throw new InvalidOperationException($"UserEntity {user.Id} introuvable.");
+        UserMapper.ApplyToEntity(user, entity);
     }
 }

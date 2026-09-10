@@ -2,12 +2,8 @@ using EventCo.Domain.Events;
 
 namespace EventCo.Application.Common.Interfaces;
 
-public interface IEventRepository
+public interface IEventRepository: IRepository<Event>
 {
-    Task AddAsync(Event @event, CancellationToken cancellationToken);
-
-    Task UpdateAsync(Event @event, CancellationToken cancellationToken);
-
     Task DeleteAsync(Event @event, CancellationToken cancellationToken);
 
     Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken);

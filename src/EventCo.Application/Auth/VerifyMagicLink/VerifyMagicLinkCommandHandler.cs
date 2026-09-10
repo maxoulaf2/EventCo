@@ -20,13 +20,13 @@ public sealed class VerifyMagicLinkCommandHandler(
             ?? throw new MagicLinkTokenNotFoundException();
 
         token.Consume(now);
-        await magicLinkTokenRepository.UpdateAsync(token, cancellationToken);
+        await magicLinkTokenRepository.ApplyAsync(token, cancellationToken);
 
         var user = await userRepository.GetByEmailAsync(token.Email, cancellationToken);
         if (user is null)
         {
             user = User.Create(token.Email, DisplayNameFromEmail(token.Email.Value), now);
-            await userRepository.AddAsync(user, cancellationToken);
+            await userRepository.ApplyAsync(user, cancellationToken);
         }
 
         var session = sessionTokenService.CreateSessionToken(user.Id, user.Email.Value, now);

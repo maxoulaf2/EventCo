@@ -7,8 +7,7 @@ namespace EventCo.Application.Events.DeleteTask;
 // Le userId courant est garanti non nul par [Authorize] sur l'endpoint appelant.
 public sealed class DeleteTaskCommandHandler(
     ICurrentUserService currentUserService,
-    IEventRepository eventRepository,
-    ITaskRealtimeNotifier taskRealtimeNotifier)
+    IEventRepository eventRepository)
     : ICommandHandler<DeleteTaskCommand>
 {
     public async Task Handle(DeleteTaskCommand command, CancellationToken cancellationToken)
@@ -18,7 +17,6 @@ public sealed class DeleteTaskCommandHandler(
 
         @event.RemoveTask(currentUserService.UserId!.Value, command.TaskId);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
-        await taskRealtimeNotifier.NotifyTaskDeleted(new TaskDeletedRealtimeDto(command.EventId, command.TaskId), cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
     }
 }

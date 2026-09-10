@@ -21,7 +21,7 @@ public sealed class CreateEventCommandHandler(
             currentUserService.UserId!.Value,
             now);
 
-        await eventRepository.AddAsync(@event, cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
 
         return new CreateEventResult(
             @event.Id,

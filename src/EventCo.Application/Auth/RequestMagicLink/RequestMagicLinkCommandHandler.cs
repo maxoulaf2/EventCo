@@ -25,7 +25,7 @@ public sealed class RequestMagicLinkCommandHandler(
 
         var token = MagicLinkToken.Create(email, tokenHash, now.AddMinutes(magicLinkOptions.ExpiryMinutes), now);
 
-        await magicLinkTokenRepository.AddAsync(token, cancellationToken);
+        await magicLinkTokenRepository.ApplyAsync(token, cancellationToken);
 
         var verificationLink = $"{magicLinkOptions.VerificationUrlBase}?token={Uri.EscapeDataString(rawToken)}";
 

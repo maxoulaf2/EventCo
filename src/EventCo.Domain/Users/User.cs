@@ -1,4 +1,5 @@
 using EventCo.Domain.Common;
+using EventCo.Domain.Users.DomainEvents;
 using EventCo.Domain.Users.Exceptions;
 using EventCo.Domain.ValueObjects;
 
@@ -23,7 +24,9 @@ public class User : Entity
         if (string.IsNullOrWhiteSpace(displayName))
             throw new UserDisplayNameEmptyException();
 
-        return new User(Guid.NewGuid(), email, displayName.Trim(), now);
+        var user = new User(Guid.NewGuid(), email, displayName.Trim(), now);
+        user.AddDomainEvent(new UserCreatedDomainEvent(user.Id));
+        return user;
     }
 
     internal static User Reconstitute(Guid id, Email email, string displayName, string? avatarUrl, DateTime createdAt) =>
@@ -36,5 +39,6 @@ public class User : Entity
 
         DisplayName = displayName.Trim();
         AvatarUrl = avatarUrl;
+        AddDomainEvent(new UserProfileUpdatedDomainEvent(Id));
     }
 }

@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<ISessionTokenService, SessionTokenService>();
 
         services.AddSignalR();

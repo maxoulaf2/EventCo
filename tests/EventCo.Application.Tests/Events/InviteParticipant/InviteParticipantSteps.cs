@@ -55,7 +55,12 @@ public sealed class InviteParticipantSteps
     {
         var userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
         var user = User.Create(Email.Create(email), "Ami existant", _now);
-        await userRepository.AddAsync(user, CancellationToken.None);
+        await userRepository.ApplyAsync(user, CancellationToken.None);
+
+        // Écriture repository directe, hors ICommandDispatcher (pas de Command dédiée pour ce fixture de test) :
+        // SaveChangesAsync n'est plus implicite dans le repository, donc à committer explicitement ici pour que
+        // la commande InviteParticipant du step suivant retrouve bien ce compte en base.
+        await _serviceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync(CancellationToken.None);
     }
 
     [Given(@"""(.*)"" est déjà invité à cet événement")]

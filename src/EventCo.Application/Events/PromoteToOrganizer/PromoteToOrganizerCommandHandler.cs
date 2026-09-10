@@ -15,6 +15,6 @@ public sealed class PromoteToOrganizerCommandHandler(ICurrentUserService current
 
         @event.PromoteToOrganizer(currentUserService.UserId!.Value, command.TargetUserId);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
     }
 }

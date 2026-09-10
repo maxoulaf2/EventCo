@@ -1,9 +1,14 @@
+using EventCo.Application.Common.Interfaces;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventCo.Application.Common.Messaging;
 
-internal sealed class CommandDispatcher(IServiceProvider serviceProvider) : ICommandDispatcher
+internal sealed class CommandDispatcher(
+    IServiceProvider serviceProvider,
+    IUnitOfWork unitOfWork,
+    IDomainEventDispatcher domainEventDispatcher,
+    DomainEventCollector domainEventCollector) : ICommandDispatcher
 {
     public async Task Send<TCommand>(TCommand command, CancellationToken cancellationToken) where TCommand : ICommand
     {
@@ -11,6 +16,8 @@ internal sealed class CommandDispatcher(IServiceProvider serviceProvider) : ICom
 
         var handler = serviceProvider.GetRequiredService<ICommandHandler<TCommand>>();
         await handler.Handle(command, cancellationToken);
+
+        await CompleteUnitOfWorkAsync(cancellationToken);
     }
 
     public async Task<TResponse> Send<TResponse>(ICommand<TResponse> command, CancellationToken cancellationToken)
@@ -22,7 +29,24 @@ internal sealed class CommandDispatcher(IServiceProvider serviceProvider) : ICom
         var handler = serviceProvider.GetRequiredService(handlerType);
 
         var handleMethod = handlerType.GetMethod(nameof(ICommandHandler<ICommand<TResponse>, TResponse>.Handle))!;
-        return await (Task<TResponse>)handleMethod.Invoke(handler, [command, cancellationToken])!;
+        var response = await (Task<TResponse>)handleMethod.Invoke(handler, [command, cancellationToken])!;
+
+        await CompleteUnitOfWorkAsync(cancellationToken);
+
+        return response;
+    }
+
+    private async Task CompleteUnitOfWorkAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await unitOfWork.SaveChangesAsync(cancellationToken);
+            await domainEventDispatcher.DispatchAsync(domainEventCollector.PendingEvents, cancellationToken);
+        }
+        finally
+        {
+            domainEventCollector.Clear();
+        }
     }
 
     private async Task ValidateAsync<TCommand>(TCommand command, CancellationToken cancellationToken)

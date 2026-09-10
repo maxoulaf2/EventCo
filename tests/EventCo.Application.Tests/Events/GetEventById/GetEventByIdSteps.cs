@@ -51,7 +51,11 @@ public sealed class GetEventByIdSteps
     {
         var userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
         var organizer = User.Create(Email.Create("organisateur@example.com"), "Organisateur", _now);
-        await userRepository.AddAsync(organizer, CancellationToken.None);
+        await userRepository.ApplyAsync(organizer, CancellationToken.None);
+
+        // Écriture repository directe, hors ICommandDispatcher : à committer explicitement (cf. même remarque
+        // dans InviteParticipantSteps).
+        await _serviceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync(CancellationToken.None);
         _currentUserContext.UserId = organizer.Id;
 
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();

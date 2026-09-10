@@ -38,43 +38,10 @@ internal static class EventMapper
         return entity;
     }
 
-    // Retourne les entités enfants retirées des collections (Participants/Tasks), à supprimer explicitement
-    // du DbContext par l'appelant : les FK EventParticipants/EventTasks -> Events sont en Restrict (pas de
-    // cascade DB, cf. EventRepository.DeleteAsync), donc les retirer de la liste en mémoire ne suffit pas
-    // (EF lève une InvalidOperationException sur la relation "severed" sans ce retrait explicite).
-    public static IReadOnlyList<object> ApplyToEntity(Event domain, EventEntity entity)
-    {
-        entity.Title = domain.Title;
-        entity.Description = domain.Description;
-        entity.EventDate = domain.EventDate;
-        entity.Location = domain.Location;
-        entity.Status = domain.Status;
-
-        var removedParticipants = SyncChildren(domain.Participants, entity.Participants,
-            d => d.Id, e => e.Id,
-            (d, e) =>
-            {
-                e.Role = d.Role;
-                e.JoinedAt = d.JoinedAt;
-            },
-            d => ToEntity(d));
-
-        var removedTasks = SyncChildren(domain.Tasks, entity.Tasks,
-            d => d.Id, e => e.Id,
-            (d, e) =>
-            {
-                e.Title = d.Title;
-                e.Category = d.Category;
-                e.Quantity = d.Quantity;
-                e.AssignedToUserId = d.AssignedToUserId;
-                e.IsDone = d.IsDone;
-            },
-            d => ToEntity(d));
-
-        return removedParticipants.Cast<object>().Concat(removedTasks.Cast<object>()).ToList();
-    }
-
-    private static EventParticipantEntity ToEntity(EventParticipant domain) => new()
+    // Accessibles depuis EventRepository (même assembly) : chaque domain event porté par l'agrégat Event
+    // pilote une opération de persistance précise (insertion d'un seul enfant, mise à jour d'un seul champ...)
+    // plutôt qu'un diff générique de tout l'agrégat.
+    internal static EventParticipantEntity ToEntity(EventParticipant domain) => new()
     {
         Id = domain.Id,
         EventId = domain.EventId,
@@ -84,7 +51,7 @@ internal static class EventMapper
         JoinedAt = domain.JoinedAt,
     };
 
-    private static EventTaskEntity ToEntity(EventTask domain) => new()
+    internal static EventTaskEntity ToEntity(EventTask domain) => new()
     {
         Id = domain.Id,
         EventId = domain.EventId,
@@ -96,28 +63,4 @@ internal static class EventMapper
         CreatedByUserId = domain.CreatedByUserId,
         CreatedAt = domain.CreatedAt,
     };
-
-    private static List<TEntity> SyncChildren<TDomain, TEntity>(
-        IReadOnlyCollection<TDomain> domainItems,
-        List<TEntity> entityItems,
-        Func<TDomain, Guid> domainId,
-        Func<TEntity, Guid> entityId,
-        Action<TDomain, TEntity> updateExisting,
-        Func<TDomain, TEntity> createNew)
-    {
-        var removed = entityItems.Where(e => domainItems.All(d => domainId(d) != entityId(e))).ToList();
-        foreach (var entity in removed)
-            entityItems.Remove(entity);
-
-        foreach (var domainItem in domainItems)
-        {
-            var existing = entityItems.FirstOrDefault(e => entityId(e) == domainId(domainItem));
-            if (existing is not null)
-                updateExisting(domainItem, existing);
-            else
-                entityItems.Add(createNew(domainItem));
-        }
-
-        return removed;
-    }
 }

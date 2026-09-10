@@ -7,8 +7,7 @@ namespace EventCo.Application.Events.CompleteTask;
 // Le userId courant est garanti non nul par [Authorize] sur l'endpoint appelant.
 public sealed class CompleteTaskCommandHandler(
     ICurrentUserService currentUserService,
-    IEventRepository eventRepository,
-    ITaskRealtimeNotifier taskRealtimeNotifier)
+    IEventRepository eventRepository)
     : ICommandHandler<CompleteTaskCommand>
 {
     public async Task Handle(CompleteTaskCommand command, CancellationToken cancellationToken)
@@ -18,9 +17,6 @@ public sealed class CompleteTaskCommandHandler(
 
         @event.CompleteTask(currentUserService.UserId!.Value, command.TaskId);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
-
-        var task = @event.Tasks.Single(t => t.Id == command.TaskId);
-        await taskRealtimeNotifier.NotifyTaskStatusChanged(TaskRealtimeDto.FromTask(task), cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
     }
 }

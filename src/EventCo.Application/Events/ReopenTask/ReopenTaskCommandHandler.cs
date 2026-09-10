@@ -7,8 +7,7 @@ namespace EventCo.Application.Events.ReopenTask;
 // Le userId courant est garanti non nul par [Authorize] sur l'endpoint appelant.
 public sealed class ReopenTaskCommandHandler(
     ICurrentUserService currentUserService,
-    IEventRepository eventRepository,
-    ITaskRealtimeNotifier taskRealtimeNotifier)
+    IEventRepository eventRepository)
     : ICommandHandler<ReopenTaskCommand>
 {
     public async Task Handle(ReopenTaskCommand command, CancellationToken cancellationToken)
@@ -18,9 +17,6 @@ public sealed class ReopenTaskCommandHandler(
 
         @event.ReopenTask(currentUserService.UserId!.Value, command.TaskId);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
-
-        var task = @event.Tasks.Single(t => t.Id == command.TaskId);
-        await taskRealtimeNotifier.NotifyTaskStatusChanged(TaskRealtimeDto.FromTask(task), cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
     }
 }

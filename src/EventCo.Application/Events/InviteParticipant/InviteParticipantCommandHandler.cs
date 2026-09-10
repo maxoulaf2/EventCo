@@ -24,12 +24,12 @@ public sealed class InviteParticipantCommandHandler(
         if (user is null)
         {
             user = User.Create(email, DisplayNameFromEmail(email.Value), now);
-            await userRepository.AddAsync(user, cancellationToken);
+            await userRepository.ApplyAsync(user, cancellationToken);
         }
 
         var participant = @event.InviteParticipant(currentUserService.UserId!.Value, user.Id, now);
 
-        await eventRepository.UpdateAsync(@event, cancellationToken);
+        await eventRepository.ApplyAsync(@event, cancellationToken);
 
         return new InviteParticipantResult(
             @event.Id,

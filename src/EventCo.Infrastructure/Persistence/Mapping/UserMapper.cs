@@ -17,4 +17,10 @@ internal static class UserMapper
         AvatarUrl = domain.AvatarUrl,
         CreatedAt = domain.CreatedAt,
     };
+
+    public static void ApplyToEntity(User domain, UserEntity entity)
+    {
+        entity.DisplayName = domain.DisplayName;
+        entity.AvatarUrl = domain.AvatarUrl;
+    }
 }

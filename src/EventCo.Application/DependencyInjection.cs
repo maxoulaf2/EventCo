@@ -15,6 +15,10 @@ public static class DependencyInjection
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
         services.AddCommandHandlersFromAssembly(assembly);
 
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<DomainEventCollector>();
+        services.AddDomainEventHandlersFromAssembly(assembly);
+
         return services;
     }
 
@@ -27,6 +31,20 @@ public static class DependencyInjection
             where handlerInterface.IsGenericType
                   && (handlerInterface.GetGenericTypeDefinition() == typeof(ICommandHandler<>)
                       || handlerInterface.GetGenericTypeDefinition() == typeof(ICommandHandler<,>))
+            select (Interface: handlerInterface, Implementation: type);
+
+        foreach (var (handlerInterface, implementation) in handlerTypes)
+            services.AddScoped(handlerInterface, implementation);
+    }
+
+    private static void AddDomainEventHandlersFromAssembly(this IServiceCollection services, Assembly assembly)
+    {
+        var handlerTypes =
+            from type in assembly.GetTypes()
+            where !type.IsAbstract && !type.IsInterface
+            from handlerInterface in type.GetInterfaces()
+            where handlerInterface.IsGenericType
+                  && handlerInterface.GetGenericTypeDefinition() == typeof(IDomainEventHandler<>)
             select (Interface: handlerInterface, Implementation: type);
 
         foreach (var (handlerInterface, implementation) in handlerTypes)

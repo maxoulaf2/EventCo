@@ -1,4 +1,5 @@
 using EventCo.Domain.Common;
+using EventCo.Domain.Events.DomainEvents;
 using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Domain.Events;
@@ -42,6 +43,8 @@ public class Event : Entity
         creatorParticipant.Join(now);
         @event._participants.Add(creatorParticipant);
 
+        @event.AddDomainEvent(new EventCreatedDomainEvent(@event.Id));
+
         return @event;
     }
 
@@ -67,11 +70,21 @@ public class Event : Entity
         Description = description;
         EventDate = eventDate;
         Location = location;
+
+        AddDomainEvent(new EventDetailsUpdatedDomainEvent(Id));
     }
 
-    public void Cancel() => Status = EventStatus.Cancelled;
+    public void Cancel()
+    {
+        Status = EventStatus.Cancelled;
+        AddDomainEvent(new EventStatusChangedDomainEvent(Id));
+    }
 
-    public void Complete() => Status = EventStatus.Completed;
+    public void Complete()
+    {
+        Status = EventStatus.Completed;
+        AddDomainEvent(new EventStatusChangedDomainEvent(Id));
+    }
 
     public EventParticipant InviteParticipant(Guid actingUserId, Guid userId, DateTime now)
     {
@@ -82,15 +95,23 @@ public class Event : Entity
 
         var participant = new EventParticipant(Id, userId, ParticipantRole.Participant, now);
         _participants.Add(participant);
+        AddDomainEvent(new ParticipantInvitedDomainEvent(Id, participant.Id));
         return participant;
     }
 
-    public void ConfirmParticipant(Guid userId, DateTime now) => GetParticipant(userId).Join(now);
+    public void ConfirmParticipant(Guid userId, DateTime now)
+    {
+        var participant = GetParticipant(userId);
+        participant.Join(now);
+        AddDomainEvent(new ParticipantJoinedDomainEvent(Id, participant.Id));
+    }
 
     public void PromoteToOrganizer(Guid actingUserId, Guid targetUserId)
     {
         EnsureActingUserIsCreator(actingUserId);
-        GetParticipant(targetUserId).ChangeRole(ParticipantRole.Organizer);
+        var participant = GetParticipant(targetUserId);
+        participant.ChangeRole(ParticipantRole.Organizer);
+        AddDomainEvent(new ParticipantRoleChangedDomainEvent(Id, participant.Id));
     }
 
     public void DemoteToParticipant(Guid actingUserId, Guid targetUserId)
@@ -100,7 +121,9 @@ public class Event : Entity
         if (targetUserId == CreatedByUserId)
             throw new EventCreatorCannotBeDemotedException(Id, targetUserId);
 
-        GetParticipant(targetUserId).ChangeRole(ParticipantRole.Participant);
+        var participant = GetParticipant(targetUserId);
+        participant.ChangeRole(ParticipantRole.Participant);
+        AddDomainEvent(new ParticipantRoleChangedDomainEvent(Id, participant.Id));
     }
 
     public void RemoveParticipant(Guid actingUserId, Guid targetUserId)
@@ -110,7 +133,9 @@ public class Event : Entity
         if (targetUserId == CreatedByUserId)
             throw new EventCreatorCannotBeRemovedException(Id, targetUserId);
 
-        _participants.Remove(GetParticipant(targetUserId));
+        var participant = GetParticipant(targetUserId);
+        _participants.Remove(participant);
+        AddDomainEvent(new ParticipantRemovedDomainEvent(Id, participant.Id));
     }
 
     public void EnsureCanBeDeletedBy(Guid actingUserId) => EnsureActingUserIsCreator(actingUserId);
@@ -123,6 +148,7 @@ public class Event : Entity
 
         var task = new EventTask(Id, title, category, quantity, actingUserId, now);
         _tasks.Add(task);
+        AddDomainEvent(new TaskCreatedDomainEvent(task));
         return task;
     }
 
@@ -136,16 +162,24 @@ public class Event : Entity
         if (userId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
             throw new ParticipantCannotAssignTaskToOthersException(Id, taskId, actingUserId, userId);
 
-        GetTask(taskId).AssignTo(userId);
+        var task = GetTask(taskId);
+        task.AssignTo(userId);
+        AddDomainEvent(new TaskAssignedDomainEvent(task));
     }
 
-    public void UnassignTask(Guid taskId) => GetTask(taskId).Unassign();
+    public void UnassignTask(Guid taskId)
+    {
+        var task = GetTask(taskId);
+        task.Unassign();
+        AddDomainEvent(new TaskUnassignedDomainEvent(task));
+    }
 
     public void CompleteTask(Guid actingUserId, Guid taskId)
     {
         var task = GetTask(taskId);
         EnsureActingUserCanToggleTaskDone(actingUserId, task);
         task.MarkDone();
+        AddDomainEvent(new TaskStatusChangedDomainEvent(task));
     }
 
     public void ReopenTask(Guid actingUserId, Guid taskId)
@@ -153,6 +187,7 @@ public class Event : Entity
         var task = GetTask(taskId);
         EnsureActingUserCanToggleTaskDone(actingUserId, task);
         task.MarkNotDone();
+        AddDomainEvent(new TaskStatusChangedDomainEvent(task));
     }
 
     public void RemoveTask(Guid actingUserId, Guid taskId)
@@ -160,6 +195,7 @@ public class Event : Entity
         var task = GetTask(taskId);
         EnsureActingUserCanDeleteTask(actingUserId, task);
         _tasks.Remove(task);
+        AddDomainEvent(new TaskDeletedDomainEvent(Id, taskId));
     }
 
     private void EnsureActingUserIsCreator(Guid actingUserId)

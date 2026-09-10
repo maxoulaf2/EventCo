@@ -1,3 +1,4 @@
+using EventCo.Domain.Auth.DomainEvents;
 using EventCo.Domain.Auth.Exceptions;
 using EventCo.Domain.Common;
 using EventCo.Domain.ValueObjects;
@@ -28,7 +29,9 @@ public class MagicLinkToken : Entity
         if (expiresAt <= now)
             throw new MagicLinkTokenExpirationInThePastException(expiresAt);
 
-        return new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt);
+        var token = new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt);
+        token.AddDomainEvent(new MagicLinkTokenCreatedDomainEvent(token.Id));
+        return token;
     }
 
     internal static MagicLinkToken Reconstitute(Guid id, Email email, string tokenHash, DateTime expiresAt, DateTime? consumedAt) =>
@@ -45,5 +48,6 @@ public class MagicLinkToken : Entity
             throw new MagicLinkTokenExpiredException(Id, ExpiresAt, now);
 
         ConsumedAt = now;
+        AddDomainEvent(new MagicLinkTokenConsumedDomainEvent(Id));
     }
 }
