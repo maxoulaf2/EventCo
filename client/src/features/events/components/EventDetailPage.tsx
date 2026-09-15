@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
+import { TaskList } from '../../tasks/components/TaskList'
 import { ApiError } from '../../../shared/lib/api'
 import { routes } from '../../../shared/lib/routes'
 import { useDemoteParticipant } from '../hooks/useDemoteParticipant'
@@ -109,6 +110,8 @@ export function EventDetailPage() {
               ))}
             </ul>
           </div>
+
+          <TaskList eventId={eventId!} />
 
           {canInvite && <InviteParticipantForm eventId={eventId!} />}
         </>

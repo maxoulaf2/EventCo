@@ -94,4 +94,6 @@ export const handlers = [
       ],
     }),
   ),
+
+  http.get('*/api/events/:id/tasks', () => HttpResponse.json([])),
 ]

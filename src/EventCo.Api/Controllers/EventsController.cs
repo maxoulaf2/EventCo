@@ -8,6 +8,7 @@ using EventCo.Application.Events.DeleteEvent;
 using EventCo.Application.Events.DeleteTask;
 using EventCo.Application.Events.DemoteToParticipant;
 using EventCo.Application.Events.GetEventById;
+using EventCo.Application.Events.GetEventTasks;
 using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.PromoteToOrganizer;
@@ -132,6 +133,24 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.HasJoined);
 
         return Created($"api/events/{id}", response);
+    }
+
+    [HttpGet("{id:guid}/tasks")]
+    public async Task<IActionResult> GetTasks(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new GetEventTasksQuery(id), cancellationToken);
+
+        var response = result.Tasks.Select(t => new EventTaskResponse(
+            t.TaskId,
+            t.EventId,
+            t.Title,
+            t.Category,
+            t.Quantity,
+            t.AssignedToUserId,
+            t.IsDone,
+            t.CreatedAt));
+
+        return Ok(response);
     }
 
     [HttpPost("{id:guid}/tasks")]

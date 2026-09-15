@@ -22,8 +22,31 @@ const participants = [
   },
 ]
 
-function mockEventDetail(page: import('@playwright/test').Page) {
-  return page.route('**/api/events/event-1', (route) =>
+const tasks = [
+  {
+    id: 'task-1',
+    eventId: 'event-1',
+    title: 'Bûche au chocolat',
+    category: 'Courses',
+    quantity: '1',
+    assignedToUserId: null,
+    isDone: false,
+    createdAt: '2026-09-01T00:00:00Z',
+  },
+  {
+    id: 'task-2',
+    eventId: 'event-1',
+    title: 'Réserver la salle',
+    category: 'Logistique',
+    quantity: null,
+    assignedToUserId: null,
+    isDone: true,
+    createdAt: '2026-09-02T00:00:00Z',
+  },
+]
+
+async function mockEventDetail(page: import('@playwright/test').Page) {
+  await page.route('**/api/events/event-1', (route) =>
     route.fulfill({
       json: {
         id: 'event-1',
@@ -38,6 +61,7 @@ function mockEventDetail(page: import('@playwright/test').Page) {
       },
     }),
   )
+  await page.route('**/api/events/event-1/tasks', (route) => route.fulfill({ json: tasks }))
 }
 
 Given("je suis sur le détail d'un événement en tant que créateur", async ({ page }) => {
@@ -56,6 +80,16 @@ Given("je suis sur le détail d'un événement en tant que simple participant", 
   )
   await page.goto('/events/event-1')
   await expect(page.getByText('Ami', { exact: true })).toBeVisible()
+})
+
+Given("je suis sur le détail d'un événement avec ses tâches filtrées par catégorie", async ({ page }) => {
+  await mockEventDetail(page)
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
+  )
+  await page.goto('/events/event-1')
+  await page.getByLabel('Filtrer par catégorie').selectOption('Courses')
+  await expect(page.getByText('Bûche au chocolat')).toBeVisible()
 })
 
 Given("je suis sur le détail d'un événement avec une erreur d'invitation", async ({ page }) => {
