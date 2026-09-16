@@ -16,6 +16,7 @@
     "test:visual:update": "bddgen --config tests/visual/playwright.config.ts && playwright test --config tests/visual/playwright.config.ts --update-snapshots"
   },
   "dependencies": {
+    "@microsoft/signalr": "^10.0.11",
     "@tanstack/react-query": "^5.102.8",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",

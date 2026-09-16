@@ -6,12 +6,13 @@ using EventCo.Application.Auth.VerifyMagicLink;
 using EventCo.Application.Common.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
 
 namespace EventCo.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public sealed class AuthController(ICommandDispatcher commandDispatcher) : ControllerBase
+public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEnvironment environment) : ControllerBase
 {
     [HttpPost("request-link")]
     public async Task<IActionResult> RequestLink(RequestMagicLinkRequest request, CancellationToken cancellationToken)
@@ -26,11 +27,15 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher) : Contr
     {
         var result = await commandDispatcher.Send(new VerifyMagicLinkCommand(request.Token), cancellationToken);
 
+        // Same-origin en dev (proxy Vite, cf. client/vite.config.ts) comme en prod (frontend/API
+        // servis sous le même domaine) : SameSite=Lax suffit et évite que le cookie soit traité comme
+        // cookie tiers (bloqué par défaut en navigation privée). Secure reste désactivé en Development
+        // car la connexion navigateur -> Vite y est en http.
         Response.Cookies.Append(SessionCookie.Name, result.SessionToken, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.None,
+            Secure = !environment.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
             Expires = result.SessionExpiresAt,
         });
 

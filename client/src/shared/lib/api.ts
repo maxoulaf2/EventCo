@@ -1,4 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'https://localhost:7166'
+// Vide par défaut = appels relatifs à l'origine courante, proxifiés vers l'API par Vite en dev
+// (cf. vite.config.ts) pour rester same-origin et éviter que le cookie de session soit traité comme
+// cookie tiers (bloqué par défaut en navigation privée). VITE_API_URL reste utile en prod si le build
+// statique est servi séparément de l'API.
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
 export class ApiError extends Error {
   readonly status: number

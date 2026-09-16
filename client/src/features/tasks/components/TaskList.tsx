@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useEventTasks } from '../hooks/useEventTasks'
+import { useTaskRealtime } from '../hooks/useTaskRealtime'
 import type { TaskCategory } from '../types'
 
 const CATEGORIES: TaskCategory[] = ['Courses', 'Logistique', 'Autre']
@@ -10,6 +11,7 @@ interface TaskListProps {
 
 export function TaskList({ eventId }: TaskListProps) {
   const { data: tasks, isPending, isError } = useEventTasks(eventId)
+  useTaskRealtime(eventId)
   const [categoryFilter, setCategoryFilter] = useState<TaskCategory | 'Toutes'>('Toutes')
 
   const filteredTasks = tasks?.filter((task) => categoryFilter === 'Toutes' || task.category === categoryFilter) ?? []
