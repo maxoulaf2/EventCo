@@ -14,7 +14,8 @@ Projet personnel de montée en compétences, mené selon des standards professio
 |---|---|---|
 | `docs/cadrage-projet-eventco.md` | Spécifications fonctionnelles, stack technique, modèle de données, priorisation MoSCoW | Avant toute nouvelle fonctionnalité, pour comprendre le besoin métier |
 | `docs/conventions-code.md` | Architecture Clean Architecture/DDD (backend), conventions React (frontend), règles Git/API/tests | Avant d'écrire du code, pour respecter la structure et le style attendus |
-| `docs/suivi-todo.md` | Backlog détaillé par lot, avec cases à cocher et journal d'avancement | En début et fin de chaque tâche — **c'est la source de vérité de l'avancement** |
+| `docs/suivi-todo.md` | Backlog détaillé par lot, avec cases à cocher | En début et fin de chaque tâche — **c'est la source de vérité de l'avancement** |
+| `docs/journal-avancement.md` | Journal d'avancement détaillé de chaque tâche faite. Complément d'information des différentes problèmatiques rencontrés jusqu'ici, à ne consulter qu'en cas de besoin |
 
 ## Règles de fonctionnement
 
@@ -22,7 +23,7 @@ Projet personnel de montée en compétences, mené selon des standards professio
 2. **Respecter scrupuleusement `docs/conventions-code.md`** : structure de dossiers (Domain/Application/Infrastructure/Api côté backend, feature-based côté React), conventions de nommage, principes DDD (agrégats, use cases explicites, pas de setters publics non contrôlés).
 3. **Après chaque tâche terminée** (code fonctionnel, testé, cohérent avec les conventions) :
    - Cocher la case correspondante dans `docs/suivi-todo.md`
-   - Ajouter une ligne dans le "Journal d'avancement" du même fichier (date, lot, description, fichiers principaux)
+   - Ajouter une ligne dans le "Journal d'avancement" (date, lot, description, fichiers principaux)
 4. **En cas de tâche bloquée**, ne pas la cocher et ajouter une note `> Bloqué : raison` juste en dessous dans `docs/suivi-todo.md`.
 5. **En cas de tâche manquante identifiée en cours de route**, l'ajouter dans le lot concerné de `docs/suivi-todo.md` avant de la traiter, plutôt que de l'exécuter sans traçabilité.
 6. **Le développeur review chaque lot** avant de passer au suivant : signaler clairement quand toutes les tâches Must have d'un lot sont cochées, pour déclencher cette review.
