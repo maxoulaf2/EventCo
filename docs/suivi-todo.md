@@ -71,7 +71,7 @@
   > Tâche identifiée en cours de route (rule 5, 2026-09-15) : ni `cadrage-projet-eventco.md` ni ce backlog ne prévoyaient d'endpoint de lecture pour les tâches — seuls des endpoints de mutation existent (création/assignation/statut/suppression), et `GetEventByIdQuery`/`EventDetailResponse` n'exposent pas non plus `Event.Tasks`. Sans lui, la tâche suivante ("Frontend : liste des tâches avec filtre par catégorie") n'a aucune donnée à afficher. `Event.Tasks` est déjà chargé par `EventRepository.GetByIdAsync` (`.Include(e => e.Tasks)`), donc pas de changement d'infrastructure nécessaire.
 - [x] Frontend : liste des tâches avec filtre par catégorie
 - [x] Frontend : connexion au Hub SignalR et mise à jour réactive de la liste de tâches
-- [ ] Frontend : formulaire d'ajout de tâche (titre, catégorie, quantité)
+- [x] Frontend : formulaire d'ajout de tâche (titre, catégorie, quantité)
 - [ ] Frontend : interaction rapide pour cocher une tâche (optimisée mobile)
 
 ## Lot 4 — Finitions MVP
@@ -84,8 +84,6 @@
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
 - [ ] Revue globale de sécurité (validation des rôles sur chaque endpoint, expiration des tokens, cookies httpOnly)
 - [ ] Revue globale des tests (couverture Domain/Application/Api)
-- [ ] Investiguer la fragilité en exécution parallèle de `EventCo.Api.Tests` (Testcontainers/Reqnroll)
-  > Tâche identifiée en cours de route (rule 5, 2026-09-08) : suite complète (64 scénarios) intermittente — à chaque exécution, un scénario différent et sans rapport échoue (observé sur `GetById`, `Update`, `CreateTask`, `InviteParticipant`, `CurrentUser`, `DeleteTask`...), reproduit aussi en excluant `DeleteTask`, donc préexistant et non lié à la tâche de suppression. Chaque suite de scénarios individuelle passe systématiquement en isolation (`--filter`). Piste probable : xUnit parallélise les classes `[Binding]`/features par défaut alors qu'elles partagent le même `Hooks.Factory`/Postgres Testcontainers et un état mutable (`RecordingEmailSender.SentEmails`) — à investiguer (désactiver la parallélisation de la collection de tests, ou isoler l'état partagé).
 
 ## Lot 5 — Enrichissements (post-MVP, non priorisé)
 

@@ -92,6 +92,17 @@ Given("je suis sur le détail d'un événement avec ses tâches filtrées par ca
   await expect(page.getByText('Bûche au chocolat')).toBeVisible()
 })
 
+Given("je suis sur le détail d'un événement avec le formulaire d'ajout de tâche rempli", async ({ page }) => {
+  await mockEventDetail(page)
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
+  )
+  await page.goto('/events/event-1')
+  await page.getByLabel('Titre').fill('Guirlandes')
+  await page.getByLabel('Catégorie').selectOption('Logistique')
+  await page.getByLabel('Quantité').fill('2')
+})
+
 Given("je suis sur le détail d'un événement avec une erreur d'invitation", async ({ page }) => {
   await mockEventDetail(page)
   await page.route('**/api/auth/me', (route) =>

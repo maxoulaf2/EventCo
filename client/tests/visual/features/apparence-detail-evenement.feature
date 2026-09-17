@@ -16,3 +16,7 @@ Fonctionnalité: Non-régression visuelle du détail d'un événement
   Scénario: Détail d'un événement avec ses tâches filtrées par catégorie
     Etant donné que je suis sur le détail d'un événement avec ses tâches filtrées par catégorie
     Alors son apparence correspond à la référence enregistrée
+
+  Scénario: Détail d'un événement avec le formulaire d'ajout de tâche rempli
+    Etant donné que je suis sur le détail d'un événement avec le formulaire d'ajout de tâche rempli
+    Alors son apparence correspond à la référence enregistrée

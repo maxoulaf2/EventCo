@@ -1,5 +1,11 @@
 export type TaskCategory = 'Courses' | 'Logistique' | 'Autre'
 
+export interface CreateTaskInput {
+  title: string
+  category: TaskCategory
+  quantity?: string
+}
+
 export interface EventTask {
   id: string
   eventId: string

@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
+import { AddTaskForm } from '../../tasks/components/AddTaskForm'
 import { TaskList } from '../../tasks/components/TaskList'
 import { ApiError } from '../../../shared/lib/api'
 import { routes } from '../../../shared/lib/routes'
@@ -23,6 +24,7 @@ export function EventDetailPage() {
   const isCreator = event !== undefined && currentUser !== undefined && event.createdByUserId === currentUser.userId
   const currentParticipant = event?.participants.find((p) => p.userId === currentUser?.userId)
   const canInvite = isCreator || currentParticipant?.role === 'Organizer'
+  const isParticipant = isCreator || currentParticipant !== undefined
 
   function renderParticipantAction(participant: EventParticipant) {
     if (!isCreator || participant.userId === event!.createdByUserId) {
@@ -112,6 +114,8 @@ export function EventDetailPage() {
           </div>
 
           <TaskList eventId={eventId!} />
+
+          {isParticipant && <AddTaskForm eventId={eventId!} />}
 
           {canInvite && <InviteParticipantForm eventId={eventId!} />}
         </>
