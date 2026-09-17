@@ -72,7 +72,7 @@
 - [x] Frontend : liste des tâches avec filtre par catégorie
 - [x] Frontend : connexion au Hub SignalR et mise à jour réactive de la liste de tâches
 - [x] Frontend : formulaire d'ajout de tâche (titre, catégorie, quantité)
-- [ ] Frontend : interaction rapide pour cocher une tâche (optimisée mobile)
+- [x] Frontend : interaction rapide pour cocher une tâche (optimisée mobile)
 
 ## Lot 4 — Finitions MVP
 

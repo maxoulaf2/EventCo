@@ -23,7 +23,8 @@ export function EventDetailPage() {
 
   const isCreator = event !== undefined && currentUser !== undefined && event.createdByUserId === currentUser.userId
   const currentParticipant = event?.participants.find((p) => p.userId === currentUser?.userId)
-  const canInvite = isCreator || currentParticipant?.role === 'Organizer'
+  const isCreatorOrOrganizer = isCreator || currentParticipant?.role === 'Organizer'
+  const canInvite = isCreatorOrOrganizer
   const isParticipant = isCreator || currentParticipant !== undefined
 
   function renderParticipantAction(participant: EventParticipant) {
@@ -113,7 +114,11 @@ export function EventDetailPage() {
             </ul>
           </div>
 
-          <TaskList eventId={eventId!} />
+          <TaskList
+            eventId={eventId!}
+            currentUserId={currentUser?.userId}
+            canManageAllTasks={isCreatorOrOrganizer}
+          />
 
           {isParticipant && <AddTaskForm eventId={eventId!} />}
 

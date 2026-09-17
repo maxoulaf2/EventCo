@@ -113,7 +113,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('la tâche "Bûche au chocolat" apparaît comme faite', async () => {
-      await waitFor(() => expect(taskRow('Bûche au chocolat')).toHaveTextContent('Faite'))
+      await waitFor(() => expect(screen.getByRole('checkbox', { name: /bûche au chocolat/i })).toBeChecked())
     })
   })
 

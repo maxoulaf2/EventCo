@@ -11,3 +11,11 @@ export function createTask(eventId: string, input: CreateTaskInput): Promise<Eve
     body: JSON.stringify({ ...input, quantity: input.quantity || null }),
   })
 }
+
+export function completeTask(eventId: string, taskId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/tasks/${taskId}/complete`, { method: 'POST' })
+}
+
+export function reopenTask(eventId: string, taskId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/tasks/${taskId}/reopen`, { method: 'POST' })
+}
