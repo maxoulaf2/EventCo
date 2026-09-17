@@ -103,7 +103,7 @@ Given("je suis sur le détail d'un événement avec le formulaire d'ajout de tâ
   )
   await page.goto('/events/event-1')
   await page.getByLabel('Titre').fill('Guirlandes')
-  await page.getByLabel('Catégorie').selectOption('Logistique')
+  await page.getByLabel('Catégorie', { exact: true }).selectOption('Logistique')
   await page.getByLabel('Quantité').fill('2')
 })
 
