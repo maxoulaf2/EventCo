@@ -33,12 +33,12 @@ Given(
       }),
     )
     await page.goto('/events')
-    await expect(page.getByText('Repas de Noël')).toBeVisible()
+    await expect(page.getByTestId('event-list-item-event-1')).toBeVisible()
   },
 )
 
 Given('je suis sur le tableau de bord sans événement', async ({ page }) => {
   await page.route('**/api/events', (route) => route.fulfill({ json: [] }))
   await page.goto('/events')
-  await expect(page.getByText(/vous ne participez encore à aucun événement/i)).toBeVisible()
+  await expect(page.getByTestId('events-dashboard-empty-message')).toBeVisible()
 })

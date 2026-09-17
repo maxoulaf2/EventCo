@@ -24,14 +24,14 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
       'je saisis le titre "Repas de Noël" et la date "2026-12-24" puis je valide le formulaire',
       async () => {
         const user = userEvent.setup()
-        await user.type(screen.getByLabelText('Titre'), 'Repas de Noël')
-        fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-12-24' } })
-        await user.click(screen.getByRole('button', { name: /créer l'événement/i }))
+        await user.type(screen.getByTestId('create-event-title-input'), 'Repas de Noël')
+        fireEvent.change(screen.getByTestId('create-event-date-input'), { target: { value: '2026-12-24' } })
+        await user.click(screen.getByTestId('create-event-submit-button'))
       },
     )
 
     Then('je suis redirigé vers le tableau de bord', async () => {
-      await screen.findByRole('heading', { name: 'Mes événements' })
+      await screen.findByTestId('events-dashboard-title')
     })
   })
 
@@ -48,18 +48,19 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
       'je saisis le titre "Repas de Noël" et la date "2026-12-24" puis je valide le formulaire',
       async () => {
         const user = userEvent.setup()
-        await user.type(screen.getByLabelText('Titre'), 'Repas de Noël')
-        fireEvent.change(screen.getByLabelText('Date'), { target: { value: '2026-12-24' } })
-        await user.click(screen.getByRole('button', { name: /créer l'événement/i }))
+        await user.type(screen.getByTestId('create-event-title-input'), 'Repas de Noël')
+        fireEvent.change(screen.getByTestId('create-event-date-input'), { target: { value: '2026-12-24' } })
+        await user.click(screen.getByTestId('create-event-submit-button'))
       },
     )
 
     Then('je vois un message d\'erreur sur le formulaire', async () => {
-      await screen.findByText('La date est obligatoire.')
+      const errorMessage = await screen.findByTestId('create-event-error')
+      expect(errorMessage).toHaveTextContent('La date est obligatoire.')
     })
 
     And('je reste sur la page de création d\'événement', () => {
-      expect(screen.getByRole('button', { name: /créer l'événement/i })).toBeInTheDocument()
+      expect(screen.getByTestId('create-event-submit-button')).toBeInTheDocument()
     })
   })
 })

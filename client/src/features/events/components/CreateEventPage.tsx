@@ -26,10 +26,10 @@ export function CreateEventPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-4">
-      <h1 className="text-xl font-semibold md:text-2xl">Nouvel événement</h1>
+    <main data-testid="create-event-page" className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-4">
+      <h1 data-testid="create-event-page-title" className="text-xl font-semibold md:text-2xl">Nouvel événement</h1>
 
-      <form onSubmit={handleSubmit} className="flex w-full flex-col gap-4">
+      <form onSubmit={handleSubmit} data-testid="create-event-form" className="flex w-full flex-col gap-4">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="title" className="text-sm font-medium text-gray-700">
             Titre
@@ -42,6 +42,7 @@ export function CreateEventPage() {
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Repas de Noël"
+            data-testid="create-event-title-input"
             className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
           />
         </div>
@@ -57,6 +58,7 @@ export function CreateEventPage() {
             required
             value={eventDate}
             onChange={(event) => setEventDate(event.target.value)}
+            data-testid="create-event-date-input"
             className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
           />
         </div>
@@ -72,6 +74,7 @@ export function CreateEventPage() {
             value={location}
             onChange={(event) => setLocation(event.target.value)}
             placeholder="Chez Alice"
+            data-testid="create-event-location-input"
             className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
           />
         </div>
@@ -86,22 +89,29 @@ export function CreateEventPage() {
             rows={3}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            data-testid="create-event-description-input"
             className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
           />
         </div>
 
-        {error && <p className="text-sm text-red-600">{error.message}</p>}
+        {error && (
+          <p data-testid="create-event-error" className="text-sm text-red-600">
+            {error.message}
+          </p>
+        )}
 
         <div className="flex gap-3">
           <button
             type="submit"
             disabled={isPending}
+            data-testid="create-event-submit-button"
             className="flex-1 rounded-lg bg-gray-900 px-4 py-3 text-base font-medium text-white transition-colors disabled:opacity-50"
           >
             {isPending ? 'Création en cours…' : 'Créer l\'événement'}
           </button>
           <Link
             to={routes.events}
+            data-testid="create-event-cancel-link"
             className="flex items-center justify-center rounded-lg border border-gray-300 px-4 py-3 text-base font-medium text-gray-700"
           >
             Annuler

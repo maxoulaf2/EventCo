@@ -29,7 +29,7 @@ export function AddTaskForm({ eventId }: AddTaskFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+    <form onSubmit={handleSubmit} data-testid="add-task-form" className="flex flex-col gap-3">
       <h2 className="text-sm font-semibold text-gray-900">Ajouter une tâche</h2>
 
       <div className="flex flex-col gap-1.5">
@@ -44,6 +44,7 @@ export function AddTaskForm({ eventId }: AddTaskFormProps) {
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="Bûche au chocolat"
+          data-testid="add-task-title-input"
           className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
         />
       </div>
@@ -58,6 +59,7 @@ export function AddTaskForm({ eventId }: AddTaskFormProps) {
             name="taskCategory"
             value={category}
             onChange={(event) => setCategory(event.target.value as TaskCategory)}
+            data-testid="add-task-category-select"
             className="rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900 focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
           >
             {CATEGORIES.map((value) => (
@@ -79,16 +81,22 @@ export function AddTaskForm({ eventId }: AddTaskFormProps) {
             value={quantity}
             onChange={(event) => setQuantity(event.target.value)}
             placeholder="1"
+            data-testid="add-task-quantity-input"
             className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
           />
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error.message}</p>}
+      {error && (
+        <p data-testid="add-task-error" className="text-sm text-red-600">
+          {error.message}
+        </p>
+      )}
 
       <button
         type="submit"
         disabled={isPending}
+        data-testid="add-task-submit-button"
         className="rounded-lg bg-gray-900 px-4 py-3 text-base font-medium text-white transition-colors disabled:opacity-50"
       >
         {isPending ? 'Ajout en cours…' : 'Ajouter la tâche'}

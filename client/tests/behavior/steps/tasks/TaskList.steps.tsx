@@ -41,22 +41,18 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     server.use(http.get('*/api/events/:id/tasks', () => HttpResponse.json(defaultTasks)))
   })
 
-  function taskRow(title: string) {
-    return screen.getByText(title).closest('li')!
-  }
-
   Scenario('Affichage des tâches de toutes les catégories', ({ When, Then, And }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
 
     Then('je vois la tâche "Bûche au chocolat" de catégorie "Courses"', async () => {
-      await screen.findByText('Bûche au chocolat')
-      expect(taskRow('Bûche au chocolat')).toHaveTextContent('Courses')
+      await screen.findByTestId('task-item-task-1')
+      expect(screen.getByTestId('task-item-category-badge-task-1')).toHaveTextContent('Courses')
     })
 
     And('je vois la tâche "Réserver la salle" de catégorie "Logistique"', () => {
-      expect(taskRow('Réserver la salle')).toHaveTextContent('Logistique')
+      expect(screen.getByTestId('task-item-category-badge-task-2')).toHaveTextContent('Logistique')
     })
   })
 
@@ -66,17 +62,17 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je filtre les tâches par catégorie "Courses"', async () => {
-      await screen.findByText('Bûche au chocolat')
+      await screen.findByTestId('task-item-task-1')
       const user = userEvent.setup()
-      await user.selectOptions(screen.getByLabelText('Filtrer par catégorie'), 'Courses')
+      await user.selectOptions(screen.getByTestId('task-list-category-filter'), 'Courses')
     })
 
     Then('je vois la tâche "Bûche au chocolat" de catégorie "Courses"', () => {
-      expect(taskRow('Bûche au chocolat')).toHaveTextContent('Courses')
+      expect(screen.getByTestId('task-item-category-badge-task-1')).toHaveTextContent('Courses')
     })
 
     And('je ne vois pas la tâche "Réserver la salle"', () => {
-      expect(screen.queryByText('Réserver la salle')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('task-item-task-2')).not.toBeInTheDocument()
     })
   })
 
@@ -86,22 +82,22 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je filtre les tâches par catégorie "Courses"', async () => {
-      await screen.findByText('Bûche au chocolat')
+      await screen.findByTestId('task-item-task-1')
       const user = userEvent.setup()
-      await user.selectOptions(screen.getByLabelText('Filtrer par catégorie'), 'Courses')
+      await user.selectOptions(screen.getByTestId('task-list-category-filter'), 'Courses')
     })
 
     And('je filtre les tâches par catégorie "Toutes"', async () => {
       const user = userEvent.setup()
-      await user.selectOptions(screen.getByLabelText('Filtrer par catégorie'), 'Toutes')
+      await user.selectOptions(screen.getByTestId('task-list-category-filter'), 'Toutes')
     })
 
     Then('je vois la tâche "Bûche au chocolat" de catégorie "Courses"', () => {
-      expect(taskRow('Bûche au chocolat')).toHaveTextContent('Courses')
+      expect(screen.getByTestId('task-item-category-badge-task-1')).toHaveTextContent('Courses')
     })
 
     And('je vois la tâche "Réserver la salle" de catégorie "Logistique"', () => {
-      expect(taskRow('Réserver la salle')).toHaveTextContent('Logistique')
+      expect(screen.getByTestId('task-item-category-badge-task-2')).toHaveTextContent('Logistique')
     })
   })
 
@@ -111,13 +107,13 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je filtre les tâches par catégorie "Autre"', async () => {
-      await screen.findByText('Bûche au chocolat')
+      await screen.findByTestId('task-item-task-1')
       const user = userEvent.setup()
-      await user.selectOptions(screen.getByLabelText('Filtrer par catégorie'), 'Autre')
+      await user.selectOptions(screen.getByTestId('task-list-category-filter'), 'Autre')
     })
 
     Then('je vois un message indiquant qu\'il n\'y a aucune tâche dans cette catégorie', async () => {
-      await screen.findByText('Aucune tâche dans cette catégorie.')
+      await screen.findByTestId('task-list-empty-category-message')
     })
   })
 
@@ -131,7 +127,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois un message indiquant qu\'il n\'y a aucune tâche pour le moment', async () => {
-      await screen.findByText('Aucune tâche pour le moment.')
+      await screen.findByTestId('task-list-empty-message')
     })
   })
 })

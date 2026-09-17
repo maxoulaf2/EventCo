@@ -22,16 +22,16 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
   Scenario('Email valide', ({ When, Then, And }) => {
     When('je saisis l\'email "test@example.com" et je valide le formulaire', async () => {
       const user = userEvent.setup()
-      await user.type(screen.getByLabelText('Adresse email'), 'test@example.com')
-      await user.click(screen.getByRole('button', { name: /recevoir un lien/i }))
+      await user.type(screen.getByTestId('request-magic-link-email-input'), 'test@example.com')
+      await user.click(screen.getByTestId('request-magic-link-submit-button'))
     })
 
     Then('je suis redirigé vers la page de confirmation', async () => {
-      await screen.findByRole('heading', { name: /vérifiez votre boîte mail/i })
+      await screen.findByTestId('check-email-page')
     })
 
     And('je vois l\'email "test@example.com" affiché', () => {
-      expect(screen.getByText('test@example.com')).toBeInTheDocument()
+      expect(screen.getByTestId('check-email-page-email')).toHaveTextContent('test@example.com')
     })
   })
 
@@ -46,16 +46,17 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
 
     When('je saisis l\'email "test@example.com" et je valide le formulaire', async () => {
       const user = userEvent.setup()
-      await user.type(screen.getByLabelText('Adresse email'), 'test@example.com')
-      await user.click(screen.getByRole('button', { name: /recevoir un lien/i }))
+      await user.type(screen.getByTestId('request-magic-link-email-input'), 'test@example.com')
+      await user.click(screen.getByTestId('request-magic-link-submit-button'))
     })
 
     Then('je vois un message d\'erreur sur le formulaire', async () => {
-      await screen.findByText('Adresse email invalide.')
+      const errorMessage = await screen.findByTestId('request-magic-link-error')
+      expect(errorMessage).toHaveTextContent('Adresse email invalide.')
     })
 
     And('je reste sur la page de connexion', () => {
-      expect(screen.getByRole('button', { name: /recevoir un lien/i })).toBeInTheDocument()
+      expect(screen.getByTestId('request-magic-link-submit-button')).toBeInTheDocument()
     })
   })
 })

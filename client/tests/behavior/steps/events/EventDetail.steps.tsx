@@ -72,9 +72,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
   AfterEachScenario(() => {
     server.resetHandlers()
-    // Plusieurs scénarios de ce fichier affichent tous un participant "Ami" : sans
-    // démontage explicite entre scénarios (aucun cleanup RTL global, cf. src/test/setup.ts),
-    // le DOM du scénario précédent reste présent et rend "Ami" ambigu pour `findByText`.
+    // Sans démontage explicite entre scénarios (aucun cleanup RTL global, cf. src/test/setup.ts),
+    // le DOM du scénario précédent reste présent en plus de celui du scénario suivant.
     cleanup()
   })
 
@@ -100,28 +99,24 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     server.use(...eventDetailHandlers(participants))
   })
 
-  function participantRow(displayName: string) {
-    return screen.getByText(displayName).closest('li')!
-  }
-
   Scenario('Affichage des informations et des participants', ({ When, Then, And }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
 
     Then('je vois le titre "Repas de Noël" et le lieu "Chez Alice"', async () => {
-      await screen.findByRole('heading', { name: 'Repas de Noël' })
-      expect(screen.getByText(/Chez Alice/)).toBeInTheDocument()
+      await screen.findByTestId('event-detail-title')
+      expect(screen.getByTestId('event-detail-title')).toHaveTextContent('Repas de Noël')
+      expect(screen.getByTestId('event-detail-date-location')).toHaveTextContent('Chez Alice')
     })
 
     And('je vois le participant "Test" avec le rôle "Co-organisateur"', () => {
-      expect(participantRow('Test')).toHaveTextContent('Co-organisateur')
+      expect(screen.getByTestId('participant-role-badge-user-1')).toHaveTextContent('Co-organisateur')
     })
 
     And('je vois le participant "Ami" avec le rôle "Participant" et un badge d\'invitation en attente', () => {
-      const row = participantRow('Ami')
-      expect(row).toHaveTextContent('Participant')
-      expect(row).toHaveTextContent('Invitation en attente')
+      expect(screen.getByTestId('participant-role-badge-user-2')).toHaveTextContent('Participant')
+      expect(screen.getByTestId('participant-pending-badge-user-2')).toBeInTheDocument()
     })
   })
 
@@ -131,13 +126,13 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je clique sur "Promouvoir co-organisateur" pour "Ami"', async () => {
-      const row = await screen.findByText('Ami').then((el) => el.closest('li')!)
+      const promoteButton = await screen.findByTestId('participant-promote-button-user-2')
       const user = userEvent.setup()
-      await user.click(row.querySelector('button')!)
+      await user.click(promoteButton)
     })
 
     Then('je vois le participant "Ami" avec le rôle "Co-organisateur"', async () => {
-      await waitFor(() => expect(participantRow('Ami')).toHaveTextContent('Co-organisateur'))
+      await waitFor(() => expect(screen.getByTestId('participant-role-badge-user-2')).toHaveTextContent('Co-organisateur'))
     })
   })
 
@@ -155,8 +150,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je ne vois aucun bouton pour promouvoir ou rétrograder un participant', async () => {
-      await screen.findByText('Ami')
-      expect(screen.queryByRole('button', { name: /promouvoir|rétrograder/i })).not.toBeInTheDocument()
+      await screen.findByTestId('participant-row-user-2')
+      expect(screen.queryByTestId('participant-promote-button-user-2')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('participant-demote-button-user-2')).not.toBeInTheDocument()
     })
   })
 
@@ -166,19 +162,18 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('j\'invite "nouveau@example.com" comme participant', async () => {
-      await screen.findByLabelText('Inviter un participant')
+      await screen.findByTestId('invite-participant-email-input')
       const user = userEvent.setup()
-      await user.type(screen.getByLabelText('Inviter un participant'), 'nouveau@example.com')
-      await user.click(screen.getByRole('button', { name: 'Inviter' }))
+      await user.type(screen.getByTestId('invite-participant-email-input'), 'nouveau@example.com')
+      await user.click(screen.getByTestId('invite-participant-submit-button'))
     })
 
     Then(
       'je vois le participant "nouveau" avec le rôle "Participant" et un badge d\'invitation en attente',
       async () => {
         await waitFor(() => {
-          const row = participantRow('nouveau')
-          expect(row).toHaveTextContent('Participant')
-          expect(row).toHaveTextContent('Invitation en attente')
+          expect(screen.getByTestId('participant-role-badge-user-3')).toHaveTextContent('Participant')
+          expect(screen.getByTestId('participant-pending-badge-user-3')).toBeInTheDocument()
         })
       },
     )
@@ -190,14 +185,15 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('j\'invite "ami@example.com" comme participant', async () => {
-      await screen.findByLabelText('Inviter un participant')
+      await screen.findByTestId('invite-participant-email-input')
       const user = userEvent.setup()
-      await user.type(screen.getByLabelText('Inviter un participant'), 'ami@example.com')
-      await user.click(screen.getByRole('button', { name: 'Inviter' }))
+      await user.type(screen.getByTestId('invite-participant-email-input'), 'ami@example.com')
+      await user.click(screen.getByTestId('invite-participant-submit-button'))
     })
 
     Then('je vois un message d\'erreur pour l\'invitation', async () => {
-      await screen.findByText('Cette personne est déjà invitée à cet événement.')
+      const errorMessage = await screen.findByTestId('invite-participant-error')
+      expect(errorMessage).toHaveTextContent('Cette personne est déjà invitée à cet événement.')
     })
   })
 
@@ -216,7 +212,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois le formulaire d\'invitation', async () => {
-      await screen.findByLabelText('Inviter un participant')
+      await screen.findByTestId('invite-participant-form')
     })
   })
 
@@ -234,8 +230,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je ne vois pas de formulaire d\'invitation', async () => {
-      await screen.findByText('Ami')
-      expect(screen.queryByLabelText('Inviter un participant')).not.toBeInTheDocument()
+      await screen.findByTestId('participant-row-user-2')
+      expect(screen.queryByTestId('invite-participant-form')).not.toBeInTheDocument()
     })
   })
 
@@ -249,7 +245,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je suis redirigé vers la page de connexion', async () => {
-      await screen.findByRole('heading', { name: 'EventCo' })
+      await screen.findByTestId('login-page-title')
     })
   })
 })

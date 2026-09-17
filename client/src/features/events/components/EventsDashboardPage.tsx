@@ -11,39 +11,52 @@ export function EventsDashboardPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-4">
+    <main data-testid="events-dashboard-page" className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-4">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-xl font-semibold md:text-2xl">Mes événements</h1>
+        <h1 data-testid="events-dashboard-title" className="text-xl font-semibold md:text-2xl">Mes événements</h1>
         <Link
           to={routes.createEvent}
+          data-testid="events-dashboard-new-event-link"
           className="shrink-0 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white"
         >
           Nouvel événement
         </Link>
       </div>
 
-      {isPending && <p className="text-sm text-gray-600">Chargement…</p>}
+      {isPending && (
+        <p data-testid="events-dashboard-loading" className="text-sm text-gray-600">
+          Chargement…
+        </p>
+      )}
 
       {isError && !(error instanceof ApiError && error.status === 401) && (
-        <p className="text-sm text-red-600">Impossible de charger vos événements pour le moment.</p>
+        <p data-testid="events-dashboard-error" className="text-sm text-red-600">
+          Impossible de charger vos événements pour le moment.
+        </p>
       )}
 
       {events && events.length === 0 && (
-        <p className="text-sm text-gray-600">Vous ne participez encore à aucun événement.</p>
+        <p data-testid="events-dashboard-empty-message" className="text-sm text-gray-600">
+          Vous ne participez encore à aucun événement.
+        </p>
       )}
 
       {events && events.length > 0 && (
-        <ul className="flex flex-col gap-3">
+        <ul data-testid="events-dashboard-list" className="flex flex-col gap-3">
           {events.map((event) => (
             <li key={event.id}>
               <Link
                 to={routes.eventDetail(event.id)}
+                data-testid={`event-list-item-${event.id}`}
                 className="flex flex-col gap-1 rounded-lg border border-gray-200 p-4"
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className="font-medium text-gray-900">{event.title}</span>
                   {!event.hasJoined && (
-                    <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">
+                    <span
+                      data-testid={`event-list-item-pending-badge-${event.id}`}
+                      className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                    >
                       Invitation en attente
                     </span>
                   )}

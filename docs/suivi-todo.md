@@ -76,6 +76,8 @@
 
 ## Lot 4 — Finitions MVP
 
+- [x] Attribut `data-testid` sur tout composant/élément testable du frontend, sélection exclusive via ce test-id dans les trois couches de tests (comportement/visuel/E2E)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-17), à la demande explicite du développeur, pour fiabiliser la sélection des composants dans les tests (jusqu'ici par rôle/label/texte affiché, avec des contournements ponctuels pour lever des ambiguïtés). Cf. `docs/conventions-code.md` §2.3 pour la convention de nommage et les décisions associées.
 - [ ] Audit et ajustement du responsive sur toutes les pages (mobile-first)
 - [ ] Configuration PWA : `manifest.json`, icônes, service worker basique
 - [ ] Test d'installation PWA sur mobile (Android/iOS)

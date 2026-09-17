@@ -50,14 +50,10 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     cleanup()
   })
 
-  function taskCheckbox(title: string) {
-    return screen.getByRole('checkbox', { name: new RegExp(title, 'i') })
-  }
-
-  async function toggle(title: string) {
-    await screen.findByText(title)
+  async function toggle(taskId: string) {
+    await screen.findByTestId(`task-item-checkbox-${taskId}`)
     const user = userEvent.setup()
-    await user.click(taskCheckbox(title))
+    await user.click(screen.getByTestId(`task-item-checkbox-${taskId}`))
   }
 
   Scenario('Le créateur coche une tâche à faire', ({ When, And, Then }) => {
@@ -66,11 +62,11 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je coche la tâche "Bûche au chocolat"', async () => {
-      await toggle('Bûche au chocolat')
+      await toggle('task-1')
     })
 
     Then('la tâche "Bûche au chocolat" est cochée', async () => {
-      await waitFor(() => expect(taskCheckbox('Bûche au chocolat')).toBeChecked())
+      await waitFor(() => expect(screen.getByTestId('task-item-checkbox-task-1')).toBeChecked())
     })
   })
 
@@ -80,11 +76,11 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je décoche la tâche "Réserver la salle"', async () => {
-      await toggle('Réserver la salle')
+      await toggle('task-2')
     })
 
     Then('la tâche "Réserver la salle" n\'est pas cochée', async () => {
-      await waitFor(() => expect(taskCheckbox('Réserver la salle')).not.toBeChecked())
+      await waitFor(() => expect(screen.getByTestId('task-item-checkbox-task-2')).not.toBeChecked())
     })
   })
 
@@ -103,11 +99,11 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je coche la tâche "Bûche au chocolat"', async () => {
-      await toggle('Bûche au chocolat')
+      await toggle('task-1')
     })
 
     Then('la tâche "Bûche au chocolat" est cochée', async () => {
-      await waitFor(() => expect(taskCheckbox('Bûche au chocolat')).toBeChecked())
+      await waitFor(() => expect(screen.getByTestId('task-item-checkbox-task-1')).toBeChecked())
     })
   })
 
@@ -125,8 +121,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('la case de la tâche "Réserver la salle" est désactivée', async () => {
-      await screen.findByText('Réserver la salle')
-      expect(taskCheckbox('Réserver la salle')).toBeDisabled()
+      await screen.findByTestId('task-item-checkbox-task-2')
+      expect(screen.getByTestId('task-item-checkbox-task-2')).toBeDisabled()
     })
   })
 
@@ -144,11 +140,11 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('je coche la tâche "Bûche au chocolat"', async () => {
-      await toggle('Bûche au chocolat')
+      await toggle('task-1')
     })
 
     Then('la tâche "Bûche au chocolat" n\'est pas cochée', async () => {
-      await waitFor(() => expect(taskCheckbox('Bûche au chocolat')).not.toBeChecked())
+      await waitFor(() => expect(screen.getByTestId('task-item-checkbox-task-1')).not.toBeChecked())
     })
   })
 })

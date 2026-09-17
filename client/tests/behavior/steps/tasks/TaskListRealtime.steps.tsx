@@ -53,10 +53,6 @@ const defaultTasks = [
   },
 ]
 
-function taskRow(title: string) {
-  return screen.getByText(title).closest('li')!
-}
-
 function emit(event: string, payload: unknown) {
   const handler = registeredHandlers.get(event)
   if (!handler) {
@@ -83,7 +79,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('un autre participant crée la tâche "Acheter des bougies" de catégorie "Courses"', async () => {
-      await screen.findByText('Bûche au chocolat')
+      await screen.findByTestId('task-item-task-1')
       emit('TaskCreated', {
         taskId: 'task-3',
         eventId: 'event-1',
@@ -97,8 +93,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois la tâche "Acheter des bougies" de catégorie "Courses"', async () => {
-      await screen.findByText('Acheter des bougies')
-      expect(taskRow('Acheter des bougies')).toHaveTextContent('Courses')
+      await screen.findByTestId('task-item-task-3')
+      expect(screen.getByTestId('task-item-category-badge-task-3')).toHaveTextContent('Courses')
     })
   })
 
@@ -108,12 +104,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('un autre participant marque la tâche "Bûche au chocolat" comme faite', async () => {
-      await screen.findByText('Bûche au chocolat')
+      await screen.findByTestId('task-item-task-1')
       emit('TaskStatusChanged', { ...defaultTasks[0], taskId: defaultTasks[0].id, isDone: true })
     })
 
     Then('la tâche "Bûche au chocolat" apparaît comme faite', async () => {
-      await waitFor(() => expect(screen.getByRole('checkbox', { name: /bûche au chocolat/i })).toBeChecked())
+      await waitFor(() => expect(screen.getByTestId('task-item-checkbox-task-1')).toBeChecked())
     })
   })
 
@@ -123,12 +119,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('un autre participant supprime la tâche "Réserver la salle"', async () => {
-      await screen.findByText('Réserver la salle')
+      await screen.findByTestId('task-item-task-2')
       emit('TaskDeleted', { eventId: 'event-1', taskId: 'task-2' })
     })
 
     Then('je ne vois plus la tâche "Réserver la salle"', async () => {
-      await waitFor(() => expect(screen.queryByText('Réserver la salle')).not.toBeInTheDocument())
+      await waitFor(() => expect(screen.queryByTestId('task-item-task-2')).not.toBeInTheDocument())
     })
   })
 })

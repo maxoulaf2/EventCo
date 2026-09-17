@@ -10,9 +10,9 @@ Given('je suis sur la page de connexion', async ({ page }) => {
 Given("je suis sur la page de confirmation d'envoi", async ({ page }) => {
   await page.route('**/api/auth/request-link', (route) => route.fulfill({ status: 202 }))
   await page.goto('/')
-  await page.getByLabel('Adresse email').fill('visual@example.com')
-  await page.getByRole('button', { name: /recevoir un lien/i }).click()
-  await expect(page.getByRole('heading', { name: /vérifiez votre boîte mail/i })).toBeVisible()
+  await page.getByTestId('request-magic-link-email-input').fill('visual@example.com')
+  await page.getByTestId('request-magic-link-submit-button').click()
+  await expect(page.getByTestId('check-email-page-title')).toBeVisible()
 })
 
 Then('son apparence correspond à la référence enregistrée', async ({ page }) => {

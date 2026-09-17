@@ -18,14 +18,14 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
     })
 
     Then('je vois l\'événement "Repas de Noël" sans badge d\'invitation en attente', async () => {
-      await screen.findByText('Repas de Noël')
-      const item = screen.getByText('Repas de Noël').closest('li')!
-      expect(item).not.toHaveTextContent('Invitation en attente')
+      await screen.findByTestId('event-list-item-event-1')
+      expect(screen.getByTestId('event-list-item-event-1')).toHaveTextContent('Repas de Noël')
+      expect(screen.queryByTestId('event-list-item-pending-badge-event-1')).not.toBeInTheDocument()
     })
 
     And('je vois l\'événement "Weekend au ski" avec un badge d\'invitation en attente', () => {
-      const item = screen.getByText('Weekend au ski').closest('li')!
-      expect(item).toHaveTextContent('Invitation en attente')
+      expect(screen.getByTestId('event-list-item-event-2')).toHaveTextContent('Weekend au ski')
+      expect(screen.getByTestId('event-list-item-pending-badge-event-2')).toBeInTheDocument()
     })
   })
 
@@ -39,7 +39,7 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
     })
 
     Then('je vois un message m\'indiquant que je ne participe à aucun événement', async () => {
-      await screen.findByText(/vous ne participez encore à aucun événement/i)
+      await screen.findByTestId('events-dashboard-empty-message')
     })
   })
 
@@ -53,7 +53,7 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
     })
 
     Then('je suis redirigé vers la page de connexion', async () => {
-      await screen.findByRole('heading', { name: 'EventCo' })
+      await screen.findByTestId('login-page-title')
     })
   })
 })

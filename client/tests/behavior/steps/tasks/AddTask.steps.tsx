@@ -18,19 +18,15 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     server.use(http.get('*/api/events/:id/tasks', () => HttpResponse.json([])))
   })
 
-  function taskRow(title: string) {
-    return screen.getByText(title).closest('li')!
-  }
-
   async function fillAndSubmit(title: string, category: string, quantity?: string) {
-    await screen.findByLabelText('Titre')
+    await screen.findByTestId('add-task-title-input')
     const user = userEvent.setup()
-    await user.type(screen.getByLabelText('Titre'), title)
-    await user.selectOptions(screen.getByLabelText('Catégorie'), category)
+    await user.type(screen.getByTestId('add-task-title-input'), title)
+    await user.selectOptions(screen.getByTestId('add-task-category-select'), category)
     if (quantity) {
-      await user.type(screen.getByLabelText('Quantité'), quantity)
+      await user.type(screen.getByTestId('add-task-quantity-input'), quantity)
     }
-    await user.click(screen.getByRole('button', { name: /ajouter la tâche/i }))
+    await user.click(screen.getByTestId('add-task-submit-button'))
   }
 
   Scenario('Ajout d\'une tâche avec succès', ({ When, And, Then }) => {
@@ -61,12 +57,13 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois la tâche "Guirlandes" de catégorie "Logistique"', async () => {
-      await waitFor(() => expect(taskRow('Guirlandes')).toHaveTextContent('Logistique'))
+      await waitFor(() => expect(screen.getByTestId('task-item-category-badge-task-new')).toHaveTextContent('Logistique'))
+      expect(screen.getByTestId('task-item-title-task-new')).toHaveTextContent('Guirlandes')
     })
 
     And('le formulaire d\'ajout de tâche est réinitialisé', () => {
-      expect(screen.getByLabelText('Titre')).toHaveValue('')
-      expect(screen.getByLabelText('Quantité')).toHaveValue('')
+      expect(screen.getByTestId('add-task-title-input')).toHaveValue('')
+      expect(screen.getByTestId('add-task-quantity-input')).toHaveValue('')
     })
   })
 
@@ -98,7 +95,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois la tâche "Réserver le DJ" de catégorie "Autre"', async () => {
-      await waitFor(() => expect(taskRow('Réserver le DJ')).toHaveTextContent('Autre'))
+      await waitFor(() => expect(screen.getByTestId('task-item-category-badge-task-new')).toHaveTextContent('Autre'))
+      expect(screen.getByTestId('task-item-title-task-new')).toHaveTextContent('Réserver le DJ')
     })
   })
 
@@ -120,7 +118,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois un message d\'erreur pour l\'ajout de tâche', async () => {
-      await screen.findByText('Impossible d\'ajouter cette tâche.')
+      const errorMessage = await screen.findByTestId('add-task-error')
+      expect(errorMessage).toHaveTextContent('Impossible d\'ajouter cette tâche.')
     })
   })
 })
