@@ -1,5 +1,6 @@
 import { type SubmitEvent, useState } from 'react'
 import { useAppNavigate } from '../../../shared/hooks/useAppNavigate'
+import { fieldLabel, input } from '../../../shared/lib/ui'
 import { useRequestMagicLink } from '../hooks/useRequestMagicLink'
 
 export function RequestMagicLinkForm() {
@@ -15,13 +16,9 @@ export function RequestMagicLinkForm() {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      data-testid="request-magic-link-form"
-      className="flex w-full max-w-sm flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit} data-testid="request-magic-link-form" className="flex w-full flex-col gap-3.5">
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm font-medium text-gray-700">
+        <label htmlFor="email" className={fieldLabel}>
           Adresse email
         </label>
         <input
@@ -35,12 +32,12 @@ export function RequestMagicLinkForm() {
           onChange={(event) => setEmail(event.target.value)}
           placeholder="vous@exemple.com"
           data-testid="request-magic-link-email-input"
-          className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
+          className={input}
         />
       </div>
 
       {error && (
-        <p data-testid="request-magic-link-error" className="text-sm text-red-600">
+        <p data-testid="request-magic-link-error" className="text-sm text-accent-800">
           {error.message}
         </p>
       )}
@@ -49,9 +46,9 @@ export function RequestMagicLinkForm() {
         type="submit"
         disabled={isPending}
         data-testid="request-magic-link-submit-button"
-        className="rounded-lg bg-gray-900 px-4 py-3 text-base font-medium text-white transition-colors disabled:opacity-50"
+        className="mt-1 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-accent-500 text-[17px] font-heading text-accent-900 transition-colors hover:bg-accent-400 active:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-45"
       >
-        {isPending ? 'Envoi en cours…' : 'Recevoir un lien de connexion'}
+        {isPending ? 'Envoi en cours…' : 'Recevoir mon lien'}
       </button>
     </form>
   )

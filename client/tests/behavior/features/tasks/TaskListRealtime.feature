@@ -11,6 +11,7 @@ Fonctionnalité: Mise à jour temps réel de la liste des tâches
   Scénario: Le statut d'une tâche se met à jour automatiquement
     Quand j'arrive sur le détail de l'événement
     Et un autre participant marque la tâche "Bûche au chocolat" comme faite
+    Et je vais sur l'onglet "Faites"
     Alors la tâche "Bûche au chocolat" apparaît comme faite
 
   Scénario: Une tâche supprimée par un autre participant disparaît automatiquement

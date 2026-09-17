@@ -12,6 +12,10 @@ export function createTask(eventId: string, input: CreateTaskInput): Promise<Eve
   })
 }
 
+export function assignTask(eventId: string, taskId: string, userId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/tasks/${taskId}/assign/${userId}`, { method: 'POST' })
+}
+
 export function completeTask(eventId: string, taskId: string): Promise<void> {
   return apiFetch(`/api/events/${eventId}/tasks/${taskId}/complete`, { method: 'POST' })
 }

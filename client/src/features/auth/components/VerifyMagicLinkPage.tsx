@@ -67,20 +67,20 @@ function VerifyMessage({
   isPending?: boolean
 }) {
   return (
-    <main data-testid="verify-magic-link-page" className="flex min-h-screen flex-col items-center justify-center gap-4 p-4 text-center">
-      <h1 data-testid="verify-magic-link-title" className="text-xl font-semibold md:text-2xl">{title}</h1>
-      <p data-testid="verify-magic-link-message" className="max-w-sm text-sm text-gray-600 md:text-base">{message}</p>
+    <main data-testid="verify-magic-link-page" className="flex min-h-screen flex-col items-center justify-center gap-4 bg-bg p-6 text-center">
+      <h1 data-testid="verify-magic-link-title" className="text-2xl">{title}</h1>
+      <p data-testid="verify-magic-link-message" className="max-w-sm text-base text-ink/70">{message}</p>
       {isPending ? (
         <div
           aria-hidden
           data-testid="verify-magic-link-spinner"
-          className="h-6 w-6 animate-spin rounded-full border-2 border-gray-300 border-t-gray-900"
+          className="h-6 w-6 animate-spin rounded-full border-2 border-accent-300 border-t-accent-700"
         />
       ) : (
         <Link
           to={routes.login}
           data-testid="verify-magic-link-back-link"
-          className="text-sm font-medium text-gray-900 underline underline-offset-2"
+          className="text-sm font-medium text-accent-700 underline underline-offset-2"
         >
           Retour à l'accueil
         </Link>

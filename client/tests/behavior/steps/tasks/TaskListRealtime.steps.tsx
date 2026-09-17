@@ -1,5 +1,6 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
 import { act, cleanup, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect, vi } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
@@ -106,6 +107,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     And('un autre participant marque la tâche "Bûche au chocolat" comme faite', async () => {
       await screen.findByTestId('task-item-task-1')
       emit('TaskStatusChanged', { ...defaultTasks[0], taskId: defaultTasks[0].id, isDone: true })
+    })
+
+    And('je vais sur l\'onglet "Faites"', async () => {
+      await waitFor(() => expect(screen.queryByTestId('task-item-task-1')).not.toBeInTheDocument())
+      const user = userEvent.setup()
+      await user.click(screen.getByTestId('task-list-tab-done'))
     })
 
     Then('la tâche "Bûche au chocolat" apparaît comme faite', async () => {

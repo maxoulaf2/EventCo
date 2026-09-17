@@ -1,14 +1,18 @@
 import { type SubmitEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppNavigate } from '../../../shared/hooks/useAppNavigate'
+import { btnPrimary, fieldLabel, input, textarea } from '../../../shared/lib/ui'
 import { routes } from '../../../shared/lib/routes'
 import { useCreateEvent } from '../hooks/useCreateEvent'
+
+const TEMPLATES = ['Repas de fête', 'Anniversaire', 'Week-end', 'Vide']
 
 export function CreateEventPage() {
   const [title, setTitle] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [template, setTemplate] = useState(TEMPLATES[0])
   const { toEvents } = useAppNavigate()
   const { mutate, isPending, error } = useCreateEvent()
 
@@ -26,98 +30,126 @@ export function CreateEventPage() {
   }
 
   return (
-    <main data-testid="create-event-page" className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 p-4">
-      <h1 data-testid="create-event-page-title" className="text-xl font-semibold md:text-2xl">Nouvel événement</h1>
+    <main data-testid="create-event-page" className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col bg-bg">
+      <div className="flex min-h-14 items-center p-3.5">
+        <Link
+          to={routes.events}
+          aria-label="Fermer"
+          data-testid="create-event-cancel-link"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink/70 transition-colors hover:bg-ink/5"
+        >
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round">
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </Link>
+      </div>
 
-      <form onSubmit={handleSubmit} data-testid="create-event-form" className="flex w-full flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="title" className="text-sm font-medium text-gray-700">
-            Titre
-          </label>
-          <input
-            id="title"
-            name="title"
-            type="text"
-            required
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Repas de Noël"
-            data-testid="create-event-title-input"
-            className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-          />
-        </div>
+      <div className="flex-1 px-5.5 pt-3">
+        <h1 data-testid="create-event-page-title" className="mb-1.5 text-[28px] sm:text-[30px]">
+          Nouvel événement
+        </h1>
+        <p className="mb-5 text-sm text-ink/62">Deux champs suffisent pour commencer.</p>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="eventDate" className="text-sm font-medium text-gray-700">
-            Date
-          </label>
-          <input
-            id="eventDate"
-            name="eventDate"
-            type="date"
-            required
-            value={eventDate}
-            onChange={(event) => setEventDate(event.target.value)}
-            data-testid="create-event-date-input"
-            className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-          />
-        </div>
+        <form onSubmit={handleSubmit} data-testid="create-event-form" className="flex w-full flex-col gap-4.5">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="title" className={fieldLabel}>
+              Titre
+            </label>
+            <input
+              id="title"
+              name="title"
+              type="text"
+              required
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Repas de Noël"
+              data-testid="create-event-title-input"
+              className={input}
+            />
+          </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="location" className="text-sm font-medium text-gray-700">
-            Lieu
-          </label>
-          <input
-            id="location"
-            name="location"
-            type="text"
-            value={location}
-            onChange={(event) => setLocation(event.target.value)}
-            placeholder="Chez Alice"
-            data-testid="create-event-location-input"
-            className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-          />
-        </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="eventDate" className={fieldLabel}>
+              Date
+            </label>
+            <input
+              id="eventDate"
+              name="eventDate"
+              type="date"
+              required
+              value={eventDate}
+              onChange={(event) => setEventDate(event.target.value)}
+              data-testid="create-event-date-input"
+              className={input}
+            />
+          </div>
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="description" className="text-sm font-medium text-gray-700">
-            Description
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows={3}
-            value={description}
-            onChange={(event) => setDescription(event.target.value)}
-            data-testid="create-event-description-input"
-            className="rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-900"
-          />
-        </div>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="location" className={fieldLabel}>
+              Lieu <span className="text-ink/50">— optionnel</span>
+            </label>
+            <input
+              id="location"
+              name="location"
+              type="text"
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
+              placeholder="Chez Alice, 12 rue des Lilas"
+              data-testid="create-event-location-input"
+              className={input}
+            />
+          </div>
 
-        {error && (
-          <p data-testid="create-event-error" className="text-sm text-red-600">
-            {error.message}
-          </p>
-        )}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="description" className={fieldLabel}>
+              Un mot pour les invités <span className="text-ink/50">— optionnel</span>
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              rows={3}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Dîner sans chichi, on répartit les plats ensemble."
+              data-testid="create-event-description-input"
+              className={textarea}
+            />
+          </div>
 
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={isPending}
-            data-testid="create-event-submit-button"
-            className="flex-1 rounded-lg bg-gray-900 px-4 py-3 text-base font-medium text-white transition-colors disabled:opacity-50"
-          >
-            {isPending ? 'Création en cours…' : 'Créer l\'événement'}
+          <div className="flex flex-col gap-1.5">
+            <span className={fieldLabel}>Modèle de liste</span>
+            <div className="mt-0.5 flex flex-wrap gap-2">
+              {TEMPLATES.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => setTemplate(name)}
+                  aria-pressed={template === name}
+                  data-testid={`create-event-template-${name}`}
+                  className={`min-h-11 rounded-full border px-4.5 text-[13.5px] transition-colors ${
+                    template === name
+                      ? 'border-accent-700 bg-accent-500 text-accent-900'
+                      : 'border-transparent bg-sand-100 text-ink/70 hover:bg-sand-200'
+                  }`}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <p data-testid="create-event-error" className="text-sm text-accent-800">
+              {error.message}
+            </p>
+          )}
+
+          <button type="submit" disabled={isPending} data-testid="create-event-submit-button" className={`${btnPrimary} mt-2 min-h-14 w-full text-base`}>
+            {isPending ? 'Création en cours…' : "Créer l'événement"}
           </button>
-          <Link
-            to={routes.events}
-            data-testid="create-event-cancel-link"
-            className="flex items-center justify-center rounded-lg border border-gray-300 px-4 py-3 text-base font-medium text-gray-700"
-          >
-            Annuler
-          </Link>
-        </div>
-      </form>
+        </form>
+      </div>
     </main>
   )
 }

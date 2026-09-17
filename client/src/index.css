@@ -1,1 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Caprasimo:wght@400&family=Figtree:wght@400;600;700&display=swap');
 @import "tailwindcss";
+
+/*
+ * "Lemon" art direction — cream ground, warm-yellow accent, sage second accent.
+ * Values carried over from the Claude Design handoff (EventCo — maquettes.dc.html),
+ * itself derived from the Organic design system with a lemon-inspired palette pass.
+ */
+@theme {
+  --font-heading: 'Caprasimo', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Figtree', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body);
+
+  --color-bg: oklch(0.972 0.026 98);
+  --color-surface: oklch(0.992 0.012 98);
+  --color-ink: oklch(0.22 0.024 95);
+  --color-border: oklch(0.88 0.02 95);
+
+  --color-accent-100: oklch(0.98 0.032 101);
+  --color-accent-200: oklch(0.955 0.062 101);
+  --color-accent-300: oklch(0.928 0.09 100);
+  --color-accent-400: oklch(0.912 0.1 100);
+  --color-accent-500: oklch(0.895 0.112 100);
+  --color-accent-600: oklch(0.74 0.098 94);
+  --color-accent-700: oklch(0.545 0.082 86);
+  --color-accent-800: oklch(0.415 0.066 82);
+  --color-accent-900: oklch(0.295 0.052 80);
+
+  --color-sage-100: oklch(0.962 0.028 140);
+  --color-sage-200: oklch(0.915 0.05 140);
+  --color-sage-300: oklch(0.848 0.07 140);
+  --color-sage-400: oklch(0.74 0.082 141);
+  --color-sage-500: oklch(0.6 0.084 142);
+  --color-sage-600: oklch(0.505 0.076 142);
+  --color-sage-700: oklch(0.42 0.086 140);
+  --color-sage-800: oklch(0.34 0.07 140);
+  --color-sage-900: oklch(0.26 0.056 140);
+
+  --color-sand-100: oklch(0.972 0.014 95);
+  --color-sand-200: oklch(0.935 0.016 95);
+  --color-sand-300: oklch(0.885 0.018 95);
+  --color-sand-400: oklch(0.785 0.02 95);
+  --color-sand-500: oklch(0.665 0.022 95);
+  --color-sand-600: oklch(0.55 0.022 95);
+  --color-sand-700: oklch(0.445 0.02 95);
+  --color-sand-800: oklch(0.335 0.017 95);
+  --color-sand-900: oklch(0.235 0.014 95);
+
+  --radius-2xl: 28px;
+  --radius-3xl: 34px;
+
+  --shadow-elev-sm: 0 1px 2px oklch(0.22 0.024 95 / 14%);
+  --shadow-elev-md: 0 3px 10px oklch(0.22 0.024 95 / 16%);
+  --shadow-elev-lg: 0 12px 32px oklch(0.22 0.024 95 / 22%);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-600);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: color-mix(in oklch, var(--color-accent-500) 35%, transparent);
+}

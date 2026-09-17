@@ -18,14 +18,10 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     server.use(http.get('*/api/events/:id/tasks', () => HttpResponse.json([])))
   })
 
-  async function fillAndSubmit(title: string, category: string, quantity?: string) {
+  async function addTask(title: string) {
     await screen.findByTestId('add-task-title-input')
     const user = userEvent.setup()
     await user.type(screen.getByTestId('add-task-title-input'), title)
-    await user.selectOptions(screen.getByTestId('add-task-category-select'), category)
-    if (quantity) {
-      await user.type(screen.getByTestId('add-task-quantity-input'), quantity)
-    }
     await user.click(screen.getByTestId('add-task-submit-button'))
   }
 
@@ -52,51 +48,16 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('j\'ajoute la tâche "Guirlandes" de catégorie "Logistique" et de quantité "2"', async () => {
-      await fillAndSubmit('Guirlandes', 'Logistique', '2')
+    And('j\'ajoute la tâche "Guirlandes"', async () => {
+      await addTask('Guirlandes')
     })
 
-    Then('je vois la tâche "Guirlandes" de catégorie "Logistique"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-category-badge-task-new')).toHaveTextContent('Logistique'))
-      expect(screen.getByTestId('task-item-title-task-new')).toHaveTextContent('Guirlandes')
+    Then('je vois la tâche "Guirlandes" sur l\'onglet "À prendre"', async () => {
+      await waitFor(() => expect(screen.getByTestId('task-item-title-task-new')).toHaveTextContent('Guirlandes'))
     })
 
     And('le formulaire d\'ajout de tâche est réinitialisé', () => {
       expect(screen.getByTestId('add-task-title-input')).toHaveValue('')
-      expect(screen.getByTestId('add-task-quantity-input')).toHaveValue('')
-    })
-  })
-
-  Scenario('Ajout d\'une tâche sans quantité', ({ When, And, Then }) => {
-    When('j\'arrive sur le détail de l\'événement', () => {
-      server.use(
-        http.post('*/api/events/:id/tasks', async ({ request, params }) => {
-          const body = (await request.json()) as { title: string; category: string; quantity: string | null }
-          return HttpResponse.json(
-            {
-              id: 'task-new',
-              eventId: params.id,
-              title: body.title,
-              category: body.category,
-              quantity: body.quantity,
-              assignedToUserId: null,
-              isDone: false,
-              createdAt: '2026-09-17T00:00:00Z',
-            },
-            { status: 201 },
-          )
-        }),
-      )
-      renderApp('/events/event-1')
-    })
-
-    And('j\'ajoute la tâche "Réserver le DJ" de catégorie "Autre" sans quantité', async () => {
-      await fillAndSubmit('Réserver le DJ', 'Autre')
-    })
-
-    Then('je vois la tâche "Réserver le DJ" de catégorie "Autre"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-category-badge-task-new')).toHaveTextContent('Autre'))
-      expect(screen.getByTestId('task-item-title-task-new')).toHaveTextContent('Réserver le DJ')
     })
   })
 
@@ -113,8 +74,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('j\'ajoute la tâche "Guirlandes" de catégorie "Logistique" et de quantité "2"', async () => {
-      await fillAndSubmit('Guirlandes', 'Logistique', '2')
+    And('j\'ajoute la tâche "Guirlandes"', async () => {
+      await addTask('Guirlandes')
     })
 
     Then('je vois un message d\'erreur pour l\'ajout de tâche', async () => {
