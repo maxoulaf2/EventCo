@@ -62,6 +62,10 @@ async function mockEventDetail(page: import('@playwright/test').Page) {
     }),
   )
   await page.route('**/api/events/event-1/tasks', (route) => route.fulfill({ json: tasks }))
+  // TaskList ouvre une connexion SignalR (`useTaskRealtime`) vers `/hubs/events`, proxifiée par Vite
+  // vers la vraie API (cf. vite.config.ts) : absente en test visuel, d'où un abort de la négociation
+  // pour éviter que le navigateur tente de joindre un backend qui n'existe pas ici.
+  await page.route('**/hubs/events/negotiate**', (route) => route.fulfill({ status: 404 }))
 }
 
 Given("je suis sur le détail d'un événement en tant que créateur", async ({ page }) => {
