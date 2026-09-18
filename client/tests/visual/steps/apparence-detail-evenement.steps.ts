@@ -88,14 +88,14 @@ Given("je suis sur le détail d'un événement en tant que simple participant", 
   await expect(page.getByTestId('participant-row-user-2')).toBeVisible()
 })
 
-Given("je suis sur le détail d'un événement avec ses tâches filtrées par catégorie", async ({ page }) => {
+Given("je suis sur le détail d'un événement avec l'onglet des tâches faites", async ({ page }) => {
   await mockEventDetail(page)
   await page.route('**/api/auth/me', (route) =>
     route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
   )
   await page.goto('/events/event-1')
-  await page.getByTestId('task-list-category-filter').selectOption('Courses')
-  await expect(page.getByTestId('task-item-task-1')).toBeVisible()
+  await page.getByTestId('task-list-tab-done').click()
+  await expect(page.getByTestId('task-item-task-2')).toBeVisible()
 })
 
 Given("je suis sur le détail d'un événement avec le formulaire d'ajout de tâche rempli", async ({ page }) => {
@@ -105,8 +105,6 @@ Given("je suis sur le détail d'un événement avec le formulaire d'ajout de tâ
   )
   await page.goto('/events/event-1')
   await page.getByTestId('add-task-title-input').fill('Guirlandes')
-  await page.getByTestId('add-task-category-select').selectOption('Logistique')
-  await page.getByTestId('add-task-quantity-input').fill('2')
 })
 
 Given("je suis sur le détail d'un événement avec une erreur d'invitation", async ({ page }) => {
