@@ -41,6 +41,9 @@ Projet personnel de montée en compétences, mené selon des standards professio
 > À compléter au fur et à mesure de la mise en place du projet (build, run, tests, migrations EF Core, etc.)
 
 ```bash
+# Tout démarrer en une commande (Docker si besoin + migrations + API + frontend, chacun dans sa fenêtre)
+pwsh -File scripts/start-dev.ps1
+
 # Backend
 dotnet build
 dotnet run --project src/EventCo.Api --launch-profile https
