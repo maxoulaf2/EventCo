@@ -9,7 +9,7 @@ public class UserTests
     [Fact]
     public void Create_ValidData_SetsProperties()
     {
-        var email = Email.Create("test@example.com");
+        var email = Email.From("test@example.com");
 
         var user = User.Create(email, "Alice", DateTime.UtcNow);
 
@@ -22,7 +22,7 @@ public class UserTests
     [Fact]
     public void Create_EmptyDisplayName_ThrowsUserDisplayNameEmptyException()
     {
-        var email = Email.Create("test@example.com");
+        var email = Email.From("test@example.com");
 
         Assert.Throws<UserDisplayNameEmptyException>(() => User.Create(email, "  ", DateTime.UtcNow));
     }
@@ -30,7 +30,7 @@ public class UserTests
     [Fact]
     public void UpdateProfile_ValidData_UpdatesDisplayNameAndAvatar()
     {
-        var user = User.Create(Email.Create("test@example.com"), "Alice", DateTime.UtcNow);
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
 
         user.UpdateProfile("Alice B.", "https://example.com/avatar.png");
 

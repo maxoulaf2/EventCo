@@ -12,7 +12,7 @@ public sealed partial record Email
         Value = value;
     }
 
-    public static Email Create(string value)
+    public static Email From(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
             throw new EmailEmptyException();

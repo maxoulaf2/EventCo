@@ -7,7 +7,7 @@ namespace EventCo.Infrastructure.Persistence.Mapping;
 internal static class UserMapper
 {
     public static User ToDomain(UserEntity entity) =>
-        User.Reconstitute(entity.Id, Email.Create(entity.Email), entity.DisplayName, entity.AvatarUrl, entity.CreatedAt);
+        User.Reconstitute(entity.Id, Email.From(entity.Email), entity.DisplayName, entity.AvatarUrl, entity.CreatedAt);
 
     public static UserEntity ToEntity(User domain) => new()
     {

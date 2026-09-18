@@ -54,7 +54,7 @@ public sealed class InviteParticipantSteps
     public async Task EtantDonneUnCompteExisteDejaPour(string email)
     {
         var userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
-        var user = User.Create(Email.Create(email), "Ami existant", _now);
+        var user = User.Create(Email.From(email), "Ami existant", _now);
         await userRepository.ApplyAsync(user, CancellationToken.None);
 
         // Écriture repository directe, hors ICommandDispatcher (pas de Command dédiée pour ce fixture de test) :

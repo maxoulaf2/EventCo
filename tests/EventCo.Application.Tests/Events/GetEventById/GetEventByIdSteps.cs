@@ -50,7 +50,7 @@ public sealed class GetEventByIdSteps
     public async Task EtantDonneUnEvenementPrevuLeAuLieu(string title, string eventDate, string location)
     {
         var userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
-        var organizer = User.Create(Email.Create("organisateur@example.com"), "Organisateur", _now);
+        var organizer = User.Create(Email.From("organisateur@example.com"), "Organisateur", _now);
         await userRepository.ApplyAsync(organizer, CancellationToken.None);
 
         // Écriture repository directe, hors ICommandDispatcher : à committer explicitement (cf. même remarque

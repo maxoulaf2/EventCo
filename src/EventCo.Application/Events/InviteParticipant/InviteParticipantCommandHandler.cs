@@ -17,7 +17,7 @@ public sealed class InviteParticipantCommandHandler(
         var @event = await eventRepository.GetByIdAsync(request.EventId, cancellationToken)
             ?? throw new EventNotFoundException(request.EventId);
 
-        var email = Email.Create(request.Email);
+        var email = Email.From(request.Email);
         var now = dateTimeProvider.UtcNow;
 
         var user = await userRepository.GetByEmailAsync(email, cancellationToken);

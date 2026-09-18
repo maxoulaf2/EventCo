@@ -10,7 +10,7 @@ public class EmailTests
     [InlineData("   ")]
     public void Create_EmptyValue_ThrowsEmailEmptyException(string value)
     {
-        Assert.Throws<EmailEmptyException>(() => Email.Create(value));
+        Assert.Throws<EmailEmptyException>(() => Email.From(value));
     }
 
     [Theory]
@@ -20,13 +20,13 @@ public class EmailTests
     [InlineData("missing-domain@.com")]
     public void Create_InvalidFormat_ThrowsEmailInvalidFormatException(string value)
     {
-        Assert.Throws<EmailInvalidFormatException>(() => Email.Create(value));
+        Assert.Throws<EmailInvalidFormatException>(() => Email.From(value));
     }
 
     [Fact]
     public void Create_ValidValue_NormalizesToLowerCaseTrimmed()
     {
-        var email = Email.Create("  Test@Example.COM  ");
+        var email = Email.From("  Test@Example.COM  ");
 
         Assert.Equal("test@example.com", email.Value);
     }
@@ -34,8 +34,8 @@ public class EmailTests
     [Fact]
     public void Equals_SameValueDifferentCase_ReturnsTrue()
     {
-        var first = Email.Create("test@example.com");
-        var second = Email.Create("TEST@EXAMPLE.COM");
+        var first = Email.From("test@example.com");
+        var second = Email.From("TEST@EXAMPLE.COM");
 
         Assert.Equal(first, second);
     }

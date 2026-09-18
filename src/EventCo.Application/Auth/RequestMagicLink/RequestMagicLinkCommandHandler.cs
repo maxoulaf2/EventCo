@@ -16,7 +16,7 @@ public sealed class RequestMagicLinkCommandHandler(
 {
     public async Task Handle(RequestMagicLinkCommand request, CancellationToken cancellationToken)
     {
-        var email = Email.Create(request.Email);
+        var email = Email.From(request.Email);
         var now = dateTimeProvider.UtcNow;
         var magicLinkOptions = options.Value;
 
