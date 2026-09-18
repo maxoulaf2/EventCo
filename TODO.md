@@ -3,10 +3,11 @@
 Ce document est une liste de notes que le développeur se fait à lui même pour plus tard, Claude Code n'a pas besoin de prendre cela en compte dans ses reflexions.
 
 # Doing
+- Connexion auto si cookie déjà present
 
 # Notes
 
-- Connexion auto si cookie déjà present
+- Bouton de déconnexion (suppression du cookie)
 - Confirmation de participation à l'ouverture d'un evenement (je viens ou je ne viens pas)
 - mettre en place un lien d'invitation plutot que d'inviter des personnes précises
 - permettre de configurer l'image

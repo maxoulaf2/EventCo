@@ -82,6 +82,8 @@
   > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur, pour éviter d'enchaîner manuellement `docker compose up`, `dotnet ef database update`, `dotnet run` et `npm run dev` à chaque session de dev. Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
 - [x] Frontend : déplacement de la liste des participants et du formulaire d'invitation dans une modale (page de détail d'un événement)
   > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur, dans le cadre des maquettes Lemon (`feature/maquettes-lemon`) : la liste des participants/organisateurs et le formulaire d'invitation, jusqu'ici affichés en permanence sous les infos de l'événement, sont désormais dans une modale ouverte au clic sur le bandeau "participants". Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
+- [x] Frontend : redirection automatique vers le tableau de bord si une session valide existe déjà (page de connexion)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-18), suite à un bug remonté par le développeur : `LoginPage` (route `/`) ne consultait jamais `GET /api/auth/me` et affichait donc systématiquement le formulaire de connexion, même avec un cookie de session valide. Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
 - [ ] Audit et ajustement du responsive sur toutes les pages (mobile-first)
 - [ ] Configuration PWA : `manifest.json`, icônes, service worker basique
 - [ ] Test d'installation PWA sur mobile (Android/iOS)

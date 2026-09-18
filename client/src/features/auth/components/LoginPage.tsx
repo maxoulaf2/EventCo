@@ -1,6 +1,26 @@
+import { Navigate } from 'react-router-dom'
+import { routes } from '../../../shared/lib/routes'
+import { useCurrentUser } from '../hooks/useCurrentUser'
 import { RequestMagicLinkForm } from './RequestMagicLinkForm'
 
 export function LoginPage() {
+  const { data: currentUser, isPending } = useCurrentUser()
+
+  if (isPending) {
+    return (
+      <main data-testid="login-page-loading" className="flex min-h-screen items-center justify-center bg-bg">
+        <div
+          aria-hidden="true"
+          className="h-6 w-6 animate-spin rounded-full border-2 border-accent-300 border-t-accent-700"
+        />
+      </main>
+    )
+  }
+
+  if (currentUser) {
+    return <Navigate to={routes.events} replace />
+  }
+
   return (
     <main
       data-testid="login-page"

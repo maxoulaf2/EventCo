@@ -1,5 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { screen } from '@testing-library/react'
+import { cleanup, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
@@ -11,10 +11,14 @@ const feature = await loadFeature('tests/behavior/features/auth/RequestMagicLink
 describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
   AfterEachScenario(() => {
     server.resetHandlers()
+    // Sans démontage explicite entre scénarios (aucun cleanup RTL global, cf. src/test/setup.ts),
+    // le DOM du scénario précédent reste présent en plus de celui du scénario suivant.
+    cleanup()
   })
 
   Background(({ Given }) => {
     Given('je suis sur la page de connexion', () => {
+      server.use(http.get('*/api/auth/me', () => new HttpResponse(null, { status: 401 })))
       renderApp('/')
     })
   })
@@ -22,7 +26,7 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
   Scenario('Email valide', ({ When, Then, And }) => {
     When('je saisis l\'email "test@example.com" et je valide le formulaire', async () => {
       const user = userEvent.setup()
-      await user.type(screen.getByTestId('request-magic-link-email-input'), 'test@example.com')
+      await user.type(await screen.findByTestId('request-magic-link-email-input'), 'test@example.com')
       await user.click(screen.getByTestId('request-magic-link-submit-button'))
     })
 
@@ -46,7 +50,7 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
 
     When('je saisis l\'email "test@example.com" et je valide le formulaire', async () => {
       const user = userEvent.setup()
-      await user.type(screen.getByTestId('request-magic-link-email-input'), 'test@example.com')
+      await user.type(await screen.findByTestId('request-magic-link-email-input'), 'test@example.com')
       await user.click(screen.getByTestId('request-magic-link-submit-button'))
     })
 

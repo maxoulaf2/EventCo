@@ -45,7 +45,10 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
 
   Scenario('Session expirée', ({ Given, When, Then }) => {
     Given('ma session a expiré', () => {
-      server.use(http.get('*/api/events', () => new HttpResponse(null, { status: 401 })))
+      server.use(
+        http.get('*/api/events', () => new HttpResponse(null, { status: 401 })),
+        http.get('*/api/auth/me', () => new HttpResponse(null, { status: 401 })),
+      )
     })
 
     When('j\'arrive sur le tableau de bord', () => {
