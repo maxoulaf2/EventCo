@@ -25,8 +25,7 @@ public sealed class GetMyEventsQueryHandler(
                     @event.Location,
                     @event.CreatedByUserId,
                     @event.Status.ToString(),
-                    participant.Role.ToString(),
-                    participant.HasJoined);
+                    participant.Role.ToString());
             })
             .ToList();
 

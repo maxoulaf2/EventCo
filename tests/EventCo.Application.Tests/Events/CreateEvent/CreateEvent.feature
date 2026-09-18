@@ -7,7 +7,7 @@ Fonctionnalité: Création d'un événement
     Quand je crée l'événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
     Alors la création réussit
     Et l'événement créé a pour titre "Repas de Noël"
-    Et je suis inscrit comme organisateur ayant rejoint l'événement créé
+    Et je suis inscrit comme organisateur de l'événement créé
 
   Scénario: Création avec un titre vide
     Quand je crée l'événement "" prévu le "2026-12-24" au lieu "Chez Alice"

@@ -8,7 +8,7 @@ Fonctionnalité: Invitation d'un participant par email
     Quand j'invite "amie@example.com" à cet événement
     Alors l'invitation réussit
     Et la personne invitée a le rôle "Participant"
-    Et la personne invitée n'a pas encore rejoint l'événement
+    Et la personne invitée n'a pas encore indiqué de statut de participation
     Et un compte est créé pour la personne invitée "amie@example.com"
 
   Scénario: Invitation d'une personne ayant déjà un compte

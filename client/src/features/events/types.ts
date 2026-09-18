@@ -8,7 +8,6 @@ export interface MyEvent {
   createdByUserId: string
   status: EventStatus
   role: 'Organizer' | 'Participant'
-  hasJoined: boolean
 }
 
 export interface CreateEventInput {
@@ -28,7 +27,6 @@ export interface EventParticipant {
   displayName: string
   role: ParticipantRole
   invitedAt: string
-  hasJoined: boolean
   participationStatus: ParticipationStatus
 }
 

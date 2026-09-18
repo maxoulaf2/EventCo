@@ -12,20 +12,20 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
     server.resetHandlers()
   })
 
-  Scenario('Liste de mes événements, dont une invitation en attente', ({ When, Then, And }) => {
+  Scenario('Liste de mes événements, dont un que j\'organise', ({ When, Then, And }) => {
     When('j\'arrive sur le tableau de bord', () => {
       renderApp('/events')
     })
 
-    Then('je vois l\'événement "Repas de Noël" sans badge d\'invitation en attente', async () => {
+    Then('je vois l\'événement "Repas de Noël" avec un badge d\'organisateur·ice', async () => {
       await screen.findByTestId('event-list-item-event-1')
       expect(screen.getByTestId('event-list-item-event-1')).toHaveTextContent('Repas de Noël')
-      expect(screen.queryByTestId('event-list-item-pending-badge-event-1')).not.toBeInTheDocument()
+      expect(screen.getByTestId('event-list-item-organizer-badge-event-1')).toBeInTheDocument()
     })
 
-    And('je vois l\'événement "Weekend au ski" avec un badge d\'invitation en attente', () => {
+    And('je vois l\'événement "Weekend au ski" sans badge d\'organisateur·ice', () => {
       expect(screen.getByTestId('event-list-item-event-2')).toHaveTextContent('Weekend au ski')
-      expect(screen.getByTestId('event-list-item-pending-badge-event-2')).toBeInTheDocument()
+      expect(screen.queryByTestId('event-list-item-organizer-badge-event-2')).not.toBeInTheDocument()
     })
   })
 

@@ -8,7 +8,7 @@ internal static class EventMapper
     public static Event ToDomain(EventEntity entity)
     {
         var participants = entity.Participants.Select(p =>
-            EventParticipant.Reconstitute(p.Id, p.EventId, p.UserId, p.Role, p.InvitedAt, p.JoinedAt, p.ParticipationStatus));
+            EventParticipant.Reconstitute(p.Id, p.EventId, p.UserId, p.Role, p.InvitedAt, p.ParticipationStatus));
 
         var tasks = entity.Tasks.Select(t =>
             EventTask.Reconstitute(t.Id, t.EventId, t.Title, t.Category, t.Quantity, t.AssignedToUserId, t.IsDone, t.CreatedByUserId, t.CreatedAt));
@@ -48,7 +48,6 @@ internal static class EventMapper
         UserId = domain.UserId,
         Role = domain.Role,
         InvitedAt = domain.InvitedAt,
-        JoinedAt = domain.JoinedAt,
         ParticipationStatus = domain.ParticipationStatus,
     };
 

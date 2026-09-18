@@ -63,8 +63,8 @@ public sealed class CreateEventSteps
     [Then(@"l'événement créé a pour titre ""(.*)""")]
     public void AlorsLevenementCreeAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);
 
-    [Then(@"je suis inscrit comme organisateur ayant rejoint l'événement créé")]
-    public async Task AlorsJeSuisInscritCommeOrganisateurAyantRejointLevenementCree()
+    [Then(@"je suis inscrit comme organisateur de l'événement créé")]
+    public async Task AlorsJeSuisInscritCommeOrganisateurDeLevenementCree()
     {
         var @event = await _dbContext.Events
             .Include(e => e.Participants)
@@ -73,7 +73,6 @@ public sealed class CreateEventSteps
         var creatorParticipant = Assert.Single(@event.Participants);
         Assert.Equal(_currentUserId, creatorParticipant.UserId);
         Assert.Equal(ParticipantRole.Organizer, creatorParticipant.Role);
-        Assert.NotNull(creatorParticipant.JoinedAt);
         Assert.Equal(ParticipationStatus.Attending, creatorParticipant.ParticipationStatus);
     }
 }

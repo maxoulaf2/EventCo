@@ -83,7 +83,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | UserId | Guid | FK |
 | Role | enum | `Organizer`, `Participant` |
 | InvitedAt | DateTime | |
-| JoinedAt | DateTime? | null tant que l'invité n'a pas confirmé via magic link |
+| ParticipationStatus | enum | `Unknown` (défaut à l'invitation), `Attending`, `NotAttending` — indiqué par le participant lui-même, `Attending` fixe pour le créateur |
 
 **EventTask**
 | Champ | Type | Notes |

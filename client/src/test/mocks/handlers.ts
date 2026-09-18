@@ -35,7 +35,6 @@ export const handlers = [
         createdByUserId: 'user-1',
         status: 'Planned',
         role: 'Organizer',
-        hasJoined: true,
       },
       {
         id: 'event-2',
@@ -45,7 +44,6 @@ export const handlers = [
         createdByUserId: 'user-2',
         status: 'Planned',
         role: 'Participant',
-        hasJoined: false,
       },
     ]),
   ),
@@ -83,7 +81,7 @@ export const handlers = [
           displayName: 'Test',
           role: 'Organizer',
           invitedAt: '2026-09-01T00:00:00Z',
-          hasJoined: true,
+          participationStatus: 'Attending',
         },
         {
           userId: 'user-2',
@@ -91,7 +89,7 @@ export const handlers = [
           displayName: 'Ami',
           role: 'Participant',
           invitedAt: '2026-09-02T00:00:00Z',
-          hasJoined: false,
+          participationStatus: 'Unknown',
         },
       ],
     }),

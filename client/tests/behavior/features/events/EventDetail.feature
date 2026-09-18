@@ -8,7 +8,7 @@ Fonctionnalité: Détail d'un événement
     Quand j'arrive sur le détail de l'événement
     Alors je vois le titre "Repas de Noël" et le lieu "Chez Alice"
     Et je vois le participant "Test" avec le rôle "Co-organisateur"
-    Et je vois le participant "Ami" avec le rôle "Participant" et un badge d'invitation en attente
+    Et je vois le participant "Ami" avec le rôle "Participant" et le statut de participation "Sans réponse"
 
   Scénario: La liste des participants est masquée tant que la modale n'est pas ouverte
     Quand j'arrive sur le détail de l'événement
@@ -34,7 +34,7 @@ Fonctionnalité: Détail d'un événement
   Scénario: Le créateur invite un nouveau participant
     Quand j'arrive sur le détail de l'événement
     Et j'invite "nouveau@example.com" comme participant
-    Alors je vois le participant "nouveau" avec le rôle "Participant" et un badge d'invitation en attente
+    Alors je vois le participant "nouveau" avec le rôle "Participant" et le statut de participation "Sans réponse"
 
   Scénario: Invitation d'une personne déjà invitée
     Quand j'arrive sur le détail de l'événement

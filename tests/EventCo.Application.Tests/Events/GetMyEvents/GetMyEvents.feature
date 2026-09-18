@@ -11,12 +11,12 @@ Fonctionnalité: Consultation de mes événements
     Et ma liste d'événements contient "Repas de Noël"
     Et ma liste d'événements ne contient pas "Anniversaire de Bob"
 
-  Scénario: Distinction entre invitation en attente et participation confirmée
+  Scénario: Un événement auquel je suis invité apparaît avec mon rôle
     Etant donné un événement "Repas de Noël" que j'ai créé
-    Et un événement "Weekend au ski" créé par un autre utilisateur qui m'y a invité sans que j'aie rejoint
+    Et un événement "Weekend au ski" créé par un autre utilisateur qui m'y a invité
     Quand je consulte la liste de mes événements
-    Alors "Repas de Noël" apparaît avec le rôle "Organizer" et le statut "rejoint"
-    Et "Weekend au ski" apparaît avec le rôle "Participant" et le statut "invitation en attente"
+    Alors "Repas de Noël" apparaît avec le rôle "Organizer"
+    Et "Weekend au ski" apparaît avec le rôle "Participant"
 
   Scénario: Aucun événement
     Quand je consulte la liste de mes événements

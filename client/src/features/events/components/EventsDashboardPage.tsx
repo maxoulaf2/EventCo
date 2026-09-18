@@ -135,18 +135,11 @@ function EventCard({ event }: { event: MyEvent }) {
           </div>
         </div>
 
-        {(!event.hasJoined || event.role === 'Organizer') && (
+        {event.role === 'Organizer' && (
           <div className="flex items-center gap-2.5">
-            {!event.hasJoined && (
-              <Tag variant="accent" className="ml-auto" >
-                <span data-testid={`event-list-item-pending-badge-${event.id}`}>Invitation en attente</span>
-              </Tag>
-            )}
-            {event.hasJoined && event.role === 'Organizer' && (
-              <Tag variant="sage" className="ml-auto">
-                Organisateur·ice
-              </Tag>
-            )}
+            <Tag variant="sage" className="ml-auto">
+              <span data-testid={`event-list-item-organizer-badge-${event.id}`}>Organisateur·ice</span>
+            </Tag>
           </div>
         )}
       </Link>

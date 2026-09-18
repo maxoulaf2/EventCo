@@ -37,8 +37,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             e.Location,
             e.CreatedByUserId,
             e.Status,
-            e.Role,
-            e.HasJoined));
+            e.Role));
 
         return Ok(response);
     }
@@ -84,7 +83,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
                 p.DisplayName,
                 p.Role,
                 p.InvitedAt,
-                p.HasJoined,
                 p.ParticipationStatus)).ToList());
 
         return Ok(response);
@@ -132,7 +130,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.DisplayName,
             result.Role,
             result.InvitedAt,
-            result.HasJoined,
             result.ParticipationStatus);
 
         return Created($"api/events/{id}", response);

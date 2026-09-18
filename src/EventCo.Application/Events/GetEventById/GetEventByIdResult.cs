@@ -17,5 +17,4 @@ public sealed record EventParticipantSummary(
     string DisplayName,
     string Role,
     DateTime InvitedAt,
-    bool HasJoined,
     string ParticipationStatus);

@@ -10,7 +10,6 @@ const participants = [
     displayName: 'Organisateur',
     role: 'Organizer',
     invitedAt: '2026-09-01T00:00:00Z',
-    hasJoined: true,
     participationStatus: 'Attending',
   },
   {
@@ -19,7 +18,6 @@ const participants = [
     displayName: 'Ami',
     role: 'Participant',
     invitedAt: '2026-09-02T00:00:00Z',
-    hasJoined: false,
     participationStatus: 'Unknown',
   },
 ]

@@ -4,7 +4,7 @@ import { createBdd } from 'playwright-bdd'
 const { Given } = createBdd()
 
 Given(
-  'je suis sur le tableau de bord avec des événements, dont une invitation en attente',
+  "je suis sur le tableau de bord avec des événements, dont un que j'organise",
   async ({ page }) => {
     await page.route('**/api/events', (route) =>
       route.fulfill({
@@ -17,7 +17,6 @@ Given(
             createdByUserId: 'user-1',
             status: 'Planned',
             role: 'Organizer',
-            hasJoined: true,
           },
           {
             id: 'event-2',
@@ -27,7 +26,6 @@ Given(
             createdByUserId: 'user-2',
             status: 'Planned',
             role: 'Participant',
-            hasJoined: false,
           },
         ],
       }),
@@ -45,6 +43,9 @@ Given('je suis sur le tableau de bord sans événement', async ({ page }) => {
 
 Given("j'ai ouvert la modale de mon compte depuis le tableau de bord", async ({ page }) => {
   await page.route('**/api/events', (route) => route.fulfill({ json: [] }))
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({ json: { userId: 'user-1', email: 'test@example.com', displayName: 'Test' } }),
+  )
   await page.goto('/events')
   await page.getByTestId('events-dashboard-account-button').click()
   await expect(page.getByTestId('account-modal-logout-button')).toBeVisible()

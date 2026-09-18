@@ -14,7 +14,6 @@ interface MockParticipant {
   displayName: string
   role: 'Organizer' | 'Participant'
   invitedAt: string
-  hasJoined: boolean
   participationStatus: 'Unknown' | 'Attending' | 'NotAttending'
 }
 
@@ -64,7 +63,6 @@ function eventDetailHandlers(participants: MockParticipant[], currentUserId: { v
         displayName: email.slice(0, email.indexOf('@')),
         role: 'Participant',
         invitedAt: '2026-09-03T00:00:00Z',
-        hasJoined: false,
         participationStatus: 'Unknown',
       }
       participants.push(newParticipant)
@@ -96,7 +94,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         displayName: 'Test',
         role: 'Organizer',
         invitedAt: '2026-09-01T00:00:00Z',
-        hasJoined: true,
         // Le créateur vient par définition (cf. Event.Create côté Domain) : jamais "Unknown" pour lui.
         participationStatus: 'Attending',
       },
@@ -106,7 +103,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         displayName: 'Ami',
         role: 'Participant',
         invitedAt: '2026-09-02T00:00:00Z',
-        hasJoined: false,
         participationStatus: 'Unknown',
       },
     ]
@@ -131,9 +127,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       expect(screen.getByTestId('participant-role-badge-user-1')).toHaveTextContent('Co-organisateur')
     })
 
-    And('je vois le participant "Ami" avec le rôle "Participant" et un badge d\'invitation en attente', () => {
+    And('je vois le participant "Ami" avec le rôle "Participant" et le statut de participation "Sans réponse"', () => {
       expect(screen.getByTestId('participant-role-badge-user-2')).toHaveTextContent('Participant')
-      expect(screen.getByTestId('participant-pending-badge-user-2')).toBeInTheDocument()
+      expect(screen.getByTestId('participant-participation-badge-user-2')).toHaveTextContent('Sans réponse')
     })
   })
 
@@ -226,11 +222,11 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then(
-      'je vois le participant "nouveau" avec le rôle "Participant" et un badge d\'invitation en attente',
+      'je vois le participant "nouveau" avec le rôle "Participant" et le statut de participation "Sans réponse"',
       async () => {
         await waitFor(() => {
           expect(screen.getByTestId('participant-role-badge-user-3')).toHaveTextContent('Participant')
-          expect(screen.getByTestId('participant-pending-badge-user-3')).toBeInTheDocument()
+          expect(screen.getByTestId('participant-participation-badge-user-3')).toHaveTextContent('Sans réponse')
         })
       },
     )

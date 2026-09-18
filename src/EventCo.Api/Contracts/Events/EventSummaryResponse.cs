@@ -7,5 +7,4 @@ public sealed record EventSummaryResponse(
     string? Location,
     Guid CreatedByUserId,
     string Status,
-    string Role,
-    bool HasJoined);
+    string Role);

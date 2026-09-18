@@ -38,7 +38,6 @@ public sealed class InviteParticipantCommandHandler(
             user.DisplayName,
             participant.Role.ToString(),
             participant.InvitedAt,
-            participant.HasJoined,
             participant.ParticipationStatus.ToString());
     }
 

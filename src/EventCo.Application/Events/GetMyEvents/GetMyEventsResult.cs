@@ -9,5 +9,4 @@ public sealed record MyEventSummary(
     string? Location,
     Guid CreatedByUserId,
     string Status,
-    string Role,
-    bool HasJoined);
+    string Role);

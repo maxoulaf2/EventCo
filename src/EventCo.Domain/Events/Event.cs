@@ -40,7 +40,6 @@ public class Event : Entity
         var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, createdByUserId, EventStatus.Planned, now);
 
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
-        creatorParticipant.Join(now);
         @event._participants.Add(creatorParticipant);
 
         @event.AddDomainEvent(new EventCreatedDomainEvent(@event.Id));
@@ -97,13 +96,6 @@ public class Event : Entity
         _participants.Add(participant);
         AddDomainEvent(new ParticipantInvitedDomainEvent(Id, participant.Id));
         return participant;
-    }
-
-    public void ConfirmParticipant(Guid userId, DateTime now)
-    {
-        var participant = GetParticipant(userId);
-        participant.Join(now);
-        AddDomainEvent(new ParticipantJoinedDomainEvent(Id, participant.Id));
     }
 
     public void SetParticipationStatus(Guid userId, ParticipationStatus status)

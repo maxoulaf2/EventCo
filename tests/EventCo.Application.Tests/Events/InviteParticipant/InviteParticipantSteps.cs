@@ -4,6 +4,7 @@ using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
+using EventCo.Domain.Events;
 using EventCo.Domain.Events.Exceptions;
 using EventCo.Domain.Users;
 using EventCo.Domain.ValueObjects;
@@ -113,8 +114,9 @@ public sealed class InviteParticipantSteps
     [Then(@"la personne invitée a le rôle ""(.*)""")]
     public void AlorsLaPersonneInviteeALeRole(string role) => Assert.Equal(role, _lastResult!.Role);
 
-    [Then(@"la personne invitée n'a pas encore rejoint l'événement")]
-    public void AlorsLaPersonneInviteeNaPasEncoreRejointLevenement() => Assert.False(_lastResult!.HasJoined);
+    [Then(@"la personne invitée n'a pas encore indiqué de statut de participation")]
+    public void AlorsLaPersonneInviteeNaPasEncoreIndiqueDeStatutDeParticipation() =>
+        Assert.Equal(nameof(ParticipationStatus.Unknown), _lastResult!.ParticipationStatus);
 
     [Then(@"un compte est créé pour la personne invitée ""(.*)""")]
     public void AlorsUnCompteEstCreePourLaPersonneInvitee(string email)

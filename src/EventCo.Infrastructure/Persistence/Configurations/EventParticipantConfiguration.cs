@@ -25,8 +25,6 @@ public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParti
 
         builder.Property(p => p.InvitedAt).IsRequired();
 
-        builder.Property(p => p.JoinedAt);
-
         builder.Property(p => p.ParticipationStatus)
             .HasConversion<string>()
             .HasMaxLength(20)

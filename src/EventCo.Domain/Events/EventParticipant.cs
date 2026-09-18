@@ -8,10 +8,7 @@ public class EventParticipant : Entity
     public Guid UserId { get; private set; }
     public ParticipantRole Role { get; private set; }
     public DateTime InvitedAt { get; private set; }
-    public DateTime? JoinedAt { get; private set; }
     public ParticipationStatus ParticipationStatus { get; private set; }
-
-    public bool HasJoined => JoinedAt is not null;
 
     internal EventParticipant(Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt)
         : base(Guid.NewGuid())
@@ -23,21 +20,18 @@ public class EventParticipant : Entity
         ParticipationStatus = role == ParticipantRole.Organizer ? ParticipationStatus.Attending : ParticipationStatus.Unknown;
     }
 
-    private EventParticipant(Guid id, Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt, DateTime? joinedAt, ParticipationStatus participationStatus)
+    private EventParticipant(Guid id, Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt, ParticipationStatus participationStatus)
         : base(id)
     {
         EventId = eventId;
         UserId = userId;
         Role = role;
         InvitedAt = invitedAt;
-        JoinedAt = joinedAt;
         ParticipationStatus = participationStatus;
     }
 
-    internal static EventParticipant Reconstitute(Guid id, Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt, DateTime? joinedAt, ParticipationStatus participationStatus) =>
-        new(id, eventId, userId, role, invitedAt, joinedAt, participationStatus);
-
-    internal void Join(DateTime joinedAt) => JoinedAt = joinedAt;
+    internal static EventParticipant Reconstitute(Guid id, Guid eventId, Guid userId, ParticipantRole role, DateTime invitedAt, ParticipationStatus participationStatus) =>
+        new(id, eventId, userId, role, invitedAt, participationStatus);
 
     internal void ChangeRole(ParticipantRole role) => Role = role;
 

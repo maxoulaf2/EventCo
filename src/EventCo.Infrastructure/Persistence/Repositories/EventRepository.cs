@@ -28,9 +28,6 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case ParticipantInvitedDomainEvent e:
                     await InsertParticipant(@event, e.ParticipantId, cancellationToken);
                     break;
-                case ParticipantJoinedDomainEvent e:
-                    await UpdateParticipantJoinedAt(@event, e.ParticipantId, cancellationToken);
-                    break;
                 case ParticipantRoleChangedDomainEvent e:
                     await UpdateParticipantRole(@event, e.ParticipantId, cancellationToken);
                     break;
@@ -89,13 +86,6 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var participant = @event.Participants.Single(p => p.Id == participantId);
         await dbContext.Set<EventParticipantEntity>().AddAsync(EventMapper.ToEntity(participant), cancellationToken);
-    }
-
-    private async Task UpdateParticipantJoinedAt(Event @event, Guid participantId, CancellationToken cancellationToken)
-    {
-        var participant = @event.Participants.Single(p => p.Id == participantId);
-        var entity = await FindParticipantEntityAsync(participantId, cancellationToken);
-        entity.JoinedAt = participant.JoinedAt;
     }
 
     private async Task UpdateParticipantRole(Event @event, Guid participantId, CancellationToken cancellationToken)

@@ -25,4 +25,4 @@ Fonctionnalité: Consultation d'un événement
     Quand je consulte cet événement
     Alors la consultation réussit
     Et l'événement consulté a 2 participants
-    Et l'événement consulté a un participant "ami@example.com" avec le rôle "Participant" n'ayant pas encore rejoint
+    Et l'événement consulté a un participant "ami@example.com" avec le rôle "Participant" sans statut de participation indiqué

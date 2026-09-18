@@ -12,14 +12,13 @@ public class EventTests
     }
 
     [Fact]
-    public void Create_ValidData_AddsCreatorAsJoinedOrganizer()
+    public void Create_ValidData_AddsCreatorAsOrganizer()
     {
         var @event = CreateEvent(out var creatorId);
 
         var creatorParticipant = Assert.Single(@event.Participants);
         Assert.Equal(creatorId, creatorParticipant.UserId);
         Assert.Equal(ParticipantRole.Organizer, creatorParticipant.Role);
-        Assert.True(creatorParticipant.HasJoined);
         Assert.Equal(ParticipationStatus.Attending, creatorParticipant.ParticipationStatus);
         Assert.Equal(EventStatus.Planned, @event.Status);
     }
@@ -39,7 +38,7 @@ public class EventTests
     }
 
     [Fact]
-    public void InviteParticipant_NewUser_AddsParticipantNotYetJoined()
+    public void InviteParticipant_NewUser_AddsParticipantWithUnknownParticipationStatus()
     {
         var @event = CreateEvent(out var creatorId);
         var invitedUserId = Guid.NewGuid();
@@ -47,7 +46,7 @@ public class EventTests
         var participant = @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
         Assert.Equal(ParticipantRole.Participant, participant.Role);
-        Assert.False(participant.HasJoined);
+        Assert.Equal(ParticipationStatus.Unknown, participant.ParticipationStatus);
     }
 
     [Fact]

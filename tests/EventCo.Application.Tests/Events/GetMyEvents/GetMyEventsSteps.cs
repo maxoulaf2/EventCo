@@ -52,8 +52,8 @@ public sealed class GetMyEventsSteps
         await _dbContext.SaveChangesAsync();
     }
 
-    [Given(@"un événement ""(.*)"" créé par un autre utilisateur qui m'y a invité sans que j'aie rejoint")]
-    public async Task EtantDonneUnEvenementCreeParUnAutreUtilisateurQuiMyAInviteSansQueJaieRejoint(string title)
+    [Given(@"un événement ""(.*)"" créé par un autre utilisateur qui m'y a invité")]
+    public async Task EtantDonneUnEvenementCreeParUnAutreUtilisateurQuiMyAInvite(string title)
     {
         var creatorId = Guid.NewGuid();
         var @event = Event.Create(title, null, _now.AddDays(1), null, creatorId, _now);
@@ -91,19 +91,10 @@ public sealed class GetMyEventsSteps
     [Then(@"ma liste d'événements est vide")]
     public void AlorsMaListeDevenementsEstVide() => Assert.Empty(_lastResult!.Events);
 
-    [Then(@"""(.*)"" apparaît avec le rôle ""(.*)"" et le statut ""rejoint""")]
-    public void AlorsLevenementApparaitAvecLeRoleEtLeStatutRejoint(string title, string role)
+    [Then(@"""(.*)"" apparaît avec le rôle ""(.*)""")]
+    public void AlorsLevenementApparaitAvecLeRole(string title, string role)
     {
         var summary = Assert.Single(_lastResult!.Events, e => e.Title == title);
         Assert.Equal(role, summary.Role);
-        Assert.True(summary.HasJoined);
-    }
-
-    [Then(@"""(.*)"" apparaît avec le rôle ""(.*)"" et le statut ""invitation en attente""")]
-    public void AlorsLevenementApparaitAvecLeRoleEtLeStatutInvitationEnAttente(string title, string role)
-    {
-        var summary = Assert.Single(_lastResult!.Events, e => e.Title == title);
-        Assert.Equal(role, summary.Role);
-        Assert.False(summary.HasJoined);
     }
 }

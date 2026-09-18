@@ -5,6 +5,7 @@ using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
+using EventCo.Domain.Events;
 using EventCo.Domain.Events.Exceptions;
 using EventCo.Domain.Users;
 using EventCo.Domain.ValueObjects;
@@ -113,11 +114,11 @@ public sealed class GetEventByIdSteps
     [Then(@"l'événement consulté a (\d+) participants?")]
     public void AlorsLevenementConsulteAParticipants(int count) => Assert.Equal(count, _lastResult!.Participants.Count);
 
-    [Then(@"l'événement consulté a un participant ""(.*)"" avec le rôle ""(.*)"" n'ayant pas encore rejoint")]
-    public void AlorsLevenementConsulteAUnParticipantAvecLeRoleNayantPasEncoreRejoint(string email, string role)
+    [Then(@"l'événement consulté a un participant ""(.*)"" avec le rôle ""(.*)"" sans statut de participation indiqué")]
+    public void AlorsLevenementConsulteAUnParticipantAvecLeRoleSansStatutDeParticipationIndique(string email, string role)
     {
         var participant = Assert.Single(_lastResult!.Participants, p => p.Email == email.ToLowerInvariant());
         Assert.Equal(role, participant.Role);
-        Assert.False(participant.HasJoined);
+        Assert.Equal(nameof(ParticipationStatus.Unknown), participant.ParticipationStatus);
     }
 }

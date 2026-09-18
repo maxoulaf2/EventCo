@@ -22,6 +22,18 @@ const PARTICIPATION_STATUS_LABELS: Record<ParticipationStatus, string> = {
   Unknown: 'Je ne sais pas encore si je viens',
 }
 
+const PARTICIPATION_STATUS_ROW_LABELS: Record<ParticipationStatus, string> = {
+  Attending: 'Vient',
+  NotAttending: 'Ne vient pas',
+  Unknown: 'Sans réponse',
+}
+
+const PARTICIPATION_STATUS_TAG_VARIANT: Record<ParticipationStatus, 'sage' | 'outline' | 'accent'> = {
+  Attending: 'sage',
+  NotAttending: 'outline',
+  Unknown: 'accent',
+}
+
 function formatDate(iso: string): string {
   const date = new Date(iso)
   const day = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
@@ -50,7 +62,7 @@ export function EventDetailPage() {
 
   const organizers = event?.participants.filter((p) => p.role === 'Organizer') ?? []
   const attendees = event?.participants.filter((p) => p.role === 'Participant') ?? []
-  const confirmedCount = event?.participants.filter((p) => p.hasJoined).length ?? 0
+  const attendingCount = event?.participants.filter((p) => p.participationStatus === 'Attending').length ?? 0
 
   function renderParticipantAction(participant: EventParticipant) {
     if (!isCreator || participant.userId === event!.createdByUserId) {
@@ -98,19 +110,17 @@ export function EventDetailPage() {
               ? 'Créateur·ice'
               : participant.role === 'Organizer'
                 ? 'Co-organisateur·ice'
-                : participant.hasJoined
-                  ? 'A rejoint'
-                  : 'Invité·e'}
+                : 'Participant'}
           </div>
         </div>
         <span data-testid={`participant-role-badge-${participant.userId}`} className="sr-only">
           {participant.role === 'Organizer' ? 'Co-organisateur' : 'Participant'}
         </span>
-        {!participant.hasJoined && (
-          <Tag variant="accent">
-            <span data-testid={`participant-pending-badge-${participant.userId}`}>En attente</span>
-          </Tag>
-        )}
+        <Tag variant={PARTICIPATION_STATUS_TAG_VARIANT[participant.participationStatus]}>
+          <span data-testid={`participant-participation-badge-${participant.userId}`}>
+            {PARTICIPATION_STATUS_ROW_LABELS[participant.participationStatus]}
+          </span>
+        </Tag>
         {renderParticipantAction(participant)}
       </li>
     )
@@ -232,7 +242,7 @@ export function EventDetailPage() {
                     )}
                   </span>
                   <span className="text-[13.5px] text-ink/65">
-                    {confirmedCount} sur {event.participants.length} ont confirmé
+                    {attendingCount} sur {event.participants.length} viennent
                   </span>
                   <span className="ml-auto text-ink/45">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round">
