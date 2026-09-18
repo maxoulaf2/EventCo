@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { TaskList } from '../../tasks/components/TaskList'
 import { Avatar } from '../../../shared/components/Avatar'
+import { Modal } from '../../../shared/components/Modal'
 import { Tag } from '../../../shared/components/Tag'
 import { ApiError } from '../../../shared/lib/api'
 import { routes } from '../../../shared/lib/routes'
@@ -25,6 +27,7 @@ export function EventDetailPage() {
   const { data: currentUser } = useCurrentUser()
   const promoteParticipant = usePromoteParticipant(eventId!)
   const demoteParticipant = useDemoteParticipant(eventId!)
+  const [isParticipantsModalOpen, setIsParticipantsModalOpen] = useState(false)
 
   if (isError && error instanceof ApiError && error.status === 401) {
     return <Navigate to={routes.login} replace />
@@ -179,8 +182,10 @@ export function EventDetailPage() {
                   </p>
                 )}
 
-                <a
-                  href="#participants"
+                <button
+                  type="button"
+                  onClick={() => setIsParticipantsModalOpen(true)}
+                  data-testid="event-detail-participants-button"
                   className="mt-5 flex items-center gap-3.5 rounded-full bg-surface px-4 py-3"
                 >
                   <span className="flex">
@@ -203,7 +208,7 @@ export function EventDetailPage() {
                       <path d="m9 18 6-6-6-6" />
                     </svg>
                   </span>
-                </a>
+                </button>
               </div>
             </div>
 
@@ -219,33 +224,40 @@ export function EventDetailPage() {
             </div>
           </div>
 
-          <div id="participants" className="flex scroll-mt-4 flex-col gap-6 px-5.5 pt-2 pb-10 lg:px-8.5">
-            {organizers.length > 0 && (
-              <div className="flex flex-col gap-2.5">
-                <p data-testid="event-detail-participants-heading" className="ml-4 text-[10px] tracking-[0.11em] text-accent-700 uppercase">
-                  Organisation
-                </p>
-                <ul data-testid="event-detail-participants-list" className="flex flex-col gap-2.5">
-                  {organizers.map((participant) => (
-                    <ParticipantRow key={participant.userId} participant={participant} />
-                  ))}
-                </ul>
-              </div>
-            )}
+          <Modal
+            open={isParticipantsModalOpen}
+            onClose={() => setIsParticipantsModalOpen(false)}
+            title="Participants"
+            testId="participants-modal"
+          >
+            <div className="flex flex-col gap-6">
+              {organizers.length > 0 && (
+                <div className="flex flex-col gap-2.5">
+                  <p data-testid="event-detail-participants-heading" className="ml-4 text-[10px] tracking-[0.11em] text-accent-700 uppercase">
+                    Organisation
+                  </p>
+                  <ul data-testid="event-detail-participants-list" className="flex flex-col gap-2.5">
+                    {organizers.map((participant) => (
+                      <ParticipantRow key={participant.userId} participant={participant} />
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-            {attendees.length > 0 && (
-              <div className="flex flex-col gap-2.5">
-                <p className="ml-4 text-[10px] tracking-[0.11em] text-accent-700 uppercase">Participants</p>
-                <ul className="flex flex-col gap-2.5">
-                  {attendees.map((participant) => (
-                    <ParticipantRow key={participant.userId} participant={participant} />
-                  ))}
-                </ul>
-              </div>
-            )}
+              {attendees.length > 0 && (
+                <div className="flex flex-col gap-2.5">
+                  <p className="ml-4 text-[10px] tracking-[0.11em] text-accent-700 uppercase">Participants</p>
+                  <ul className="flex flex-col gap-2.5">
+                    {attendees.map((participant) => (
+                      <ParticipantRow key={participant.userId} participant={participant} />
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-            {canInvite && <InviteParticipantForm eventId={eventId!} />}
-          </div>
+              {canInvite && <InviteParticipantForm eventId={eventId!} />}
+            </div>
+          </Modal>
         </>
       )}
     </main>

@@ -58,6 +58,7 @@ dotnet user-secrets set "Email:Smtp:Password" "<password-mailtrap>" --project sr
 # npm install
 # npm run dev
 # npm run build
+# npm run test:visual
 
 # Infra (Docker Compose)
 # cp .env.example .env

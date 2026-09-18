@@ -74,6 +74,7 @@ Given("je suis sur le détail d'un événement en tant que créateur", async ({ 
     route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
   )
   await page.goto('/events/event-1')
+  await page.getByTestId('event-detail-participants-button').click()
   await expect(page.getByTestId('participant-promote-button-user-2')).toBeVisible()
 })
 
@@ -83,6 +84,7 @@ Given("je suis sur le détail d'un événement en tant que simple participant", 
     route.fulfill({ json: { userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' } }),
   )
   await page.goto('/events/event-1')
+  await page.getByTestId('event-detail-participants-button').click()
   await expect(page.getByTestId('participant-row-user-2')).toBeVisible()
 })
 
@@ -116,6 +118,7 @@ Given("je suis sur le détail d'un événement avec une erreur d'invitation", as
     route.fulfill({ status: 400, json: { detail: 'Cette personne est déjà invitée à cet événement.' } }),
   )
   await page.goto('/events/event-1')
+  await page.getByTestId('event-detail-participants-button').click()
   await page.getByTestId('invite-participant-email-input').fill('ami@example.com')
   await page.getByTestId('invite-participant-submit-button').click()
   await expect(page.getByTestId('invite-participant-error')).toBeVisible()

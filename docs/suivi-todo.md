@@ -78,6 +78,10 @@
 
 - [x] Attribut `data-testid` sur tout composant/élément testable du frontend, sélection exclusive via ce test-id dans les trois couches de tests (comportement/visuel/E2E)
   > Tâche identifiée en cours de route (rule 5, 2026-09-17), à la demande explicite du développeur, pour fiabiliser la sélection des composants dans les tests (jusqu'ici par rôle/label/texte affiché, avec des contournements ponctuels pour lever des ambiguïtés). Cf. `docs/conventions-code.md` §2.3 pour la convention de nommage et les décisions associées.
+- [x] Script de démarrage local en une commande (Docker + migrations + backend + frontend)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur, pour éviter d'enchaîner manuellement `docker compose up`, `dotnet ef database update`, `dotnet run` et `npm run dev` à chaque session de dev. Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
+- [x] Frontend : déplacement de la liste des participants et du formulaire d'invitation dans une modale (page de détail d'un événement)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur, dans le cadre des maquettes Lemon (`feature/maquettes-lemon`) : la liste des participants/organisateurs et le formulaire d'invitation, jusqu'ici affichés en permanence sous les infos de l'événement, sont désormais dans une modale ouverte au clic sur le bandeau "participants". Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
 - [ ] Audit et ajustement du responsive sur toutes les pages (mobile-first)
 - [ ] Configuration PWA : `manifest.json`, icônes, service worker basique
 - [ ] Test d'installation PWA sur mobile (Android/iOS)

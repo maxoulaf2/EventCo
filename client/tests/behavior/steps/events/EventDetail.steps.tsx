@@ -110,7 +110,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       expect(screen.getByTestId('event-detail-date-location')).toHaveTextContent('Chez Alice')
     })
 
-    And('je vois le participant "Test" avec le rôle "Co-organisateur"', () => {
+    And('je vois le participant "Test" avec le rôle "Co-organisateur"', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
       expect(screen.getByTestId('participant-role-badge-user-1')).toHaveTextContent('Co-organisateur')
     })
 
@@ -120,14 +122,50 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
   })
 
+  Scenario('La liste des participants est masquée tant que la modale n\'est pas ouverte', ({ When, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas la liste des participants', async () => {
+      await screen.findByTestId('event-detail-participants-button')
+      expect(screen.queryByTestId('event-detail-participants-list')).not.toBeInTheDocument()
+    })
+  })
+
+  Scenario('Ouverture et fermeture de la modale des participants', ({ When, And, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('j\'ouvre la modale des participants', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
+    })
+
+    Then('je vois la liste des participants', async () => {
+      await screen.findByTestId('event-detail-participants-list')
+    })
+
+    When('je ferme la modale des participants', async () => {
+      const user = userEvent.setup()
+      await user.click(screen.getByTestId('participants-modal-close-button'))
+    })
+
+    Then('je ne vois pas la liste des participants', () => {
+      expect(screen.queryByTestId('event-detail-participants-list')).not.toBeInTheDocument()
+    })
+  })
+
   Scenario('Le créateur promeut un participant en co-organisateur', ({ When, And, Then }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
 
     And('je clique sur "Promouvoir co-organisateur" pour "Ami"', async () => {
-      const promoteButton = await screen.findByTestId('participant-promote-button-user-2')
       const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
+      const promoteButton = await screen.findByTestId('participant-promote-button-user-2')
       await user.click(promoteButton)
     })
 
@@ -150,6 +188,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je ne vois aucun bouton pour promouvoir ou rétrograder un participant', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
       await screen.findByTestId('participant-row-user-2')
       expect(screen.queryByTestId('participant-promote-button-user-2')).not.toBeInTheDocument()
       expect(screen.queryByTestId('participant-demote-button-user-2')).not.toBeInTheDocument()
@@ -162,8 +202,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('j\'invite "nouveau@example.com" comme participant', async () => {
-      await screen.findByTestId('invite-participant-email-input')
       const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
+      await screen.findByTestId('invite-participant-email-input')
       await user.type(screen.getByTestId('invite-participant-email-input'), 'nouveau@example.com')
       await user.click(screen.getByTestId('invite-participant-submit-button'))
     })
@@ -185,8 +226,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     And('j\'invite "ami@example.com" comme participant', async () => {
-      await screen.findByTestId('invite-participant-email-input')
       const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
+      await screen.findByTestId('invite-participant-email-input')
       await user.type(screen.getByTestId('invite-participant-email-input'), 'ami@example.com')
       await user.click(screen.getByTestId('invite-participant-submit-button'))
     })
@@ -212,6 +254,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je vois le formulaire d\'invitation', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
       await screen.findByTestId('invite-participant-form')
     })
   })
@@ -230,6 +274,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
 
     Then('je ne vois pas de formulaire d\'invitation', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
       await screen.findByTestId('participant-row-user-2')
       expect(screen.queryByTestId('invite-participant-form')).not.toBeInTheDocument()
     })

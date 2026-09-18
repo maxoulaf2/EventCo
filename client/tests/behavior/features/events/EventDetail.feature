@@ -10,6 +10,17 @@ Fonctionnalité: Détail d'un événement
     Et je vois le participant "Test" avec le rôle "Co-organisateur"
     Et je vois le participant "Ami" avec le rôle "Participant" et un badge d'invitation en attente
 
+  Scénario: La liste des participants est masquée tant que la modale n'est pas ouverte
+    Quand j'arrive sur le détail de l'événement
+    Alors je ne vois pas la liste des participants
+
+  Scénario: Ouverture et fermeture de la modale des participants
+    Quand j'arrive sur le détail de l'événement
+    Et j'ouvre la modale des participants
+    Alors je vois la liste des participants
+    Quand je ferme la modale des participants
+    Alors je ne vois pas la liste des participants
+
   Scénario: Le créateur promeut un participant en co-organisateur
     Quand j'arrive sur le détail de l'événement
     Et je clique sur "Promouvoir co-organisateur" pour "Ami"
