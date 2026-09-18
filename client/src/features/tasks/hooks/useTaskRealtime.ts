@@ -46,6 +46,7 @@ export function useTaskRealtime(eventId: string) {
 
     connection.on('TaskCreated', upsertTask)
     connection.on('TaskAssigned', upsertTask)
+    connection.on('TaskUnassigned', upsertTask)
     connection.on('TaskStatusChanged', upsertTask)
     connection.on('TaskDeleted', removeTask)
 

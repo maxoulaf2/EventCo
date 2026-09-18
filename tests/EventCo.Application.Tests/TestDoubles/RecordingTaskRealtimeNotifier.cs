@@ -6,6 +6,7 @@ public sealed class RecordingTaskRealtimeNotifier : ITaskRealtimeNotifier
 {
     public List<TaskRealtimeDto> TaskCreatedNotifications { get; } = [];
     public List<TaskRealtimeDto> TaskAssignedNotifications { get; } = [];
+    public List<TaskRealtimeDto> TaskUnassignedNotifications { get; } = [];
     public List<TaskRealtimeDto> TaskStatusChangedNotifications { get; } = [];
     public List<TaskDeletedRealtimeDto> TaskDeletedNotifications { get; } = [];
 
@@ -18,6 +19,12 @@ public sealed class RecordingTaskRealtimeNotifier : ITaskRealtimeNotifier
     public Task NotifyTaskAssigned(TaskRealtimeDto task, CancellationToken cancellationToken)
     {
         TaskAssignedNotifications.Add(task);
+        return Task.CompletedTask;
+    }
+
+    public Task NotifyTaskUnassigned(TaskRealtimeDto task, CancellationToken cancellationToken)
+    {
+        TaskUnassignedNotifications.Add(task);
         return Task.CompletedTask;
     }
 

@@ -79,6 +79,8 @@
 - [x] Frontend : connexion au Hub SignalR et mise à jour réactive de la liste de tâches
 - [x] Frontend : formulaire d'ajout de tâche (titre, catégorie, quantité)
 - [x] Frontend : interaction rapide pour cocher une tâche (optimisée mobile)
+- [x] Endpoint + Command : désassignation d'une tâche par un participant (`POST /api/events/{id}/tasks/{taskId}/unassign`) + bouton "Laisser" frontend
+  > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur : `Event.UnassignTask` existait côté Domain depuis ce même lot mais n'était exercée par aucun Command (cf. décision du 2026-09-10 dans `conventions-code.md` §1.2). Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
 
 ## Lot 4 — Finitions MVP
 

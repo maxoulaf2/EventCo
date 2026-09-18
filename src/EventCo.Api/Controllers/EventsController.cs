@@ -14,6 +14,7 @@ using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.ReopenTask;
 using EventCo.Application.Events.SetParticipationStatus;
+using EventCo.Application.Events.UnassignTask;
 using EventCo.Application.Events.UpdateEvent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -177,6 +178,14 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> AssignTask(Guid id, Guid taskId, Guid userId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new AssignTaskCommand(id, taskId, userId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/tasks/{taskId:guid}/unassign")]
+    public async Task<IActionResult> UnassignTask(Guid id, Guid taskId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new UnassignTaskCommand(id, taskId), cancellationToken);
 
         return NoContent();
     }

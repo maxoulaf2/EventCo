@@ -345,6 +345,58 @@ public class EventTests
     }
 
     [Fact]
+    public void UnassignTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.AssignTask(creatorId, task.Id, creatorId);
+
+        Assert.Throws<UserNotEventParticipantException>(() => @event.UnassignTask(Guid.NewGuid(), task.Id));
+    }
+
+    [Fact]
+    public void UnassignTask_ActingUserIsAssignedParticipant_ClearsAssignedToUserId()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.AssignTask(creatorId, task.Id, regularParticipantId);
+
+        @event.UnassignTask(regularParticipantId, task.Id);
+
+        Assert.Null(task.AssignedToUserId);
+    }
+
+    [Fact]
+    public void UnassignTask_ActingUserIsCreatorOrOrganizer_ClearsAssignedToUserIdForAnotherParticipant()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.AssignTask(creatorId, task.Id, regularParticipantId);
+
+        @event.UnassignTask(creatorId, task.Id);
+
+        Assert.Null(task.AssignedToUserId);
+    }
+
+    [Fact]
+    public void UnassignTask_ActingUserIsParticipantNotAssigned_ThrowsParticipantCannotUnassignOthersTaskException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        var otherParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        @event.AssignTask(creatorId, task.Id, otherParticipantId);
+
+        Assert.Throws<ParticipantCannotUnassignOthersTaskException>(() => @event.UnassignTask(regularParticipantId, task.Id));
+    }
+
+    [Fact]
     public void CompleteTask_ActingUserIsOrganizer_SetsIsDoneTrue()
     {
         var @event = CreateEvent(out var creatorId);

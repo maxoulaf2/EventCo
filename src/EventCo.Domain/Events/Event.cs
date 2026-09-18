@@ -169,9 +169,10 @@ public class Event : Entity
         AddDomainEvent(new TaskAssignedDomainEvent(task));
     }
 
-    public void UnassignTask(Guid taskId)
+    public void UnassignTask(Guid actingUserId, Guid taskId)
     {
         var task = GetTask(taskId);
+        EnsureActingUserCanUnassignTask(actingUserId, task);
         task.Unassign();
         AddDomainEvent(new TaskUnassignedDomainEvent(task));
     }
@@ -237,6 +238,14 @@ public class Event : Entity
 
         if (task.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
             throw new ParticipantCannotDeleteOthersTaskException(Id, task.Id, actingUserId);
+    }
+
+    private void EnsureActingUserCanUnassignTask(Guid actingUserId, EventTask task)
+    {
+        EnsureActingUserIsParticipant(actingUserId);
+
+        if (task.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotUnassignOthersTaskException(Id, task.Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>

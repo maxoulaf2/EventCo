@@ -6,6 +6,7 @@ import { useAssignTask } from '../hooks/useAssignTask'
 import { useEventTasks } from '../hooks/useEventTasks'
 import { useTaskRealtime } from '../hooks/useTaskRealtime'
 import { useToggleTaskDone } from '../hooks/useToggleTaskDone'
+import { useUnassignTask } from '../hooks/useUnassignTask'
 import type { EventTask, TaskCategory } from '../types'
 
 const CATEGORIES: TaskCategory[] = ['Courses', 'Logistique', 'Autre']
@@ -44,6 +45,7 @@ export function TaskList({
   useTaskRealtime(eventId)
   const toggleTaskDone = useToggleTaskDone(eventId)
   const assignTask = useAssignTask(eventId)
+  const unassignTask = useUnassignTask(eventId)
   const [tab, setTab] = useState<TaskTab>('todo')
 
   const counts: Record<TaskTab, number> = { todo: 0, assigned: 0, done: 0 }
@@ -57,6 +59,10 @@ export function TaskList({
 
   function canToggle(task: EventTask) {
     return canManageAllTasks || task.assignedToUserId === currentUserId
+  }
+
+  function canUnassign(task: EventTask) {
+    return !task.isDone && (canManageAllTasks || task.assignedToUserId === currentUserId)
   }
 
   function participantName(userId: string | null) {
@@ -178,7 +184,21 @@ export function TaskList({
                             </button>
                           )}
                           {!showAssign && task.assignedToUserId && (
-                            <Avatar name={participantName(task.assignedToUserId)} size="sm" />
+                            <div className="flex shrink-0 items-center gap-2">
+                              <Avatar name={participantName(task.assignedToUserId)} size="sm" />
+                              {canUnassign(task) && (
+                                <button
+                                  type="button"
+                                  onClick={() => unassignTask.mutate(task.id)}
+                                  disabled={unassignTask.isPending}
+                                  aria-label={`Se désassigner de "${task.title}"`}
+                                  data-testid={`task-item-unassign-button-${task.id}`}
+                                  className="inline-flex min-h-9.5 shrink-0 items-center rounded-full border border-ink/15 bg-surface px-3.5 text-[13px] font-heading text-ink/70 transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
+                                >
+                                  Laisser
+                                </button>
+                              )}
+                            </div>
                           )}
                         </li>
                       )

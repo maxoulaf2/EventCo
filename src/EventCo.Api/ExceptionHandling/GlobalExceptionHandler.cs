@@ -36,6 +36,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             ParticipantCannotToggleOthersTaskException forbiddenToggleException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenToggleException.Message }),
+            ParticipantCannotUnassignOthersTaskException forbiddenUnassignException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenUnassignException.Message }),
             ParticipantCannotDeleteOthersTaskException forbiddenDeleteException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenDeleteException.Message }),

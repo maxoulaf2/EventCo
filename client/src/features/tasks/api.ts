@@ -16,6 +16,10 @@ export function assignTask(eventId: string, taskId: string, userId: string): Pro
   return apiFetch(`/api/events/${eventId}/tasks/${taskId}/assign/${userId}`, { method: 'POST' })
 }
 
+export function unassignTask(eventId: string, taskId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/tasks/${taskId}/unassign`, { method: 'POST' })
+}
+
 export function completeTask(eventId: string, taskId: string): Promise<void> {
   return apiFetch(`/api/events/${eventId}/tasks/${taskId}/complete`, { method: 'POST' })
 }
