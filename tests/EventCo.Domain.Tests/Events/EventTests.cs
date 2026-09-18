@@ -8,7 +8,7 @@ public class EventTests
     private static Event CreateEvent(out Guid creatorId)
     {
         creatorId = Guid.NewGuid();
-        return Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", creatorId, DateTime.UtcNow);
+        return Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", null, creatorId, DateTime.UtcNow);
     }
 
     [Fact]
@@ -26,7 +26,23 @@ public class EventTests
     [Fact]
     public void Create_EmptyTitle_ThrowsEventTitleEmptyException()
     {
-        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, Guid.NewGuid(), DateTime.UtcNow));
+        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, null, Guid.NewGuid(), DateTime.UtcNow));
+    }
+
+    [Fact]
+    public void Create_NoImageUrl_ImageUrlIsNull()
+    {
+        var @event = CreateEvent(out _);
+
+        Assert.Null(@event.ImageUrl);
+    }
+
+    [Fact]
+    public void Create_WithImageUrl_ImageUrlIsSet()
+    {
+        var @event = Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", "https://example.com/photo.jpg", Guid.NewGuid(), DateTime.UtcNow);
+
+        Assert.Equal("https://example.com/photo.jpg", @event.ImageUrl);
     }
 
     [Fact]

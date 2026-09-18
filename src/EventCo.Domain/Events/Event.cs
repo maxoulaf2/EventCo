@@ -13,6 +13,7 @@ public class Event : Entity
     public string? Description { get; private set; }
     public DateTime EventDate { get; private set; }
     public string? Location { get; private set; }
+    public string? ImageUrl { get; private set; }
     public Guid CreatedByUserId { get; private set; }
     public EventStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -20,24 +21,25 @@ public class Event : Entity
     public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
     public IReadOnlyCollection<EventTask> Tasks => _tasks.AsReadOnly();
 
-    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, Guid createdByUserId, EventStatus status, DateTime createdAt)
+    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, Guid createdByUserId, EventStatus status, DateTime createdAt)
         : base(id)
     {
         Title = title;
         Description = description;
         EventDate = eventDate;
         Location = location;
+        ImageUrl = imageUrl;
         CreatedByUserId = createdByUserId;
         Status = status;
         CreatedAt = createdAt;
     }
 
-    public static Event Create(string title, string? description, DateTime eventDate, string? location, Guid createdByUserId, DateTime now)
+    public static Event Create(string title, string? description, DateTime eventDate, string? location, string? imageUrl, Guid createdByUserId, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException();
 
-        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, createdByUserId, EventStatus.Planned, now);
+        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, imageUrl, createdByUserId, EventStatus.Planned, now);
 
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
         @event._participants.Add(creatorParticipant);
@@ -48,11 +50,11 @@ public class Event : Entity
     }
 
     internal static Event Reconstitute(
-        Guid id, string title, string? description, DateTime eventDate, string? location,
+        Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl,
         Guid createdByUserId, EventStatus status, DateTime createdAt,
         IEnumerable<EventParticipant> participants, IEnumerable<EventTask> tasks)
     {
-        var @event = new Event(id, title, description, eventDate, location, createdByUserId, status, createdAt);
+        var @event = new Event(id, title, description, eventDate, location, imageUrl, createdByUserId, status, createdAt);
         @event._participants.AddRange(participants);
         @event._tasks.AddRange(tasks);
         return @event;

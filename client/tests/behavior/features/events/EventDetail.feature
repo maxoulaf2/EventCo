@@ -75,3 +75,12 @@ Fonctionnalité: Détail d'un événement
   Scénario: Le créateur ne voit pas le formulaire de participation
     Quand j'arrive sur le détail de l'événement
     Alors je ne vois pas de formulaire de participation
+
+  Scénario: Affichage de l'image de l'événement
+    Etant donné que l'événement a une image
+    Quand j'arrive sur le détail de l'événement
+    Alors je vois l'image de l'événement
+
+  Scénario: Aucune image affichée si l'événement n'en a pas
+    Quand j'arrive sur le détail de l'événement
+    Alors je ne vois pas d'image d'événement

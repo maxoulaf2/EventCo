@@ -13,7 +13,6 @@ import { useEventDetail } from '../hooks/useEventDetail'
 import { usePromoteParticipant } from '../hooks/usePromoteParticipant'
 import { useSetParticipationStatus } from '../hooks/useSetParticipationStatus'
 import { InviteParticipantForm } from './InviteParticipantForm'
-import eventPhoto from '../../../assets/event-photo.jpg'
 import type { EventParticipant, ParticipationStatus } from '../types'
 
 const PARTICIPATION_STATUS_LABELS: Record<ParticipationStatus, string> = {
@@ -156,9 +155,16 @@ export function EventDetailPage() {
         <>
           <div className="flex flex-col gap-6 px-5.5 pt-5.5 lg:grid lg:grid-cols-2 lg:gap-10 lg:px-8.5 lg:pb-9">
             <div className="flex flex-col">
-              <div className="h-52 flex-none overflow-hidden rounded-3xl lg:h-64">
-                <img src={eventPhoto} alt="" className="h-full w-full object-cover opacity-95 saturate-[0.6] contrast-[0.85] brightness-110" />
-              </div>
+              {event.imageUrl && (
+                <div className="h-52 flex-none overflow-hidden rounded-3xl lg:h-64">
+                  <img
+                    src={event.imageUrl}
+                    alt=""
+                    data-testid="event-detail-image"
+                    className="h-full w-full object-cover opacity-95 saturate-[0.6] contrast-[0.85] brightness-110"
+                  />
+                </div>
+              )}
 
               <div className="pt-5.5">
                 {(isCreator || currentParticipant?.role === 'Organizer') && (

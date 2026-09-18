@@ -18,6 +18,7 @@ public sealed class CreateEventCommandHandler(
             request.Description,
             request.EventDate,
             request.Location,
+            request.ImageUrl,
             currentUserService.UserId!.Value,
             now);
 
@@ -29,6 +30,7 @@ public sealed class CreateEventCommandHandler(
             @event.Description,
             @event.EventDate,
             @event.Location,
+            @event.ImageUrl,
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt);

@@ -6,4 +6,5 @@ public sealed record CreateEventCommand(
     string Title,
     string? Description,
     DateTime EventDate,
-    string? Location) : ICommand<CreateEventResult>;
+    string? Location,
+    string? ImageUrl = null) : ICommand<CreateEventResult>;

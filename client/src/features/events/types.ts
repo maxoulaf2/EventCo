@@ -15,6 +15,7 @@ export interface CreateEventInput {
   description?: string
   eventDate: string
   location?: string
+  imageUrl?: string
 }
 
 export type ParticipantRole = 'Organizer' | 'Participant'
@@ -36,6 +37,7 @@ export interface EventDetail {
   description: string | null
   eventDate: string
   location: string | null
+  imageUrl: string | null
   createdByUserId: string
   status: EventStatus
   createdAt: string

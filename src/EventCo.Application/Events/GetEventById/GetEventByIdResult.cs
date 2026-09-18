@@ -6,6 +6,7 @@ public sealed record GetEventByIdResult(
     string? Description,
     DateTime EventDate,
     string? Location,
+    string? ImageUrl,
     Guid CreatedByUserId,
     string Status,
     DateTime CreatedAt,

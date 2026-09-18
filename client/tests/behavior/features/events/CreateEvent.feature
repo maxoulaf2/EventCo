@@ -15,3 +15,7 @@ Fonctionnalité: Création d'un événement
     Quand je saisis le titre "Repas de Noël" et la date "2026-12-24" puis je valide le formulaire
     Alors je vois un message d'erreur sur le formulaire
     Et je reste sur la page de création d'événement
+
+  Scénario: Création avec une image
+    Quand je saisis le titre "Repas de Noël", la date "2026-12-24" et l'image "https://example.com/photo.jpg" puis je valide le formulaire
+    Alors la requête de création envoyée au serveur contient l'image "https://example.com/photo.jpg"

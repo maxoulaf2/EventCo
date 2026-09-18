@@ -41,6 +41,7 @@ public sealed class GetEventByIdQueryHandler(
             @event.Description,
             @event.EventDate,
             @event.Location,
+            @event.ImageUrl,
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt,

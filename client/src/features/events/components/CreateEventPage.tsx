@@ -10,6 +10,7 @@ export function CreateEventPage() {
   const [eventDate, setEventDate] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const { toEvents } = useAppNavigate()
   const { mutate, isPending, error } = useCreateEvent()
 
@@ -21,6 +22,7 @@ export function CreateEventPage() {
         eventDate,
         location: location || undefined,
         description: description || undefined,
+        imageUrl: imageUrl || undefined,
       },
       { onSuccess: () => toEvents() },
     )
@@ -111,6 +113,22 @@ export function CreateEventPage() {
               placeholder="Dîner sans chichi, on répartit les plats ensemble."
               data-testid="create-event-description-input"
               className={textarea}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="imageUrl" className={fieldLabel}>
+              Image <span className="text-ink/50">— optionnel</span>
+            </label>
+            <input
+              id="imageUrl"
+              name="imageUrl"
+              type="url"
+              value={imageUrl}
+              onChange={(event) => setImageUrl(event.target.value)}
+              placeholder="https://exemple.com/photo.jpg"
+              data-testid="create-event-image-url-input"
+              className={input}
             />
           </div>
 

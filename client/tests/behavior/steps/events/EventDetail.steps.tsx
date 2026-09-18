@@ -17,7 +17,7 @@ interface MockParticipant {
   participationStatus: 'Unknown' | 'Attending' | 'NotAttending'
 }
 
-function eventDetailHandlers(participants: MockParticipant[], currentUserId: { value: string }) {
+function eventDetailHandlers(participants: MockParticipant[], currentUserId: { value: string }, imageUrl: { value: string | null }) {
   return [
     http.get('*/api/events/:id', ({ params }) =>
       HttpResponse.json({
@@ -26,6 +26,7 @@ function eventDetailHandlers(participants: MockParticipant[], currentUserId: { v
         description: null,
         eventDate: '2026-12-24T00:00:00Z',
         location: 'Chez Alice',
+        imageUrl: imageUrl.value,
         createdByUserId: 'user-1',
         status: 'Planned',
         createdAt: '2026-09-01T00:00:00Z',
@@ -78,6 +79,7 @@ function eventDetailHandlers(participants: MockParticipant[], currentUserId: { v
 describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) => {
   let participants: MockParticipant[]
   let currentUserId: { value: string }
+  let eventImageUrl: { value: string | null }
 
   AfterEachScenario(() => {
     server.resetHandlers()
@@ -107,7 +109,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       },
     ]
     currentUserId = { value: 'user-1' }
-    server.use(...eventDetailHandlers(participants, currentUserId))
+    eventImageUrl = { value: null }
+    server.use(...eventDetailHandlers(participants, currentUserId, eventImageUrl))
   })
 
   Scenario('Affichage des informations et des participants', ({ When, Then, And }) => {
@@ -387,6 +390,32 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     Then('je ne vois pas de formulaire de participation', async () => {
       await screen.findByTestId('event-detail-title')
       expect(screen.queryByTestId('event-detail-participation-status-select')).not.toBeInTheDocument()
+    })
+  })
+
+  Scenario('Affichage de l\'image de l\'événement', ({ Given, When, Then }) => {
+    Given('l\'événement a une image', () => {
+      eventImageUrl.value = 'https://example.com/photo.jpg'
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je vois l\'image de l\'événement', async () => {
+      await screen.findByTestId('event-detail-title')
+      expect(screen.getByTestId('event-detail-image')).toHaveAttribute('src', 'https://example.com/photo.jpg')
+    })
+  })
+
+  Scenario('Aucune image affichée si l\'événement n\'en a pas', ({ When, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas d\'image d\'événement', async () => {
+      await screen.findByTestId('event-detail-title')
+      expect(screen.queryByTestId('event-detail-image')).not.toBeInTheDocument()
     })
   })
 })

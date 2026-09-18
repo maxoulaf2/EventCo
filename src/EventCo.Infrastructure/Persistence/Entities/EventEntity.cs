@@ -9,6 +9,7 @@ public class EventEntity
     public string? Description { get; set; }
     public DateTime EventDate { get; set; }
     public string? Location { get; set; }
+    public string? ImageUrl { get; set; }
     public Guid CreatedByUserId { get; set; }
     public EventStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }

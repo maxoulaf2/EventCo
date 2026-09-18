@@ -22,6 +22,9 @@ public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
         builder.Property(e => e.Location)
             .HasMaxLength(300);
 
+        builder.Property(e => e.ImageUrl)
+            .HasMaxLength(2048);
+
         builder.Property(e => e.Status)
             .HasConversion<string>()
             .HasMaxLength(20)

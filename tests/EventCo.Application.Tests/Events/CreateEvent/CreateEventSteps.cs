@@ -36,7 +36,7 @@ public sealed class CreateEventSteps
         _dbContext = _serviceProvider.GetRequiredService<EventCoDbContext>();
     }
 
-    [When(@"je crée l'événement ""(.*)"" prévu le ""(.*)"" au lieu ""(.*)""")]
+    [When(@"je crée l'événement ""(.*)"" prévu le ""(.*)"" au lieu ""([^""]*)""")]
     public async Task JeCreeLevenementPrevuLeAuLieu(string title, string eventDate, string location)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
@@ -45,6 +45,23 @@ public sealed class CreateEventSteps
         {
             _lastResult = await dispatcher.Send(
                 new CreateEventCommand(title, null, DateTime.Parse(eventDate), location),
+                CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            _thrownException = exception;
+        }
+    }
+
+    [When(@"je crée l'événement ""(.*)"" prévu le ""(.*)"" au lieu ""([^""]*)"" avec l'image ""(.*)""")]
+    public async Task JeCreeLevenementPrevuLeAuLieuAvecLimage(string title, string eventDate, string location, string imageUrl)
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+
+        try
+        {
+            _lastResult = await dispatcher.Send(
+                new CreateEventCommand(title, null, DateTime.Parse(eventDate), location, imageUrl),
                 CancellationToken.None);
         }
         catch (Exception exception)
@@ -62,6 +79,12 @@ public sealed class CreateEventSteps
 
     [Then(@"l'événement créé a pour titre ""(.*)""")]
     public void AlorsLevenementCreeAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);
+
+    [Then(@"l'événement créé a pour image ""(.*)""")]
+    public void AlorsLevenementCreeAPourImage(string imageUrl) => Assert.Equal(imageUrl, _lastResult!.ImageUrl);
+
+    [Then(@"l'événement créé n'a pas d'image")]
+    public void AlorsLevenementCreeNaPasDimage() => Assert.Null(_lastResult!.ImageUrl);
 
     [Then(@"je suis inscrit comme organisateur de l'événement créé")]
     public async Task AlorsJeSuisInscritCommeOrganisateurDeLevenementCree()

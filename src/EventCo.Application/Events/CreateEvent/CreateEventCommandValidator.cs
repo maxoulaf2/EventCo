@@ -8,5 +8,6 @@ public sealed class CreateEventCommandValidator : AbstractValidator<CreateEventC
     {
         RuleFor(x => x.Title).NotEmpty();
         RuleFor(x => x.EventDate).NotEmpty();
+        RuleFor(x => x.ImageUrl).MaximumLength(2048);
     }
 }

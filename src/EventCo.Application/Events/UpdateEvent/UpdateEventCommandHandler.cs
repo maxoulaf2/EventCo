@@ -22,6 +22,7 @@ public sealed class UpdateEventCommandHandler(ICurrentUserService currentUserSer
             @event.Description,
             @event.EventDate,
             @event.Location,
+            @event.ImageUrl,
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt);

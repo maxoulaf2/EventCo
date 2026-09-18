@@ -47,7 +47,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> Create(CreateEventRequest request, CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(
-            new CreateEventCommand(request.Title, request.Description, request.EventDate, request.Location),
+            new CreateEventCommand(request.Title, request.Description, request.EventDate, request.Location, request.ImageUrl),
             cancellationToken);
 
         var response = new EventResponse(
@@ -56,6 +56,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.Description,
             result.EventDate,
             result.Location,
+            result.ImageUrl,
             result.CreatedByUserId,
             result.Status,
             result.CreatedAt);
@@ -74,6 +75,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.Description,
             result.EventDate,
             result.Location,
+            result.ImageUrl,
             result.CreatedByUserId,
             result.Status,
             result.CreatedAt,
@@ -102,6 +104,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.Description,
             result.EventDate,
             result.Location,
+            result.ImageUrl,
             result.CreatedByUserId,
             result.Status,
             result.CreatedAt);
