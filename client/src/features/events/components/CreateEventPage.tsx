@@ -5,14 +5,11 @@ import { btnPrimary, fieldLabel, input, textarea } from '../../../shared/lib/ui'
 import { routes } from '../../../shared/lib/routes'
 import { useCreateEvent } from '../hooks/useCreateEvent'
 
-const TEMPLATES = ['Repas de fête', 'Anniversaire', 'Week-end', 'Vide']
-
 export function CreateEventPage() {
   const [title, setTitle] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
-  const [template, setTemplate] = useState(TEMPLATES[0])
   const { toEvents } = useAppNavigate()
   const { mutate, isPending, error } = useCreateEvent()
 
@@ -115,28 +112,6 @@ export function CreateEventPage() {
               data-testid="create-event-description-input"
               className={textarea}
             />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            <span className={fieldLabel}>Modèle de liste</span>
-            <div className="mt-0.5 flex flex-wrap gap-2">
-              {TEMPLATES.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => setTemplate(name)}
-                  aria-pressed={template === name}
-                  data-testid={`create-event-template-${name}`}
-                  className={`min-h-11 rounded-full border px-4.5 text-[13.5px] transition-colors ${
-                    template === name
-                      ? 'border-accent-700 bg-accent-500 text-accent-900'
-                      : 'border-transparent bg-sand-100 text-ink/70 hover:bg-sand-200'
-                  }`}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
           </div>
 
           {error && (
