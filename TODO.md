@@ -2,9 +2,16 @@
 
 Ce document est une liste de notes que le développeur se fait à lui même pour plus tard, Claude Code n'a pas besoin de prendre cela en compte dans ses reflexions.
 
+# Doing
+
 # Notes
 
+- Connexion auto si cookie déjà present
+- Confirmation de participation à l'ouverture d'un evenement (je viens ou je ne viens pas)
 - mettre en place un lien d'invitation plutot que d'inviter des personnes précises
+- permettre de configurer l'image
+- permettre de configurer l'image de profil et le nom d'un utilisateur à sa première connexion
+- Invitation pareil
 - Précision de l'heure dans l'evenement
 - Changer les queries pour simplifier au max et faire directement une requête en base specifique
 - Mettre un rate limit sur l'envoi de mail pour éviter le spam
