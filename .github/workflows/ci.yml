@@ -151,6 +151,26 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.e2e.yml down -v
 
+  # Permet de relancer la régénération des captures de référence (workflow "Update visual
+  # baselines") directement depuis ce run CI, sans aller chercher l'autre workflow dans
+  # l'onglet Actions. Le job attend une approbation manuelle (bouton "Review deployments"
+  # affiché sur ce run) avant de déclencher update-visual-baselines.yml via l'API — configuré
+  # une fois pour toutes via un environment "update-visual-baselines" (Settings > Environments)
+  # avec soi-même en required reviewer ; sans cette configuration, le job attend indéfiniment.
+  trigger-update-baselines:
+    name: Régénérer les captures de référence ?
+    needs: frontend-visual-tests
+    if: always() && needs.frontend-visual-tests.result == 'failure'
+    runs-on: ubuntu-latest
+    environment: update-visual-baselines
+    permissions:
+      actions: write
+    steps:
+      - name: Déclenche le workflow "Update visual baselines"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run update-visual-baselines.yml --repo "$GITHUB_REPOSITORY" --ref "${{ github.ref_name }}"
+
   # Publie les rapports Playwright en échec sur GitHub Pages, consultables directement dans
   # le navigateur (pas de zip à télécharger). Le site est republié en entier à chaque run où
   # au moins un des deux jobs échoue : un job qui n'échoue pas cette fois-ci ne fournit pas de
