@@ -20,6 +20,7 @@ public class EventTests
         Assert.Equal(creatorId, creatorParticipant.UserId);
         Assert.Equal(ParticipantRole.Organizer, creatorParticipant.Role);
         Assert.True(creatorParticipant.HasJoined);
+        Assert.Equal(ParticipationStatus.Attending, creatorParticipant.ParticipationStatus);
         Assert.Equal(EventStatus.Planned, @event.Status);
     }
 
@@ -161,6 +162,35 @@ public class EventTests
         @event.RemoveParticipant(creatorId, invitedUserId);
 
         Assert.DoesNotContain(@event.Participants, p => p.UserId == invitedUserId);
+    }
+
+    [Fact]
+    public void SetParticipationStatus_UserIsCreator_ThrowsEventCreatorCannotChangeParticipationStatusException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventCreatorCannotChangeParticipationStatusException>(
+            () => @event.SetParticipationStatus(creatorId, ParticipationStatus.NotAttending));
+    }
+
+    [Fact]
+    public void SetParticipationStatus_UserNotParticipant_ThrowsParticipantNotFoundException()
+    {
+        var @event = CreateEvent(out _);
+
+        Assert.Throws<ParticipantNotFoundException>(() => @event.SetParticipationStatus(Guid.NewGuid(), ParticipationStatus.Attending));
+    }
+
+    [Fact]
+    public void SetParticipationStatus_UserIsParticipant_ChangesStatus()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var invitedUserId = Guid.NewGuid();
+        var participant = @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
+
+        @event.SetParticipationStatus(invitedUserId, ParticipationStatus.Attending);
+
+        Assert.Equal(ParticipationStatus.Attending, participant.ParticipationStatus);
     }
 
     [Fact]

@@ -11,6 +11,7 @@ const participants = [
     role: 'Organizer',
     invitedAt: '2026-09-01T00:00:00Z',
     hasJoined: true,
+    participationStatus: 'Attending',
   },
   {
     userId: 'user-2',
@@ -19,6 +20,7 @@ const participants = [
     role: 'Participant',
     invitedAt: '2026-09-02T00:00:00Z',
     hasJoined: false,
+    participationStatus: 'Unknown',
   },
 ]
 
@@ -105,6 +107,43 @@ Given("je suis sur le détail d'un événement avec le formulaire d'ajout de tâ
   )
   await page.goto('/events/event-1')
   await page.getByTestId('add-task-title-input').fill('Guirlandes')
+})
+
+Given("je suis sur le détail d'un événement avec le statut de participation renseigné", async ({ page }) => {
+  await mockEventDetail(page)
+  // Copie locale au scénario : la route GET partagée (mockEventDetail) sert le tableau `participants` du
+  // module tel quel, or ce scénario est le seul à faire évoluer un statut après un PUT — muter le tableau
+  // partagé fuiterait vers les autres scénarios de ce fichier (mêmes objets, même worker Playwright).
+  const localParticipants = participants.map((p) => ({ ...p }))
+  await page.route('**/api/events/event-1', (route) =>
+    route.fulfill({
+      json: {
+        id: 'event-1',
+        title: 'Repas de Noël',
+        description: 'Un bon repas de fêtes entre amis.',
+        eventDate: '2026-12-24T00:00:00Z',
+        location: 'Chez Alice',
+        createdByUserId: 'user-1',
+        status: 'Planned',
+        createdAt: '2026-09-01T00:00:00Z',
+        participants: localParticipants,
+      },
+    }),
+  )
+  // Le créateur (user-1) ne voit pas ce dropdown (statut "Attending" fixe côté Domain) : ce scénario
+  // se place du point de vue d'un simple participant (user-2), seul à pouvoir indiquer son statut.
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({ json: { userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' } }),
+  )
+  await page.route('**/api/events/event-1/participation-status', async (route) => {
+    const { status } = route.request().postDataJSON() as { status: string }
+    localParticipants[1].participationStatus = status
+    await route.fulfill({ status: 204 })
+  })
+  await page.goto('/events/event-1')
+  await page.getByTestId('event-detail-participation-status-select').click()
+  await page.getByTestId('event-detail-participation-status-select-option-Attending').click()
+  await expect(page.getByTestId('event-detail-participation-status-select')).toHaveText('Je viens !')
 })
 
 Given("je suis sur le détail d'un événement avec une erreur d'invitation", async ({ page }) => {

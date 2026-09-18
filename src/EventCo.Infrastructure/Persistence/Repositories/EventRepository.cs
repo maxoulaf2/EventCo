@@ -34,6 +34,9 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case ParticipantRoleChangedDomainEvent e:
                     await UpdateParticipantRole(@event, e.ParticipantId, cancellationToken);
                     break;
+                case ParticipantParticipationStatusChangedDomainEvent e:
+                    await UpdateParticipantParticipationStatus(@event, e.ParticipantId, cancellationToken);
+                    break;
                 case ParticipantRemovedDomainEvent e:
                     await DeleteParticipant(e.ParticipantId, cancellationToken);
                     break;
@@ -100,6 +103,13 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         var participant = @event.Participants.Single(p => p.Id == participantId);
         var entity = await FindParticipantEntityAsync(participantId, cancellationToken);
         entity.Role = participant.Role;
+    }
+
+    private async Task UpdateParticipantParticipationStatus(Event @event, Guid participantId, CancellationToken cancellationToken)
+    {
+        var participant = @event.Participants.Single(p => p.Id == participantId);
+        var entity = await FindParticipantEntityAsync(participantId, cancellationToken);
+        entity.ParticipationStatus = participant.ParticipationStatus;
     }
 
     private async Task DeleteParticipant(Guid participantId, CancellationToken cancellationToken)

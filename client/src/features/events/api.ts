@@ -1,5 +1,5 @@
 import { apiFetch } from '../../shared/lib/api'
-import type { CreateEventInput, EventDetail, MyEvent } from './types'
+import type { CreateEventInput, EventDetail, MyEvent, ParticipationStatus } from './types'
 
 export function getMyEvents(): Promise<MyEvent[]> {
   return apiFetch<MyEvent[]>('/api/events')
@@ -28,5 +28,12 @@ export function inviteParticipant(eventId: string, email: string): Promise<void>
   return apiFetch(`/api/events/${eventId}/participants`, {
     method: 'POST',
     body: JSON.stringify({ email }),
+  })
+}
+
+export function setParticipationStatus(eventId: string, status: ParticipationStatus): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/participation-status`, {
+    method: 'PUT',
+    body: JSON.stringify({ status }),
   })
 }

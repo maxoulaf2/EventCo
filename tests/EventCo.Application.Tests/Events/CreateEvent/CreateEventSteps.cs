@@ -74,5 +74,6 @@ public sealed class CreateEventSteps
         Assert.Equal(_currentUserId, creatorParticipant.UserId);
         Assert.Equal(ParticipantRole.Organizer, creatorParticipant.Role);
         Assert.NotNull(creatorParticipant.JoinedAt);
+        Assert.Equal(ParticipationStatus.Attending, creatorParticipant.ParticipationStatus);
     }
 }

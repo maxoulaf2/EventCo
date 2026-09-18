@@ -13,6 +13,7 @@ using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.ReopenTask;
+using EventCo.Application.Events.SetParticipationStatus;
 using EventCo.Application.Events.UpdateEvent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -83,7 +84,8 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
                 p.DisplayName,
                 p.Role,
                 p.InvitedAt,
-                p.HasJoined)).ToList());
+                p.HasJoined,
+                p.ParticipationStatus)).ToList());
 
         return Ok(response);
     }
@@ -130,7 +132,8 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.DisplayName,
             result.Role,
             result.InvitedAt,
-            result.HasJoined);
+            result.HasJoined,
+            result.ParticipationStatus);
 
         return Created($"api/events/{id}", response);
     }
@@ -217,6 +220,14 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> DemoteParticipant(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new DemoteToParticipantCommand(id, userId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/participation-status")]
+    public async Task<IActionResult> SetParticipationStatus(Guid id, SetParticipationStatusRequest request, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new SetParticipationStatusCommand(id, request.Status), cancellationToken);
 
         return NoContent();
     }

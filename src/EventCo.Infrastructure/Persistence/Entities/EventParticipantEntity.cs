@@ -10,4 +10,5 @@ public class EventParticipantEntity
     public ParticipantRole Role { get; set; }
     public DateTime InvitedAt { get; set; }
     public DateTime? JoinedAt { get; set; }
+    public ParticipationStatus ParticipationStatus { get; set; }
 }

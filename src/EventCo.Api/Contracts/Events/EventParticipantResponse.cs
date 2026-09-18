@@ -7,4 +7,5 @@ public sealed record EventParticipantResponse(
     string DisplayName,
     string Role,
     DateTime InvitedAt,
-    bool HasJoined);
+    bool HasJoined,
+    string ParticipationStatus);

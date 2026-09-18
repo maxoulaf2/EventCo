@@ -54,6 +54,9 @@
 - [x] Frontend : page de création d'événement
 - [x] Frontend : page de détail d'un événement (infos + liste des participants)
 - [x] Frontend : formulaire d'invitation de participants
+- [x] Endpoint + Command : indication du statut de participation par le participant lui-même (`PUT /api/events/{id}/participation-status`) + dropdown frontend sur la page de détail (« Je viens ! » / « Je ne viens pas » / « Je ne sais pas encore si je viens », statut par défaut `Unknown` pour un participant invité)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur : ni `cadrage-projet-eventco.md` ni ce backlog ne prévoyaient de statut de participation — distinct du flow d'invitation existant (`EventParticipant.JoinedAt`/`HasJoined`, qui ne reflète que l'acceptation de l'invitation, pas l'intention de présence).
+  > Corrigé le même jour (rule 5) : le créateur de l'événement ne voit pas ce dropdown et ne peut pas modifier son propre statut, fixé à `Attending` par défaut (garde appliquée côté Domain, pas seulement côté UI). Portée limitée à `CreatedByUserId` (pas à tout `Role == Organizer`) — à confirmer si les co-organisateurs promus doivent aussi être concernés.
 
 ## Lot 3 — Tâches et temps réel
 

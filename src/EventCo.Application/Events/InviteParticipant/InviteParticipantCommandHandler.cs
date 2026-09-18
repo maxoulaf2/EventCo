@@ -38,7 +38,8 @@ public sealed class InviteParticipantCommandHandler(
             user.DisplayName,
             participant.Role.ToString(),
             participant.InvitedAt,
-            participant.HasJoined);
+            participant.HasJoined,
+            participant.ParticipationStatus.ToString());
     }
 
     private static string DisplayNameFromEmail(string email) => email[..email.IndexOf('@')];

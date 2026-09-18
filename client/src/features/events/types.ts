@@ -20,6 +20,8 @@ export interface CreateEventInput {
 
 export type ParticipantRole = 'Organizer' | 'Participant'
 
+export type ParticipationStatus = 'Unknown' | 'Attending' | 'NotAttending'
+
 export interface EventParticipant {
   userId: string
   email: string
@@ -27,6 +29,7 @@ export interface EventParticipant {
   role: ParticipantRole
   invitedAt: string
   hasJoined: boolean
+  participationStatus: ParticipationStatus
 }
 
 export interface EventDetail {

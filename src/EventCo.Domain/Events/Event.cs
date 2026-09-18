@@ -106,6 +106,16 @@ public class Event : Entity
         AddDomainEvent(new ParticipantJoinedDomainEvent(Id, participant.Id));
     }
 
+    public void SetParticipationStatus(Guid userId, ParticipationStatus status)
+    {
+        if (userId == CreatedByUserId)
+            throw new EventCreatorCannotChangeParticipationStatusException(Id, userId);
+
+        var participant = GetParticipant(userId);
+        participant.ChangeParticipationStatus(status);
+        AddDomainEvent(new ParticipantParticipationStatusChangedDomainEvent(Id, participant.Id));
+    }
+
     public void PromoteToOrganizer(Guid actingUserId, Guid targetUserId)
     {
         EnsureActingUserIsCreator(actingUserId);

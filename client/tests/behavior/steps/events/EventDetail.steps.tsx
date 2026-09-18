@@ -15,9 +15,10 @@ interface MockParticipant {
   role: 'Organizer' | 'Participant'
   invitedAt: string
   hasJoined: boolean
+  participationStatus: 'Unknown' | 'Attending' | 'NotAttending'
 }
 
-function eventDetailHandlers(participants: MockParticipant[]) {
+function eventDetailHandlers(participants: MockParticipant[], currentUserId: { value: string }) {
   return [
     http.get('*/api/events/:id', ({ params }) =>
       HttpResponse.json({
@@ -39,6 +40,14 @@ function eventDetailHandlers(participants: MockParticipant[]) {
       }
       return new HttpResponse(null, { status: 204 })
     }),
+    http.put('*/api/events/:id/participation-status', async ({ request }) => {
+      const { status } = (await request.json()) as { status: MockParticipant['participationStatus'] }
+      const participant = participants.find((p) => p.userId === currentUserId.value)
+      if (participant) {
+        participant.participationStatus = status
+      }
+      return new HttpResponse(null, { status: 204 })
+    }),
     http.post('*/api/events/:id/participants', async ({ request, params }) => {
       const { email } = (await request.json()) as { email: string }
 
@@ -56,6 +65,7 @@ function eventDetailHandlers(participants: MockParticipant[]) {
         role: 'Participant',
         invitedAt: '2026-09-03T00:00:00Z',
         hasJoined: false,
+        participationStatus: 'Unknown',
       }
       participants.push(newParticipant)
 
@@ -69,6 +79,7 @@ function eventDetailHandlers(participants: MockParticipant[]) {
 
 describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) => {
   let participants: MockParticipant[]
+  let currentUserId: { value: string }
 
   AfterEachScenario(() => {
     server.resetHandlers()
@@ -86,6 +97,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         role: 'Organizer',
         invitedAt: '2026-09-01T00:00:00Z',
         hasJoined: true,
+        // Le créateur vient par définition (cf. Event.Create côté Domain) : jamais "Unknown" pour lui.
+        participationStatus: 'Attending',
       },
       {
         userId: 'user-2',
@@ -94,9 +107,11 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         role: 'Participant',
         invitedAt: '2026-09-02T00:00:00Z',
         hasJoined: false,
+        participationStatus: 'Unknown',
       },
     ]
-    server.use(...eventDetailHandlers(participants))
+    currentUserId = { value: 'user-1' }
+    server.use(...eventDetailHandlers(participants, currentUserId))
   })
 
   Scenario('Affichage des informations et des participants', ({ When, Then, And }) => {
@@ -176,6 +191,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
   Scenario('Un participant qui n\'est pas le créateur ne voit aucune action', ({ Given, When, Then }) => {
     Given('je ne suis pas le créateur de cet événement', () => {
+      currentUserId.value = 'user-2'
       server.use(
         http.get('*/api/auth/me', () =>
           HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
@@ -242,6 +258,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
   Scenario('Un co-organisateur non créateur peut aussi inviter un participant', ({ Given, When, Then }) => {
     Given('je suis un co-organisateur non créateur de cet événement', () => {
       participants[1].role = 'Organizer'
+      currentUserId.value = 'user-2'
       server.use(
         http.get('*/api/auth/me', () =>
           HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
@@ -262,6 +279,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
   Scenario('Un simple participant ne voit pas le formulaire d\'invitation', ({ Given, When, Then }) => {
     Given('je ne suis pas le créateur de cet événement', () => {
+      currentUserId.value = 'user-2'
       server.use(
         http.get('*/api/auth/me', () =>
           HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
@@ -295,6 +313,84 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     Then('je suis redirigé vers la page de connexion', async () => {
       await screen.findByTestId('login-page-title')
+    })
+  })
+
+  Scenario('Statut de participation par défaut pour un simple participant', ({ Given, When, Then }) => {
+    Given('je ne suis pas le créateur de cet événement', () => {
+      currentUserId.value = 'user-2'
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('mon statut de participation affiché est "Je ne sais pas encore si je viens"', async () => {
+      const trigger = await screen.findByTestId('event-detail-participation-status-select')
+      expect(trigger).toHaveTextContent('Je ne sais pas encore si je viens')
+    })
+  })
+
+  Scenario('J\'indique que je viens', ({ Given, When, And, Then }) => {
+    Given('je ne suis pas le créateur de cet événement', () => {
+      currentUserId.value = 'user-2'
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('j\'indique le statut de participation "Je viens !"', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participation-status-select'))
+      await user.click(await screen.findByTestId('event-detail-participation-status-select-option-Attending'))
+    })
+
+    Then('mon statut de participation affiché est "Je viens !"', async () => {
+      await waitFor(() => {
+        const trigger = screen.getByTestId('event-detail-participation-status-select')
+        expect(trigger).toHaveTextContent('Je viens !')
+      })
+    })
+  })
+
+  Scenario('Le formulaire de participation n\'est pas affiché pour un utilisateur non participant', ({ Given, When, Then }) => {
+    Given('je ne participe pas à cet événement', () => {
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-3', email: 'exterieur@example.com', displayName: 'Exterieur' }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas de formulaire de participation', async () => {
+      await screen.findByTestId('event-detail-title')
+      expect(screen.queryByTestId('event-detail-participation-status-select')).not.toBeInTheDocument()
+    })
+  })
+
+  Scenario('Le créateur ne voit pas le formulaire de participation', ({ When, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas de formulaire de participation', async () => {
+      await screen.findByTestId('event-detail-title')
+      expect(screen.queryByTestId('event-detail-participation-status-select')).not.toBeInTheDocument()
     })
   })
 })

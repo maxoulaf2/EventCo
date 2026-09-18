@@ -31,7 +31,8 @@ public sealed class GetEventByIdQueryHandler(
                     user.DisplayName,
                     participant.Role.ToString(),
                     participant.InvitedAt,
-                    participant.HasJoined);
+                    participant.HasJoined,
+                    participant.ParticipationStatus.ToString());
             })
             .ToList();
 

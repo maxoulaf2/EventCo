@@ -27,6 +27,11 @@ public class EventParticipantConfiguration : IEntityTypeConfiguration<EventParti
 
         builder.Property(p => p.JoinedAt);
 
+        builder.Property(p => p.ParticipationStatus)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+
         builder.HasIndex(p => new { p.EventId, p.UserId }).IsUnique();
 
         builder.HasOne<UserEntity>()

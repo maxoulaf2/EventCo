@@ -4,15 +4,23 @@ import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { TaskList } from '../../tasks/components/TaskList'
 import { Avatar } from '../../../shared/components/Avatar'
 import { Modal } from '../../../shared/components/Modal'
+import { Select } from '../../../shared/components/Select'
 import { Tag } from '../../../shared/components/Tag'
 import { ApiError } from '../../../shared/lib/api'
 import { routes } from '../../../shared/lib/routes'
 import { useDemoteParticipant } from '../hooks/useDemoteParticipant'
 import { useEventDetail } from '../hooks/useEventDetail'
 import { usePromoteParticipant } from '../hooks/usePromoteParticipant'
+import { useSetParticipationStatus } from '../hooks/useSetParticipationStatus'
 import { InviteParticipantForm } from './InviteParticipantForm'
 import eventPhoto from '../../../assets/event-photo.jpg'
-import type { EventParticipant } from '../types'
+import type { EventParticipant, ParticipationStatus } from '../types'
+
+const PARTICIPATION_STATUS_LABELS: Record<ParticipationStatus, string> = {
+  Attending: 'Je viens !',
+  NotAttending: 'Je ne viens pas',
+  Unknown: 'Je ne sais pas encore si je viens',
+}
 
 function formatDate(iso: string): string {
   const date = new Date(iso)
@@ -27,6 +35,7 @@ export function EventDetailPage() {
   const { data: currentUser } = useCurrentUser()
   const promoteParticipant = usePromoteParticipant(eventId!)
   const demoteParticipant = useDemoteParticipant(eventId!)
+  const setParticipationStatus = useSetParticipationStatus(eventId!)
   const [isParticipantsModalOpen, setIsParticipantsModalOpen] = useState(false)
 
   if (isError && error instanceof ApiError && error.status === 401) {
@@ -136,7 +145,7 @@ export function EventDetailPage() {
       {event && (
         <>
           <div className="flex flex-col gap-6 px-5.5 pt-5.5 lg:grid lg:grid-cols-2 lg:gap-10 lg:px-8.5 lg:pb-9">
-            <div className="flex flex-col overflow-hidden">
+            <div className="flex flex-col">
               <div className="h-52 flex-none overflow-hidden rounded-3xl lg:h-64">
                 <img src={eventPhoto} alt="" className="h-full w-full object-cover opacity-95 saturate-[0.6] contrast-[0.85] brightness-110" />
               </div>
@@ -180,6 +189,28 @@ export function EventDetailPage() {
                   <p data-testid="event-detail-description" className="mt-4 max-w-md text-[15px] text-ink/75">
                     {event.description}
                   </p>
+                )}
+
+                {!isCreator && isParticipant && currentParticipant && (
+                  <div className="mt-4 max-w-xs">
+                    <label
+                      htmlFor="event-detail-participation-status-select"
+                      className="mb-1.5 ml-4 block text-[10px] tracking-[0.11em] text-accent-700 uppercase"
+                    >
+                      Ma participation
+                    </label>
+                    <Select
+                      id="event-detail-participation-status-select"
+                      testId="event-detail-participation-status-select"
+                      value={currentParticipant.participationStatus}
+                      onChange={(status) => setParticipationStatus.mutate(status as ParticipationStatus)}
+                      disabled={setParticipationStatus.isPending}
+                      options={(Object.keys(PARTICIPATION_STATUS_LABELS) as ParticipationStatus[]).map((status) => ({
+                        value: status,
+                        label: PARTICIPATION_STATUS_LABELS[status],
+                      }))}
+                    />
+                  </div>
                 )}
 
                 <button

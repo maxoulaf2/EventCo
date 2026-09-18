@@ -55,3 +55,23 @@ Fonctionnalité: Détail d'un événement
     Etant donné que ma session a expiré
     Quand j'arrive sur le détail de l'événement
     Alors je suis redirigé vers la page de connexion
+
+  Scénario: Statut de participation par défaut pour un simple participant
+    Etant donné que je ne suis pas le créateur de cet événement
+    Quand j'arrive sur le détail de l'événement
+    Alors mon statut de participation affiché est "Je ne sais pas encore si je viens"
+
+  Scénario: J'indique que je viens
+    Etant donné que je ne suis pas le créateur de cet événement
+    Quand j'arrive sur le détail de l'événement
+    Et j'indique le statut de participation "Je viens !"
+    Alors mon statut de participation affiché est "Je viens !"
+
+  Scénario: Le formulaire de participation n'est pas affiché pour un utilisateur non participant
+    Etant donné que je ne participe pas à cet événement
+    Quand j'arrive sur le détail de l'événement
+    Alors je ne vois pas de formulaire de participation
+
+  Scénario: Le créateur ne voit pas le formulaire de participation
+    Quand j'arrive sur le détail de l'événement
+    Alors je ne vois pas de formulaire de participation
