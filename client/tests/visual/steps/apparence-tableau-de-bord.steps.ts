@@ -42,3 +42,10 @@ Given('je suis sur le tableau de bord sans événement', async ({ page }) => {
   await page.goto('/events')
   await expect(page.getByTestId('events-dashboard-empty-message')).toBeVisible()
 })
+
+Given("j'ai ouvert la modale de mon compte depuis le tableau de bord", async ({ page }) => {
+  await page.route('**/api/events', (route) => route.fulfill({ json: [] }))
+  await page.goto('/events')
+  await page.getByTestId('events-dashboard-account-button').click()
+  await expect(page.getByTestId('account-modal-logout-button')).toBeVisible()
+})

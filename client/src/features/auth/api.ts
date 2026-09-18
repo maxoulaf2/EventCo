@@ -18,3 +18,7 @@ export function verifyMagicLink(token: string): Promise<VerifyMagicLinkResult> {
 export function getCurrentUser(): Promise<CurrentUser> {
   return apiFetch<CurrentUser>('/api/auth/me')
 }
+
+export function logout(): Promise<void> {
+  return apiFetch('/api/auth/logout', { method: 'POST' })
+}

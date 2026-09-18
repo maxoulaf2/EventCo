@@ -50,4 +50,20 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
 
         return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName));
     }
+
+    // Le token de session est auto-porté (cf. SessionTokenService) : la déconnexion ne fait que
+    // supprimer le cookie côté navigateur, sans registre de révocation côté serveur.
+    [Authorize]
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete(SessionCookie.Name, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !environment.IsDevelopment(),
+            SameSite = SameSiteMode.Lax,
+        });
+
+        return NoContent();
+    }
 }

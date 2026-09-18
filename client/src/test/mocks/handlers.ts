@@ -23,6 +23,8 @@ export const handlers = [
     }),
   ),
 
+  http.post('*/api/auth/logout', () => new HttpResponse(null, { status: 204 })),
+
   http.get('*/api/events', () =>
     HttpResponse.json([
       {

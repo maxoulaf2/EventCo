@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
+import { AccountModal } from '../../auth/components/AccountModal'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { ApiError } from '../../../shared/lib/api'
 import { btnPrimary } from '../../../shared/lib/ui'
@@ -22,6 +24,7 @@ function formatDate(iso: string): string {
 export function EventsDashboardPage() {
   const { data: events, isPending, isError, error } = useMyEvents()
   const { data: currentUser } = useCurrentUser()
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false)
 
   if (isError && error instanceof ApiError && error.status === 401) {
     return <Navigate to={routes.login} replace />
@@ -40,8 +43,20 @@ export function EventsDashboardPage() {
             Mes événements
           </h1>
         </div>
-        {currentUser && <span className="inline-grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sage-600 text-[15px] font-semibold text-bg">{currentUser.displayName.charAt(0).toUpperCase()}</span>}
+        {currentUser && (
+          <button
+            type="button"
+            onClick={() => setIsAccountModalOpen(true)}
+            aria-label="Mon compte"
+            data-testid="events-dashboard-account-button"
+            className="inline-grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sage-600 text-[15px] font-semibold text-bg transition-colors hover:bg-sage-700"
+          >
+            {currentUser.displayName.charAt(0).toUpperCase()}
+          </button>
+        )}
       </div>
+
+      <AccountModal open={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
 
       <div className="flex flex-1 flex-col gap-3.5 px-5.5 pt-6">
         {isPending && (
