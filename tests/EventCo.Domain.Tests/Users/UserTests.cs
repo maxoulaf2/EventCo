@@ -37,4 +37,12 @@ public class UserTests
         Assert.Equal("Alice B.", user.DisplayName);
         Assert.Equal("https://example.com/avatar.png", user.AvatarUrl);
     }
+
+    [Fact]
+    public void UpdateProfile_EmptyDisplayName_ThrowsUserDisplayNameEmptyException()
+    {
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
+
+        Assert.Throws<UserDisplayNameEmptyException>(() => user.UpdateProfile("  ", null));
+    }
 }

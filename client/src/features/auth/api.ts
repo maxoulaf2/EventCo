@@ -22,3 +22,10 @@ export function getCurrentUser(): Promise<CurrentUser> {
 export function logout(): Promise<void> {
   return apiFetch('/api/auth/logout', { method: 'POST' })
 }
+
+export function updateProfile(displayName: string): Promise<CurrentUser> {
+  return apiFetch<CurrentUser>('/api/auth/me', {
+    method: 'PUT',
+    body: JSON.stringify({ displayName }),
+  })
+}

@@ -2,6 +2,7 @@ using EventCo.Api.Auth;
 using EventCo.Api.Contracts.Auth;
 using EventCo.Application.Auth.GetCurrentUser;
 using EventCo.Application.Auth.RequestMagicLink;
+using EventCo.Application.Auth.UpdateProfile;
 using EventCo.Application.Auth.VerifyMagicLink;
 using EventCo.Application.Common.Messaging;
 using Microsoft.AspNetCore.Authorization;
@@ -47,6 +48,15 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(new GetCurrentUserQuery(), cancellationToken);
+
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName));
+    }
+
+    [Authorize]
+    [HttpPut("me")]
+    public async Task<IActionResult> UpdateProfile(UpdateProfileRequest request, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new UpdateProfileCommand(request.DisplayName), cancellationToken);
 
         return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName));
     }

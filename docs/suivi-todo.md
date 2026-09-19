@@ -97,6 +97,9 @@
   > Tâche identifiée en cours de route (rule 5, 2026-09-18), suite à un bug remonté par le développeur : `LoginPage` (route `/`) ne consultait jamais `GET /api/auth/me` et affichait donc systématiquement le formulaire de connexion, même avec un cookie de session valide. Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
 - [x] Frontend : modale de gestion de compte au clic sur l'icône de profil (tableau de bord), avec pour l'instant un bouton de déconnexion (endpoint `POST /api/auth/logout`)
   > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur. Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
+- [x] Endpoint + Command : modification du nom d'affichage de l'utilisateur courant (`PUT /api/auth/me`) + formulaire frontend dans la modale de gestion de compte
+  > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur. `User.UpdateProfile`/`UserProfileUpdatedDomainEvent` existaient déjà côté Domain (anticipés lors du refactoring du 2026-09-10, cf. `conventions-code.md` §1.2) mais n'étaient exercés par aucun Command.
+  > Référence visuelle de la modale de compte (`tests/visual/__screenshots__/`, scénario déjà existant "Modale de mon compte ouverte depuis le tableau de bord") devenue obsolète suite à l'ajout du formulaire — à régénérer via le workflow GitHub Actions `update-visual-baselines` (cf. `conventions-code.md` §2.3, jamais `test:visual:update` en local) puis à valider/committer par le développeur.
 - [ ] Audit et ajustement du responsive sur toutes les pages (mobile-first)
 - [ ] Configuration PWA : `manifest.json`, icônes, service worker basique
 - [ ] Test d'installation PWA sur mobile (Android/iOS)

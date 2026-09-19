@@ -4,9 +4,7 @@ Ce document est une liste de notes que le développeur se fait à lui même pour
 
 # Notes
 
-- pouvoir  se désassigner d'une tâche
 - mettre en place un lien d'invitation plutot que d'inviter des personnes précises
-- permettre de configurer l'image
 - permettre de configurer l'image de profil et le nom d'un utilisateur à sa première connexion
 - Invitation pareil
 - Précision de l'heure dans l'evenement

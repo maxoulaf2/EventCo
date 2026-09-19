@@ -23,6 +23,15 @@ export const handlers = [
     }),
   ),
 
+  http.put('*/api/auth/me', async ({ request }) => {
+    const body = (await request.json()) as { displayName: string }
+    return HttpResponse.json({
+      userId: 'user-1',
+      email: 'test@example.com',
+      displayName: body.displayName,
+    })
+  }),
+
   http.post('*/api/auth/logout', () => new HttpResponse(null, { status: 204 })),
 
   http.get('*/api/events', () =>
