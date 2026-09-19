@@ -19,7 +19,7 @@ interface TagProps {
 export function Tag({ variant = 'sand', className = '', children }: TagProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium tracking-wide ${VARIANTS[variant]} ${className}`}
+      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium tracking-wide whitespace-nowrap ${VARIANTS[variant]} ${className}`}
     >
       {children}
     </span>

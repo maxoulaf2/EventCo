@@ -100,28 +100,32 @@ export function EventDetailPage() {
     return (
       <li
         data-testid={`participant-row-${participant.userId}`}
-        className="flex min-h-14 items-center gap-3 rounded-full bg-surface px-3.5 py-2"
+        className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 rounded-[1.75rem] bg-surface px-3.5 py-2"
       >
-        <Avatar name={participant.displayName} />
-        <div className="flex-1">
-          <div className="text-[15px] font-semibold text-ink">{participant.displayName}</div>
-          <div className="text-[12.5px] text-ink/55">
-            {participant.userId === event?.createdByUserId
-              ? 'Créateur·ice'
-              : participant.role === 'Organizer'
-                ? 'Co-organisateur·ice'
-                : 'Participant'}
+        <div className="flex min-w-0 grow items-center gap-3">
+          <Avatar name={participant.displayName} />
+          <div className="min-w-0">
+            <div className="truncate text-[15px] font-semibold text-ink">{participant.displayName}</div>
+            <div className="truncate text-[12.5px] text-ink/55">
+              {participant.userId === event?.createdByUserId
+                ? 'Créateur·ice'
+                : participant.role === 'Organizer'
+                  ? 'Co-organisateur·ice'
+                  : 'Participant'}
+            </div>
           </div>
         </div>
         <span data-testid={`participant-role-badge-${participant.userId}`} className="sr-only">
           {participant.role === 'Organizer' ? 'Co-organisateur' : 'Participant'}
         </span>
-        <Tag variant={PARTICIPATION_STATUS_TAG_VARIANT[participant.participationStatus]}>
-          <span data-testid={`participant-participation-badge-${participant.userId}`}>
-            {PARTICIPATION_STATUS_ROW_LABELS[participant.participationStatus]}
-          </span>
-        </Tag>
-        {renderParticipantAction(participant)}
+        <div className="ml-auto flex shrink-0 items-center gap-3">
+          <Tag variant={PARTICIPATION_STATUS_TAG_VARIANT[participant.participationStatus]}>
+            <span data-testid={`participant-participation-badge-${participant.userId}`}>
+              {PARTICIPATION_STATUS_ROW_LABELS[participant.participationStatus]}
+            </span>
+          </Tag>
+          {renderParticipantAction(participant)}
+        </div>
       </li>
     )
   }

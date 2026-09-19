@@ -133,7 +133,7 @@ export function TaskList({
                         <li
                           key={task.id}
                           data-testid={`task-item-${task.id}`}
-                          className={`flex min-h-14 items-center gap-3 rounded-full bg-surface px-3.5 ${
+                          className={`flex min-h-14 items-center gap-3 rounded-[1.75rem] bg-surface px-3.5 ${
                             !task.isDone && !task.assignedToUserId && tab === 'todo'
                               ? 'shadow-[inset_0_0_0_1.5px_var(--color-accent-600)]'
                               : ''
