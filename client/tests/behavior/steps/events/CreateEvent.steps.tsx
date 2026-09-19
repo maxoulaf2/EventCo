@@ -94,4 +94,63 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
       expect(requestBody?.imageUrl).toBe('https://example.com/photo.jpg')
     })
   })
+
+  Scenario('Création avec une heure précisée', ({ When, Then }) => {
+    let requestBody: { eventDate?: string } | undefined
+
+    When(
+      'je saisis le titre "Repas de Noël", la date "2026-12-24" et l\'heure "19:30" puis je valide le formulaire',
+      async () => {
+        server.use(
+          http.post('*/api/events', async ({ request }) => {
+            requestBody = (await request.json()) as { eventDate?: string }
+            return HttpResponse.json(
+              { id: 'event-new', title: 'Repas de Noël', description: null, eventDate: requestBody.eventDate, location: null, imageUrl: null, createdByUserId: 'user-1', status: 'Draft', createdAt: '2026-09-08T00:00:00Z' },
+              { status: 201 },
+            )
+          }),
+        )
+
+        const user = userEvent.setup()
+        await user.type(screen.getByTestId('create-event-title-input'), 'Repas de Noël')
+        fireEvent.change(screen.getByTestId('create-event-date-input'), { target: { value: '2026-12-24' } })
+        fireEvent.change(screen.getByTestId('create-event-time-input'), { target: { value: '19:30' } })
+        await user.click(screen.getByTestId('create-event-submit-button'))
+      },
+    )
+
+    Then('la requête de création envoyée au serveur contient la date "2026-12-24T19:30:00.000Z"', async () => {
+      await screen.findByTestId('events-dashboard-title')
+      expect(requestBody?.eventDate).toBe('2026-12-24T19:30:00.000Z')
+    })
+  })
+
+  Scenario('Création sans heure précisée', ({ When, Then }) => {
+    let requestBody: { eventDate?: string } | undefined
+
+    When(
+      'je saisis le titre "Repas de Noël" et la date "2026-12-24" puis je valide le formulaire',
+      async () => {
+        server.use(
+          http.post('*/api/events', async ({ request }) => {
+            requestBody = (await request.json()) as { eventDate?: string }
+            return HttpResponse.json(
+              { id: 'event-new', title: 'Repas de Noël', description: null, eventDate: requestBody.eventDate, location: null, imageUrl: null, createdByUserId: 'user-1', status: 'Draft', createdAt: '2026-09-08T00:00:00Z' },
+              { status: 201 },
+            )
+          }),
+        )
+
+        const user = userEvent.setup()
+        await user.type(screen.getByTestId('create-event-title-input'), 'Repas de Noël')
+        fireEvent.change(screen.getByTestId('create-event-date-input'), { target: { value: '2026-12-24' } })
+        await user.click(screen.getByTestId('create-event-submit-button'))
+      },
+    )
+
+    Then('la requête de création envoyée au serveur contient la date "2026-12-24T00:00:00.000Z"', async () => {
+      await screen.findByTestId('events-dashboard-title')
+      expect(requestBody?.eventDate).toBe('2026-12-24T00:00:00.000Z')
+    })
+  })
 })

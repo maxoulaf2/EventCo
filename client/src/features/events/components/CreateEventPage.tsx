@@ -8,6 +8,7 @@ import { useCreateEvent } from '../hooks/useCreateEvent'
 export function CreateEventPage() {
   const [title, setTitle] = useState('')
   const [eventDate, setEventDate] = useState('')
+  const [eventTime, setEventTime] = useState('')
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
   const [imageUrl, setImageUrl] = useState('')
@@ -20,6 +21,7 @@ export function CreateEventPage() {
       {
         title,
         eventDate,
+        eventTime: eventTime || undefined,
         location: location || undefined,
         description: description || undefined,
         imageUrl: imageUrl || undefined,
@@ -80,6 +82,21 @@ export function CreateEventPage() {
               value={eventDate}
               onChange={(event) => setEventDate(event.target.value)}
               data-testid="create-event-date-input"
+              className={input}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="eventTime" className={fieldLabel}>
+              Heure <span className="text-ink/50">— optionnel</span>
+            </label>
+            <input
+              id="eventTime"
+              name="eventTime"
+              type="time"
+              value={eventTime}
+              onChange={(event) => setEventTime(event.target.value)}
+              data-testid="create-event-time-input"
               className={input}
             />
           </div>

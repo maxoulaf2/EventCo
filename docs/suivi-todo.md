@@ -63,6 +63,9 @@
 - [x] Image d'événement configurable par le créateur à la création (`Event.ImageUrl`, optionnelle) + suppression de l'image placeholder statique du détail d'événement
   > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur : ni `cadrage-projet-eventco.md` ni ce backlog ne prévoyaient d'image pour un événement. Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail (champ `string?` façon `User.AvatarUrl`, pas d'upload de fichier — décision explicite du développeur).
   > **Portée limitée à la création** (pas de modification de l'image via `PUT /api/events/{id}`/`UpdateEvent`, à la différence des autres champs de détail) : demande explicite du développeur, pas d'édition post-création pour l'instant — à revisiter si le besoin se confirme.
+- [x] Frontend : possibilité de préciser l'heure de l'événement à la création (champ optionnel, en plus de la date)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-19), à la demande explicite du développeur. Aucun changement backend nécessaire : `Event.EventDate` (Domain) est déjà un `DateTime` complet (date + heure), déjà exploité par `EventDetailPage` (`formatDate` affiche déjà l'heure) — seul le formulaire de création forçait l'heure à `00:00:00.000Z` (`client/src/features/events/api.ts`). Nouveau champ `Heure` (`type="time"`, optionnel, `create-event-time-input`) à côté du champ `Date` existant ; valeur par défaut `00:00` si non renseignée, pour ne pas changer le comportement existant quand l'heure n'est pas précisée.
+  > Référence visuelle de la page de création (`tests/visual/__screenshots__/`, scénarios "formulaire de création d'événement") devenue obsolète suite à l'ajout du champ Heure — à régénérer via le workflow GitHub Actions `update-visual-baselines` (cf. `conventions-code.md` §2.3, jamais `test:visual:update` en local) puis à valider/committer par le développeur.
 
 ## Lot 3 — Tâches et temps réel
 

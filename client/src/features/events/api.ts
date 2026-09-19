@@ -6,9 +6,10 @@ export function getMyEvents(): Promise<MyEvent[]> {
 }
 
 export function createEvent(input: CreateEventInput): Promise<{ id: string }> {
+  const { eventTime, ...rest } = input
   return apiFetch<{ id: string }>('/api/events', {
     method: 'POST',
-    body: JSON.stringify({ ...input, eventDate: `${input.eventDate}T00:00:00.000Z` }),
+    body: JSON.stringify({ ...rest, eventDate: `${input.eventDate}T${eventTime || '00:00'}:00.000Z` }),
   })
 }
 

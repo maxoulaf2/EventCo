@@ -14,6 +14,7 @@ export interface CreateEventInput {
   title: string
   description?: string
   eventDate: string
+  eventTime?: string
   location?: string
   imageUrl?: string
 }
