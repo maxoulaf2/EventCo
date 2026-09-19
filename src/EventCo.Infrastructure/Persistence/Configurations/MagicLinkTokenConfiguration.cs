@@ -27,5 +27,8 @@ public class MagicLinkTokenConfiguration : IEntityTypeConfiguration<MagicLinkTok
         builder.Property(t => t.ExpiresAt).IsRequired();
 
         builder.Property(t => t.ConsumedAt);
+
+        builder.Property(t => t.EventInviteLinkToken)
+            .HasMaxLength(64);
     }
 }

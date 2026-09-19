@@ -25,6 +25,9 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case EventStatusChangedDomainEvent:
                     await UpdateEventStatus(@event, cancellationToken);
                     break;
+                case EventInviteLinkRegeneratedDomainEvent:
+                    await UpdateEventInviteLink(@event, cancellationToken);
+                    break;
                 case ParticipantInvitedDomainEvent e:
                     await InsertParticipant(@event, e.ParticipantId, cancellationToken);
                     break;
@@ -80,6 +83,12 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entity = await FindEventEntityAsync(@event.Id, cancellationToken);
         entity.Status = @event.Status;
+    }
+
+    private async Task UpdateEventInviteLink(Event @event, CancellationToken cancellationToken)
+    {
+        var entity = await FindEventEntityAsync(@event.Id, cancellationToken);
+        entity.InviteLinkToken = @event.InviteLinkToken;
     }
 
     private async Task InsertParticipant(Event @event, Guid participantId, CancellationToken cancellationToken)
@@ -167,6 +176,16 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
             .Include(e => e.Participants)
             .Include(e => e.Tasks)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
+        return entity is null ? null : EventMapper.ToDomain(entity);
+    }
+
+    public async Task<Event?> GetByInviteLinkTokenAsync(string token, CancellationToken cancellationToken)
+    {
+        var entity = await dbContext.Events
+            .Include(e => e.Participants)
+            .Include(e => e.Tasks)
+            .FirstOrDefaultAsync(e => e.InviteLinkToken == token, cancellationToken);
 
         return entity is null ? null : EventMapper.ToDomain(entity);
     }

@@ -17,7 +17,12 @@ interface MockParticipant {
   participationStatus: 'Unknown' | 'Attending' | 'NotAttending'
 }
 
-function eventDetailHandlers(participants: MockParticipant[], currentUserId: { value: string }, imageUrl: { value: string | null }) {
+function eventDetailHandlers(
+  participants: MockParticipant[],
+  currentUserId: { value: string },
+  imageUrl: { value: string | null },
+  inviteLinkToken: { value: string | null },
+) {
   return [
     http.get('*/api/events/:id', ({ params }) =>
       HttpResponse.json({
@@ -31,8 +36,13 @@ function eventDetailHandlers(participants: MockParticipant[], currentUserId: { v
         status: 'Planned',
         createdAt: '2026-09-01T00:00:00Z',
         participants,
+        inviteLinkToken: inviteLinkToken.value,
       }),
     ),
+    http.post('*/api/events/:id/invite-link/regenerate', ({ params }) => {
+      inviteLinkToken.value = 'invite-token-2'
+      return HttpResponse.json({ eventId: params.id, inviteLinkToken: inviteLinkToken.value })
+    }),
     http.post('*/api/events/:id/participants/:userId/promote', ({ params }) => {
       const participant = participants.find((p) => p.userId === params.userId)
       if (participant) {
@@ -80,6 +90,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
   let participants: MockParticipant[]
   let currentUserId: { value: string }
   let eventImageUrl: { value: string | null }
+  let eventInviteLinkToken: { value: string | null }
 
   AfterEachScenario(() => {
     server.resetHandlers()
@@ -110,7 +121,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     ]
     currentUserId = { value: 'user-1' }
     eventImageUrl = { value: null }
-    server.use(...eventDetailHandlers(participants, currentUserId, eventImageUrl))
+    eventInviteLinkToken = { value: 'invite-token-1' }
+    server.use(...eventDetailHandlers(participants, currentUserId, eventImageUrl, eventInviteLinkToken))
   })
 
   Scenario('Affichage des informations et des participants', ({ When, Then, And }) => {
@@ -416,6 +428,59 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     Then('je ne vois pas d\'image d\'événement', async () => {
       await screen.findByTestId('event-detail-title')
       expect(screen.queryByTestId('event-detail-image')).not.toBeInTheDocument()
+    })
+  })
+
+  Scenario('Le créateur peut copier et régénérer le lien d\'invitation', ({ When, And, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('j\'ouvre la modale des participants', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
+    })
+
+    Then('je vois le lien d\'invitation', async () => {
+      const shareUrl = await screen.findByTestId('invite-link-share-url')
+      expect(shareUrl).toHaveTextContent('invite-token-1')
+    })
+
+    When('je régénère le lien d\'invitation', async () => {
+      const user = userEvent.setup()
+      await user.click(screen.getByTestId('invite-link-regenerate-button'))
+      await user.click(await screen.findByTestId('invite-link-regenerate-confirm-button'))
+    })
+
+    Then('le lien d\'invitation affiché change', async () => {
+      await waitFor(() => {
+        expect(screen.getByTestId('invite-link-share-url')).toHaveTextContent('invite-token-2')
+      })
+    })
+  })
+
+  Scenario('Un simple participant ne voit pas le lien d\'invitation', ({ Given, When, And, Then }) => {
+    Given('je ne suis pas le créateur de cet événement', () => {
+      currentUserId.value = 'user-2'
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('j\'ouvre la modale des participants', async () => {
+      const user = userEvent.setup()
+      await user.click(await screen.findByTestId('event-detail-participants-button'))
+    })
+
+    Then('je ne vois pas le lien d\'invitation', async () => {
+      await screen.findByTestId('participant-row-user-2')
+      expect(screen.queryByTestId('invite-link-share-box')).not.toBeInTheDocument()
     })
   })
 })

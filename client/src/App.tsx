@@ -6,6 +6,7 @@ import { VerifyMagicLinkPage } from './features/auth/components/VerifyMagicLinkP
 import { CreateEventPage } from './features/events/components/CreateEventPage'
 import { EventDetailPage } from './features/events/components/EventDetailPage'
 import { EventsDashboardPage } from './features/events/components/EventsDashboardPage'
+import { InviteLinkPage } from './features/events/components/InviteLinkPage'
 import { routes } from './shared/lib/routes'
 
 const queryClient = new QueryClient()
@@ -20,6 +21,7 @@ export function AppRoutes() {
       <Route path={routes.events} element={<EventsDashboardPage />} />
       <Route path={routes.createEvent} element={<CreateEventPage />} />
       <Route path="/events/:eventId" element={<EventDetailPage />} />
+      <Route path="/invite/:token" element={<InviteLinkPage />} />
     </Routes>
   )
 }

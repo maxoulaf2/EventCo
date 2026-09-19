@@ -4,10 +4,6 @@ Ce document est une liste de notes que le développeur se fait à lui même pour
 
 # Notes
 
-- mettre en place un lien d'invitation plutot que d'inviter des personnes précises
-- permettre de configurer l'image de profil et le nom d'un utilisateur à sa première connexion
-- Invitation pareil
-- Précision de l'heure dans l'evenement
 - Changer les queries pour simplifier au max et faire directement une requête en base specifique
 - Mettre un rate limit sur l'envoi de mail pour éviter le spam
 - Plutôt que d'avoir un EventContext dans les tests d'API, utiliser des services de résolution d'ID basé sur les informations de la step (le titre de l'event) pour éviter au maximum d'avoir un state courant du contexte

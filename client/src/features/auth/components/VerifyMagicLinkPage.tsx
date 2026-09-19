@@ -8,7 +8,7 @@ export function VerifyMagicLinkPage() {
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
   const { mutate, isPending, isSuccess, isError, data } = useVerifyMagicLink()
-  const { toEvents } = useAppNavigate()
+  const { toEvents, toEventDetail } = useAppNavigate()
   const hasRequested = useRef(false)
 
   useEffect(() => {
@@ -19,10 +19,14 @@ export function VerifyMagicLinkPage() {
   }, [token, mutate])
 
   useEffect(() => {
-    if (isSuccess) {
-      toEvents()
+    if (isSuccess && data) {
+      if (data.eventId) {
+        toEventDetail(data.eventId)
+      } else {
+        toEvents()
+      }
     }
-  }, [isSuccess, toEvents])
+  }, [isSuccess, data, toEvents, toEventDetail])
 
   if (!token) {
     return (

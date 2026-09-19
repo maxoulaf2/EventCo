@@ -7,4 +7,6 @@ public sealed class EventContext
     public Guid? EventId { get; set; }
 
     public Guid? CreatedByUserId { get; set; }
+
+    public string? InviteLinkToken { get; set; }
 }

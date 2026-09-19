@@ -43,4 +43,13 @@ export interface EventDetail {
   status: EventStatus
   createdAt: string
   participants: EventParticipant[]
+  inviteLinkToken: string | null
+}
+
+export interface EventInvitePreview {
+  eventId: string
+  title: string
+  eventDate: string
+  location: string | null
+  createdByDisplayName: string
 }

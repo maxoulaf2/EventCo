@@ -1,4 +1,5 @@
 using EventCo.Domain.Events;
+using EventCo.Domain.Events.DomainEvents;
 using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Domain.Tests.Events;
@@ -8,7 +9,7 @@ public class EventTests
     private static Event CreateEvent(out Guid creatorId)
     {
         creatorId = Guid.NewGuid();
-        return Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", null, creatorId, DateTime.UtcNow);
+        return Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", null, "invite-token", creatorId, DateTime.UtcNow);
     }
 
     [Fact]
@@ -26,7 +27,7 @@ public class EventTests
     [Fact]
     public void Create_EmptyTitle_ThrowsEventTitleEmptyException()
     {
-        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, null, Guid.NewGuid(), DateTime.UtcNow));
+        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, null, "invite-token", Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Fact]
@@ -40,7 +41,7 @@ public class EventTests
     [Fact]
     public void Create_WithImageUrl_ImageUrlIsSet()
     {
-        var @event = Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", "https://example.com/photo.jpg", Guid.NewGuid(), DateTime.UtcNow);
+        var @event = Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", "https://example.com/photo.jpg", "invite-token", Guid.NewGuid(), DateTime.UtcNow);
 
         Assert.Equal("https://example.com/photo.jpg", @event.ImageUrl);
     }
@@ -548,5 +549,56 @@ public class EventTests
         var task = @event.AddTask(taskCreatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
 
         Assert.Throws<ParticipantCannotDeleteOthersTaskException>(() => @event.RemoveTask(otherParticipantId, task.Id));
+    }
+
+    [Fact]
+    public void JoinViaInviteLink_NewUser_AddsParticipantAndRaisesDomainEvent()
+    {
+        var @event = CreateEvent(out _);
+        var joiningUserId = Guid.NewGuid();
+
+        var participant = @event.JoinViaInviteLink(joiningUserId, DateTime.UtcNow);
+
+        Assert.Contains(@event.Participants, p => p.UserId == joiningUserId);
+        Assert.Equal(ParticipantRole.Participant, participant.Role);
+        Assert.Contains(@event.DomainEvents, e => e is ParticipantInvitedDomainEvent);
+    }
+
+    [Fact]
+    public void JoinViaInviteLink_AlreadyParticipant_ReturnsExistingParticipantWithoutNewDomainEvent()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var joiningUserId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, joiningUserId, DateTime.UtcNow);
+        @event.ClearDomainEvents();
+
+        var participant = @event.JoinViaInviteLink(joiningUserId, DateTime.UtcNow);
+
+        Assert.Equal(joiningUserId, participant.UserId);
+        Assert.Single(@event.Participants, p => p.UserId == joiningUserId);
+        Assert.Empty(@event.DomainEvents);
+    }
+
+    [Fact]
+    public void RegenerateInviteLink_ActingUserNotCreatorNorOrganizer_ThrowsUserNotEventOrganizerException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventOrganizerException>(() => @event.RegenerateInviteLink(regularParticipantId, "new-token"));
+    }
+
+    [Fact]
+    public void RegenerateInviteLink_ActingUserIsCreator_ChangesTokenAndRaisesDomainEvent()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var previousToken = @event.InviteLinkToken;
+
+        @event.RegenerateInviteLink(creatorId, "new-token");
+
+        Assert.Equal("new-token", @event.InviteLinkToken);
+        Assert.NotEqual(previousToken, @event.InviteLinkToken);
+        Assert.Contains(@event.DomainEvents, e => e is EventInviteLinkRegeneratedDomainEvent);
     }
 }

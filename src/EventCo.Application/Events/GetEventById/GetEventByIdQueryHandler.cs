@@ -1,5 +1,6 @@
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
+using EventCo.Domain.Events;
 using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Application.Events.GetEventById;
@@ -15,7 +16,12 @@ public sealed class GetEventByIdQueryHandler(
         var @event = await eventRepository.GetByIdAsync(request.EventId, cancellationToken)
             ?? throw new EventNotFoundException(request.EventId);
 
-        @event.EnsureCanBeViewedBy(currentUserService.UserId!.Value);
+        var currentUserId = currentUserService.UserId!.Value;
+        @event.EnsureCanBeViewedBy(currentUserId);
+
+        var isCreatorOrOrganizer = @event.CreatedByUserId == currentUserId
+            || @event.Participants.Any(p => p.UserId == currentUserId && p.Role == ParticipantRole.Organizer);
+        var inviteLinkToken = isCreatorOrOrganizer ? @event.InviteLinkToken : null;
 
         var userIds = @event.Participants.Select(p => p.UserId).ToList();
         var users = await userRepository.GetByIdsAsync(userIds, cancellationToken);
@@ -45,6 +51,7 @@ public sealed class GetEventByIdQueryHandler(
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt,
-            participants);
+            participants,
+            inviteLinkToken);
     }
 }

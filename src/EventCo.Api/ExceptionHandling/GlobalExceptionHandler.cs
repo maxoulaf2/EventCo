@@ -21,6 +21,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             EventNotFoundException notFoundException => (
                 StatusCodes.Status404NotFound,
                 new ProblemDetails { Title = "Ressource introuvable", Detail = notFoundException.Message }),
+            InviteLinkNotFoundException inviteLinkNotFoundException => (
+                StatusCodes.Status404NotFound,
+                new ProblemDetails { Title = "Ressource introuvable", Detail = inviteLinkNotFoundException.Message }),
             UserNotEventCreatorException forbiddenException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenException.Message }),

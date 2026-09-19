@@ -8,6 +8,7 @@ namespace EventCo.Application.Auth.VerifyMagicLink;
 public sealed class VerifyMagicLinkCommandHandler(
     IMagicLinkTokenRepository magicLinkTokenRepository,
     IUserRepository userRepository,
+    IEventRepository eventRepository,
     ISessionTokenService sessionTokenService,
     IDateTimeProvider dateTimeProvider) : ICommandHandler<VerifyMagicLinkCommand, VerifyMagicLinkResult>
 {
@@ -31,7 +32,20 @@ public sealed class VerifyMagicLinkCommandHandler(
 
         var session = sessionTokenService.CreateSessionToken(user.Id, user.Email.Value, now);
 
-        return new VerifyMagicLinkResult(user.Id, user.Email.Value, user.DisplayName, session.Value, session.ExpiresAt);
+        Guid? eventId = null;
+        if (token.EventInviteLinkToken is not null)
+        {
+            var joinedEvent = await eventRepository.GetByInviteLinkTokenAsync(token.EventInviteLinkToken, cancellationToken);
+            if (joinedEvent is not null)
+            {
+                joinedEvent.JoinViaInviteLink(user.Id, now);
+                await eventRepository.ApplyAsync(joinedEvent, cancellationToken);
+                eventId = joinedEvent.Id;
+            }
+            // joinedEvent null (lien régénéré entre-temps) : on ignore silencieusement, la connexion reste valide.
+        }
+
+        return new VerifyMagicLinkResult(user.Id, user.Email.Value, user.DisplayName, session.Value, session.ExpiresAt, eventId);
     }
 
     private static string DisplayNameFromEmail(string email) => email[..email.IndexOf('@')];

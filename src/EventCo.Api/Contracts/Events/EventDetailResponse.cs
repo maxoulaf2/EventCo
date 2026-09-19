@@ -10,4 +10,5 @@ public sealed record EventDetailResponse(
     Guid CreatedByUserId,
     string Status,
     DateTime CreatedAt,
-    IReadOnlyList<EventParticipantResponse> Participants);
+    IReadOnlyList<EventParticipantResponse> Participants,
+    string? InviteLinkToken);

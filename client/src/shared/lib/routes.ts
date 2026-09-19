@@ -10,6 +10,7 @@ export const routes = {
   events: '/events',
   createEvent: '/events/new',
   eventDetail: (eventId: string) => `/events/${eventId}`,
+  inviteLink: (token: string) => `/invite/${token}`,
 } as const
 
 /**
@@ -19,4 +20,5 @@ export const routes = {
  */
 export interface CheckEmailNavigationState {
   email: string
+  eventInviteLinkToken?: string
 }

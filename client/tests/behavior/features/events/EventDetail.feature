@@ -84,3 +84,16 @@ Fonctionnalité: Détail d'un événement
   Scénario: Aucune image affichée si l'événement n'en a pas
     Quand j'arrive sur le détail de l'événement
     Alors je ne vois pas d'image d'événement
+
+  Scénario: Le créateur peut copier et régénérer le lien d'invitation
+    Quand j'arrive sur le détail de l'événement
+    Et j'ouvre la modale des participants
+    Alors je vois le lien d'invitation
+    Quand je régénère le lien d'invitation
+    Alors le lien d'invitation affiché change
+
+  Scénario: Un simple participant ne voit pas le lien d'invitation
+    Etant donné que je ne suis pas le créateur de cet événement
+    Quand j'arrive sur le détail de l'événement
+    Et j'ouvre la modale des participants
+    Alors je ne vois pas le lien d'invitation

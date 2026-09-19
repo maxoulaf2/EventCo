@@ -5,4 +5,5 @@ public sealed record VerifyMagicLinkResult(
     string Email,
     string DisplayName,
     string SessionToken,
-    DateTime SessionExpiresAt);
+    DateTime SessionExpiresAt,
+    Guid? EventId);

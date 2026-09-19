@@ -13,6 +13,7 @@ export function CheckEmailPage() {
   }
 
   const email = state.email
+  const eventInviteLinkToken = state.eventInviteLinkToken
 
   return (
     <main data-testid="check-email-page" className="relative flex min-h-screen flex-col bg-bg">
@@ -54,7 +55,7 @@ export function CheckEmailPage() {
         <div className="mt-9 flex w-full flex-col gap-1.5">
           <button
             type="button"
-            onClick={() => mutate(email)}
+            onClick={() => mutate({ email, eventInviteLinkToken })}
             disabled={isPending}
             data-testid="check-email-page-resend-button"
             className={`${btnSecondary} w-full`}

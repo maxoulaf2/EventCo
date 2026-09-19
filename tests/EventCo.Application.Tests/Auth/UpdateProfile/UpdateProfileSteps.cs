@@ -34,6 +34,7 @@ public sealed class UpdateProfileSteps
 
         builder.Services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddSingleton<IEmailSender>(_emailSender);
         builder.Services.AddSingleton<ISessionTokenService, SessionTokenService>();

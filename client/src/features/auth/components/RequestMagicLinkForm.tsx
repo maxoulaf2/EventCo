@@ -3,16 +3,21 @@ import { useAppNavigate } from '../../../shared/hooks/useAppNavigate'
 import { fieldLabel, input } from '../../../shared/lib/ui'
 import { useRequestMagicLink } from '../hooks/useRequestMagicLink'
 
-export function RequestMagicLinkForm() {
+interface RequestMagicLinkFormProps {
+  eventInviteLinkToken?: string
+}
+
+export function RequestMagicLinkForm({ eventInviteLinkToken }: RequestMagicLinkFormProps = {}) {
   const [email, setEmail] = useState('')
   const { toCheckEmail } = useAppNavigate()
   const { mutate, isPending, error } = useRequestMagicLink()
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
-    mutate(email, {
-      onSuccess: () => toCheckEmail({ email }),
-    })
+    mutate(
+      { email, eventInviteLinkToken },
+      { onSuccess: () => toCheckEmail({ email, eventInviteLinkToken }) },
+    )
   }
 
   return (

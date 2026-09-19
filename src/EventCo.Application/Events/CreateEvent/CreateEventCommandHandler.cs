@@ -1,5 +1,6 @@
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
+using EventCo.Application.Common.Security;
 using EventCo.Domain.Events;
 
 namespace EventCo.Application.Events.CreateEvent;
@@ -13,12 +14,14 @@ public sealed class CreateEventCommandHandler(
     public async Task<CreateEventResult> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         var now = dateTimeProvider.UtcNow;
+        var inviteLinkToken = SecureTokenGenerator.GenerateUrlSafeToken();
         var @event = Event.Create(
             request.Title,
             request.Description,
             request.EventDate,
             request.Location,
             request.ImageUrl,
+            inviteLinkToken,
             currentUserService.UserId!.Value,
             now);
 

@@ -3,11 +3,16 @@ using EventCo.Application.Auth.VerifyMagicLink;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
+using EventCo.Application.Events.CreateEvent;
+using EventCo.Application.Events.RegenerateEventInviteLink;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
 using EventCo.Domain.Auth.Exceptions;
+using EventCo.Domain.Users;
+using EventCo.Domain.ValueObjects;
 using EventCo.Infrastructure.Auth;
 using EventCo.Infrastructure.Persistence;
+using EventCo.Infrastructure.Persistence.Entities;
 using EventCo.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -22,11 +27,14 @@ public sealed class VerifyMagicLinkSteps
     private readonly RecordingEmailSender _emailSender;
     private readonly FixedDateTimeProvider _dateTimeProvider;
     private readonly EventCoDbContext _dbContext;
+    private readonly FixedCurrentUserService _organizerCurrentUserService = new(Guid.NewGuid());
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
     private string? _lastRawToken;
     private VerifyMagicLinkResult? _lastResult;
     private Exception? _thrownException;
+    private Guid? _eventId;
+    private string? _eventInviteLinkToken;
 
     public VerifyMagicLinkSteps()
     {
@@ -36,6 +44,8 @@ public sealed class VerifyMagicLinkSteps
 
         builder.Services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IEventRepository, EventRepository>();
+        builder.Services.AddScoped<ICurrentUserService>(_ => _organizerCurrentUserService);
         builder.Services.AddSingleton<IDateTimeProvider>(_dateTimeProvider);
         builder.Services.AddSingleton<IEmailSender>(_emailSender);
         builder.Services.AddSingleton<ISessionTokenService, SessionTokenService>();
@@ -60,6 +70,40 @@ public sealed class VerifyMagicLinkSteps
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
         await dispatcher.Send(new RequestMagicLinkCommand(email), CancellationToken.None);
         _lastRawToken = ExtractRawToken(_emailSender.SentEmails.Last().HtmlBody);
+    }
+
+    [Given(@"un événement ""(.*)"" avec un lien d'invitation actif")]
+    public async Task EtantDonneUnEvenementAvecUnLienDinvitationActif(string title)
+    {
+        var userRepository = _serviceProvider.GetRequiredService<IUserRepository>();
+        var organizer = User.Create(Email.From("organisateur-invite-link@example.com"), "Organisateur", _now);
+        await userRepository.ApplyAsync(organizer, CancellationToken.None);
+        await _serviceProvider.GetRequiredService<IUnitOfWork>().SaveChangesAsync(CancellationToken.None);
+        _organizerCurrentUserService.UserId = organizer.Id;
+
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        var createResult = await dispatcher.Send(new CreateEventCommand(title, null, _now.AddDays(1), null), CancellationToken.None);
+        _eventId = createResult.EventId;
+
+        var eventRepository = _serviceProvider.GetRequiredService<IEventRepository>();
+        var @event = await eventRepository.GetByIdAsync(_eventId.Value, CancellationToken.None);
+        _eventInviteLinkToken = @event!.InviteLinkToken;
+    }
+
+    [Given(@"un lien de connexion avec intention de rejoindre cet événement est demandé pour ""(.*)""")]
+    [When(@"un lien de connexion avec intention de rejoindre cet événement est demandé pour ""(.*)""")]
+    public async Task UnLienDeConnexionAvecIntentionDeRejoindreCetEvenementEstDemandePour(string email)
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        await dispatcher.Send(new RequestMagicLinkCommand(email, _eventInviteLinkToken), CancellationToken.None);
+        _lastRawToken = ExtractRawToken(_emailSender.SentEmails.Last().HtmlBody);
+    }
+
+    [Given(@"le lien d'invitation de cet événement est régénéré")]
+    public async Task EtantDonneLeLienDinvitationDeCetEvenementEstRegenere()
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        await dispatcher.Send(new RegenerateEventInviteLinkCommand(_eventId!.Value), CancellationToken.None);
     }
 
     [When(@"le temps avance de (\d+) minutes")]
@@ -124,6 +168,22 @@ public sealed class VerifyMagicLinkSteps
         var token = _dbContext.MagicLinkTokens.Single(t => t.Email == email.ToLowerInvariant());
         Assert.NotNull(token.ConsumedAt);
     }
+
+    [Then(@"je rejoins l'événement ""(.*)""")]
+    public void AlorsJeRejoinsLevenement(string title)
+    {
+        Assert.Equal(_eventId, _lastResult!.EventId);
+
+        var eventEntity = _dbContext.Events.Single(e => e.Id == _eventId);
+        Assert.Equal(title, eventEntity.Title);
+
+        var participant = _dbContext.Set<EventParticipantEntity>()
+            .SingleOrDefault(p => p.EventId == _eventId && p.UserId == _lastResult.UserId);
+        Assert.NotNull(participant);
+    }
+
+    [Then(@"je ne rejoins aucun événement")]
+    public void AlorsJeNeRejoinsAucunEvenement() => Assert.Null(_lastResult!.EventId);
 
     private async Task ValiderToken(string token)
     {

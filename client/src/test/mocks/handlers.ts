@@ -12,6 +12,7 @@ export const handlers = [
       userId: 'user-1',
       email: 'test@example.com',
       displayName: 'Test',
+      eventId: null,
     }),
   ),
 
@@ -101,8 +102,25 @@ export const handlers = [
           participationStatus: 'Unknown',
         },
       ],
+      inviteLinkToken: 'invite-token-1',
     }),
   ),
 
   http.get('*/api/events/:id/tasks', () => HttpResponse.json([])),
+
+  http.post('*/api/events/:id/invite-link/regenerate', ({ params }) =>
+    HttpResponse.json({ eventId: params.id, inviteLinkToken: 'invite-token-2' }),
+  ),
+
+  http.get('*/api/events/invite-links/:token/preview', () =>
+    HttpResponse.json({
+      eventId: 'event-1',
+      title: 'Repas de Noël',
+      eventDate: '2026-12-24T00:00:00Z',
+      location: 'Chez Alice',
+      createdByDisplayName: 'Test',
+    }),
+  ),
+
+  http.post('*/api/events/invite-links/:token/join', () => HttpResponse.json({ eventId: 'event-1' })),
 ]

@@ -14,6 +14,7 @@ public class Event : Entity
     public DateTime EventDate { get; private set; }
     public string? Location { get; private set; }
     public string? ImageUrl { get; private set; }
+    public string InviteLinkToken { get; private set; } = null!;
     public Guid CreatedByUserId { get; private set; }
     public EventStatus Status { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -21,7 +22,7 @@ public class Event : Entity
     public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
     public IReadOnlyCollection<EventTask> Tasks => _tasks.AsReadOnly();
 
-    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, Guid createdByUserId, EventStatus status, DateTime createdAt)
+    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken, Guid createdByUserId, EventStatus status, DateTime createdAt)
         : base(id)
     {
         Title = title;
@@ -29,17 +30,18 @@ public class Event : Entity
         EventDate = eventDate;
         Location = location;
         ImageUrl = imageUrl;
+        InviteLinkToken = inviteLinkToken;
         CreatedByUserId = createdByUserId;
         Status = status;
         CreatedAt = createdAt;
     }
 
-    public static Event Create(string title, string? description, DateTime eventDate, string? location, string? imageUrl, Guid createdByUserId, DateTime now)
+    public static Event Create(string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken, Guid createdByUserId, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException();
 
-        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, imageUrl, createdByUserId, EventStatus.Planned, now);
+        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, imageUrl, inviteLinkToken, createdByUserId, EventStatus.Planned, now);
 
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
         @event._participants.Add(creatorParticipant);
@@ -50,11 +52,11 @@ public class Event : Entity
     }
 
     internal static Event Reconstitute(
-        Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl,
+        Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken,
         Guid createdByUserId, EventStatus status, DateTime createdAt,
         IEnumerable<EventParticipant> participants, IEnumerable<EventTask> tasks)
     {
-        var @event = new Event(id, title, description, eventDate, location, imageUrl, createdByUserId, status, createdAt);
+        var @event = new Event(id, title, description, eventDate, location, imageUrl, inviteLinkToken, createdByUserId, status, createdAt);
         @event._participants.AddRange(participants);
         @event._tasks.AddRange(tasks);
         return @event;
@@ -98,6 +100,27 @@ public class Event : Entity
         _participants.Add(participant);
         AddDomainEvent(new ParticipantInvitedDomainEvent(Id, participant.Id));
         return participant;
+    }
+
+    public EventParticipant JoinViaInviteLink(Guid userId, DateTime now)
+    {
+        var existing = _participants.FirstOrDefault(p => p.UserId == userId);
+        if (existing is not null)
+            return existing; // idempotent : recliquer un lien déjà utilisé ramène juste sur l'événement
+
+        var participant = new EventParticipant(Id, userId, ParticipantRole.Participant, now);
+        _participants.Add(participant);
+        // Réutilise ParticipantInvitedDomainEvent : la persistance (insertion) est identique à une
+        // invitation classique, et aucun consommateur ne distingue aujourd'hui les deux origines.
+        AddDomainEvent(new ParticipantInvitedDomainEvent(Id, participant.Id));
+        return participant;
+    }
+
+    public void RegenerateInviteLink(Guid actingUserId, string newToken)
+    {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+        InviteLinkToken = newToken;
+        AddDomainEvent(new EventInviteLinkRegeneratedDomainEvent(Id));
     }
 
     public void SetParticipationStatus(Guid userId, ParticipationStatus status)

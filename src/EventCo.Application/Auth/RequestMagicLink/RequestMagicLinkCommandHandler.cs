@@ -1,7 +1,7 @@
-using System.Security.Cryptography;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
+using EventCo.Application.Common.Security;
 using EventCo.Domain.Auth;
 using EventCo.Domain.ValueObjects;
 using Microsoft.Extensions.Options;
@@ -20,10 +20,10 @@ public sealed class RequestMagicLinkCommandHandler(
         var now = dateTimeProvider.UtcNow;
         var magicLinkOptions = options.Value;
 
-        var rawToken = GenerateRawToken();
+        var rawToken = SecureTokenGenerator.GenerateUrlSafeToken();
         var tokenHash = MagicLinkTokenHasher.Hash(rawToken);
 
-        var token = MagicLinkToken.Create(email, tokenHash, now.AddMinutes(magicLinkOptions.ExpiryMinutes), now);
+        var token = MagicLinkToken.Create(email, tokenHash, now.AddMinutes(magicLinkOptions.ExpiryMinutes), now, request.EventInviteLinkToken);
 
         await magicLinkTokenRepository.ApplyAsync(token, cancellationToken);
 
@@ -35,14 +35,5 @@ public sealed class RequestMagicLinkCommandHandler(
             $"<p>Cliquez sur ce lien pour vous connecter à EventCo (valable {magicLinkOptions.ExpiryMinutes} minutes) :</p>"
             + $"<p><a href=\"{verificationLink}\">{verificationLink}</a></p>",
             cancellationToken);
-    }
-
-    private static string GenerateRawToken()
-    {
-        var bytes = RandomNumberGenerator.GetBytes(32);
-        return Convert.ToBase64String(bytes)
-            .Replace('+', '-')
-            .Replace('/', '_')
-            .TrimEnd('=');
     }
 }

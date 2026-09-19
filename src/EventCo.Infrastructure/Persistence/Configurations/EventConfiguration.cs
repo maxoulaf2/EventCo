@@ -25,6 +25,12 @@ public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
         builder.Property(e => e.ImageUrl)
             .HasMaxLength(2048);
 
+        builder.Property(e => e.InviteLinkToken)
+            .HasMaxLength(64)
+            .IsRequired();
+
+        builder.HasIndex(e => e.InviteLinkToken).IsUnique();
+
         builder.Property(e => e.Status)
             .HasConversion<string>()
             .HasMaxLength(20)

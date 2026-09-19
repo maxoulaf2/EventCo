@@ -26,5 +26,15 @@ public sealed class ExistingEventSteps(SessionContext sessionContext, EventConte
         var createdEvent = await response.Content.ReadFromJsonAsync<EventResponse>();
         eventContext.EventId = createdEvent!.Id;
         eventContext.CreatedByUserId = createdEvent.CreatedByUserId;
+
+        // Le lien d'invitation n'est pas exposé par la réponse de création (EventResponse) — seule la
+        // consultation (GET, réservée créateur/organisateur) l'expose. Récupéré ici, tant que la session
+        // courante est encore celle du créateur, pour rester disponible même après un changement de session
+        // (cf. "je rejoins cet événement via son lien d'invitation via l'API").
+        using var detailRequest = new HttpRequestMessage(HttpMethod.Get, $"/api/events/{eventContext.EventId}");
+        detailRequest.Headers.Add("Cookie", sessionContext.Cookie!);
+        var detailResponse = await client.SendAsync(detailRequest);
+        var eventDetail = await detailResponse.Content.ReadFromJsonAsync<EventDetailResponse>();
+        eventContext.InviteLinkToken = eventDetail!.InviteLinkToken;
     }
 }

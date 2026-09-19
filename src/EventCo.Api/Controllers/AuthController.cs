@@ -18,7 +18,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     [HttpPost("request-link")]
     public async Task<IActionResult> RequestLink(RequestMagicLinkRequest request, CancellationToken cancellationToken)
     {
-        await commandDispatcher.Send(new RequestMagicLinkCommand(request.Email), cancellationToken);
+        await commandDispatcher.Send(new RequestMagicLinkCommand(request.Email, request.EventInviteLinkToken), cancellationToken);
 
         return Accepted();
     }
@@ -40,7 +40,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
             Expires = result.SessionExpiresAt,
         });
 
-        return Ok(new VerifyMagicLinkResponse(result.UserId, result.Email, result.DisplayName));
+        return Ok(new VerifyMagicLinkResponse(result.UserId, result.Email, result.DisplayName, result.EventId));
     }
 
     [Authorize]

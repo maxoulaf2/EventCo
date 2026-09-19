@@ -34,3 +34,18 @@ Fonctionnalité: Validation du lien de connexion (magic link)
     Et le temps avance de 20 minutes
     Et je valide le lien de connexion reçu
     Alors la validation échoue avec une erreur d'expiration
+
+  Scénario: Connexion via un lien associé à une intention de rejoindre un événement
+    Etant donné un événement "Réveillon" avec un lien d'invitation actif
+    Quand un lien de connexion avec intention de rejoindre cet événement est demandé pour "invite-magic@example.com"
+    Et je valide le lien de connexion reçu
+    Alors la validation réussit
+    Et je rejoins l'événement "Réveillon"
+
+  Scénario: Connexion via un lien dont l'événement associé a été régénéré entre-temps
+    Etant donné un événement "Réveillon" avec un lien d'invitation actif
+    Et un lien de connexion avec intention de rejoindre cet événement est demandé pour "invite-perime@example.com"
+    Et le lien d'invitation de cet événement est régénéré
+    Quand je valide le lien de connexion reçu
+    Alors la validation réussit
+    Et je ne rejoins aucun événement

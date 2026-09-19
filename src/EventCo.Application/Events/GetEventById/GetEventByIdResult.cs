@@ -10,7 +10,8 @@ public sealed record GetEventByIdResult(
     Guid CreatedByUserId,
     string Status,
     DateTime CreatedAt,
-    IReadOnlyList<EventParticipantSummary> Participants);
+    IReadOnlyList<EventParticipantSummary> Participants,
+    string? InviteLinkToken);
 
 public sealed record EventParticipantSummary(
     Guid UserId,

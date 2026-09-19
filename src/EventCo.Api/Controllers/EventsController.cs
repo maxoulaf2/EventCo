@@ -8,10 +8,13 @@ using EventCo.Application.Events.DeleteEvent;
 using EventCo.Application.Events.DeleteTask;
 using EventCo.Application.Events.DemoteToParticipant;
 using EventCo.Application.Events.GetEventById;
+using EventCo.Application.Events.GetEventInvitePreviewByToken;
 using EventCo.Application.Events.GetEventTasks;
 using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.InviteParticipant;
+using EventCo.Application.Events.JoinEventViaInviteLink;
 using EventCo.Application.Events.PromoteToOrganizer;
+using EventCo.Application.Events.RegenerateEventInviteLink;
 using EventCo.Application.Events.ReopenTask;
 using EventCo.Application.Events.SetParticipationStatus;
 using EventCo.Application.Events.UnassignTask;
@@ -86,9 +89,35 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
                 p.DisplayName,
                 p.Role,
                 p.InvitedAt,
-                p.ParticipationStatus)).ToList());
+                p.ParticipationStatus)).ToList(),
+            result.InviteLinkToken);
 
         return Ok(response);
+    }
+
+    [HttpPost("{id:guid}/invite-link/regenerate")]
+    public async Task<IActionResult> RegenerateInviteLink(Guid id, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new RegenerateEventInviteLinkCommand(id), cancellationToken);
+
+        return Ok(new RegenerateEventInviteLinkResponse(result.EventId, result.InviteLinkToken));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("invite-links/{token}/preview")]
+    public async Task<IActionResult> GetInviteLinkPreview(string token, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new GetEventInvitePreviewByTokenQuery(token), cancellationToken);
+
+        return Ok(new EventInvitePreviewResponse(result.EventId, result.Title, result.EventDate, result.Location, result.CreatedByDisplayName));
+    }
+
+    [HttpPost("invite-links/{token}/join")]
+    public async Task<IActionResult> JoinViaInviteLink(string token, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new JoinEventViaInviteLinkCommand(token), cancellationToken);
+
+        return Ok(new JoinEventViaInviteLinkResponse(result.EventId));
     }
 
     [HttpPut("{id:guid}")]

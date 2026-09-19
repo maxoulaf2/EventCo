@@ -1,5 +1,5 @@
 import { apiFetch } from '../../shared/lib/api'
-import type { CreateEventInput, EventDetail, MyEvent, ParticipationStatus } from './types'
+import type { CreateEventInput, EventDetail, EventInvitePreview, MyEvent, ParticipationStatus } from './types'
 
 export function getMyEvents(): Promise<MyEvent[]> {
   return apiFetch<MyEvent[]>('/api/events')
@@ -37,4 +37,16 @@ export function setParticipationStatus(eventId: string, status: ParticipationSta
     method: 'PUT',
     body: JSON.stringify({ status }),
   })
+}
+
+export function regenerateInviteLink(eventId: string): Promise<{ eventId: string; inviteLinkToken: string }> {
+  return apiFetch(`/api/events/${eventId}/invite-link/regenerate`, { method: 'POST' })
+}
+
+export function getEventInvitePreview(token: string): Promise<EventInvitePreview> {
+  return apiFetch<EventInvitePreview>(`/api/events/invite-links/${token}/preview`)
+}
+
+export function joinEventViaInviteLink(token: string): Promise<{ eventId: string }> {
+  return apiFetch(`/api/events/invite-links/${token}/join`, { method: 'POST' })
 }

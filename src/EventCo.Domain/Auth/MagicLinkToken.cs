@@ -11,17 +11,19 @@ public class MagicLinkToken : Entity
     public string TokenHash { get; private set; } = null!;
     public DateTime ExpiresAt { get; private set; }
     public DateTime? ConsumedAt { get; private set; }
+    public string? EventInviteLinkToken { get; private set; }
 
     public bool IsConsumed => ConsumedAt is not null;
 
-    private MagicLinkToken(Guid id, Email email, string tokenHash, DateTime expiresAt) : base(id)
+    private MagicLinkToken(Guid id, Email email, string tokenHash, DateTime expiresAt, string? eventInviteLinkToken) : base(id)
     {
         Email = email;
         TokenHash = tokenHash;
         ExpiresAt = expiresAt;
+        EventInviteLinkToken = eventInviteLinkToken;
     }
 
-    public static MagicLinkToken Create(Email email, string tokenHash, DateTime expiresAt, DateTime now)
+    public static MagicLinkToken Create(Email email, string tokenHash, DateTime expiresAt, DateTime now, string? eventInviteLinkToken = null)
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
             throw new MagicLinkTokenHashEmptyException();
@@ -29,13 +31,13 @@ public class MagicLinkToken : Entity
         if (expiresAt <= now)
             throw new MagicLinkTokenExpirationInThePastException(expiresAt);
 
-        var token = new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt);
+        var token = new MagicLinkToken(Guid.NewGuid(), email, tokenHash, expiresAt, eventInviteLinkToken);
         token.AddDomainEvent(new MagicLinkTokenCreatedDomainEvent(token.Id));
         return token;
     }
 
-    internal static MagicLinkToken Reconstitute(Guid id, Email email, string tokenHash, DateTime expiresAt, DateTime? consumedAt) =>
-        new(id, email, tokenHash, expiresAt) { ConsumedAt = consumedAt };
+    internal static MagicLinkToken Reconstitute(Guid id, Email email, string tokenHash, DateTime expiresAt, DateTime? consumedAt, string? eventInviteLinkToken) =>
+        new(id, email, tokenHash, expiresAt, eventInviteLinkToken) { ConsumedAt = consumedAt };
 
     public bool IsExpired(DateTime now) => now >= ExpiresAt;
 

@@ -12,6 +12,7 @@ import { useDemoteParticipant } from '../hooks/useDemoteParticipant'
 import { useEventDetail } from '../hooks/useEventDetail'
 import { usePromoteParticipant } from '../hooks/usePromoteParticipant'
 import { useSetParticipationStatus } from '../hooks/useSetParticipationStatus'
+import { InviteLinkShareBox } from './InviteLinkShareBox'
 import { InviteParticipantForm } from './InviteParticipantForm'
 import type { EventParticipant, ParticipationStatus } from '../types'
 
@@ -300,6 +301,10 @@ export function EventDetailPage() {
                     ))}
                   </ul>
                 </div>
+              )}
+
+              {canInvite && event.inviteLinkToken && (
+                <InviteLinkShareBox eventId={eventId!} token={event.inviteLinkToken} />
               )}
 
               {canInvite && <InviteParticipantForm eventId={eventId!} />}

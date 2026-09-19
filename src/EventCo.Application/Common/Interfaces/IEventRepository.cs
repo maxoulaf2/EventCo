@@ -8,5 +8,7 @@ public interface IEventRepository: IRepository<Event>
 
     Task<Event?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 
+    Task<Event?> GetByInviteLinkTokenAsync(string token, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<Event>> GetByParticipantUserIdAsync(Guid userId, CancellationToken cancellationToken);
 }

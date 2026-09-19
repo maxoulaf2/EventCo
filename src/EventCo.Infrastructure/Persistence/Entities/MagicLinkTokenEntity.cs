@@ -7,4 +7,5 @@ public class MagicLinkTokenEntity
     public string TokenHash { get; set; } = null!;
     public DateTime ExpiresAt { get; set; }
     public DateTime? ConsumedAt { get; set; }
+    public string? EventInviteLinkToken { get; set; }
 }

@@ -7,7 +7,7 @@ namespace EventCo.Infrastructure.Persistence.Mapping;
 internal static class MagicLinkTokenMapper
 {
     public static MagicLinkToken ToDomain(MagicLinkTokenEntity entity) =>
-        MagicLinkToken.Reconstitute(entity.Id, Email.From(entity.Email), entity.TokenHash, entity.ExpiresAt, entity.ConsumedAt);
+        MagicLinkToken.Reconstitute(entity.Id, Email.From(entity.Email), entity.TokenHash, entity.ExpiresAt, entity.ConsumedAt, entity.EventInviteLinkToken);
 
     public static MagicLinkTokenEntity ToEntity(MagicLinkToken domain) => new()
     {
@@ -16,6 +16,7 @@ internal static class MagicLinkTokenMapper
         TokenHash = domain.TokenHash,
         ExpiresAt = domain.ExpiresAt,
         ConsumedAt = domain.ConsumedAt,
+        EventInviteLinkToken = domain.EventInviteLinkToken,
     };
 
     public static void ApplyToEntity(MagicLinkToken domain, MagicLinkTokenEntity entity)

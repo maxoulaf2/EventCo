@@ -1,10 +1,10 @@
 import { apiFetch } from '../../shared/lib/api'
 import type { CurrentUser, VerifyMagicLinkResult } from './types'
 
-export function requestMagicLink(email: string): Promise<void> {
+export function requestMagicLink(email: string, eventInviteLinkToken?: string): Promise<void> {
   return apiFetch('/api/auth/request-link', {
     method: 'POST',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, eventInviteLinkToken }),
   })
 }
 

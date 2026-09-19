@@ -10,6 +10,7 @@ public class EventEntity
     public DateTime EventDate { get; set; }
     public string? Location { get; set; }
     public string? ImageUrl { get; set; }
+    public string InviteLinkToken { get; set; } = null!;
     public Guid CreatedByUserId { get; set; }
     public EventStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
