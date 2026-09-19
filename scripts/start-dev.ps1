@@ -9,8 +9,19 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 
 function Test-DockerRunning {
-    docker info > $null 2>&1
-    return $LASTEXITCODE -eq 0
+    # 2>&1 sur une commande native fait remonter stderr comme une ErrorRecord :
+    # avec $ErrorActionPreference = "Stop", ça devient une exception au lieu
+    # d'être simplement ignoré. On redirige donc stdout et stderr séparément,
+    # et on neutralise temporairement le "Stop" par sécurité.
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = "SilentlyContinue"
+    try {
+        docker info 1>$null 2>$null
+        return $LASTEXITCODE -eq 0
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
 }
 
 Write-Host "==> Vérification de Docker..." -ForegroundColor Cyan
@@ -71,14 +82,17 @@ Start-Process powershell -ArgumentList @(
     "Set-Location '$repoRoot'; dotnet run --project src/EventCo.Api --launch-profile https"
 ) -WindowStyle Normal
 
-Write-Host "==> Démarrage du frontend (npm run dev)..." -ForegroundColor Cyan
+Write-Host "==> Démarrage du frontend (npm run dev -- --host)..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList @(
     "-NoExit", "-Command",
-    "Set-Location '$repoRoot\client'; npm run dev"
+    "Set-Location '$repoRoot\client'; npm run dev -- --host"
 ) -WindowStyle Normal
 
 Write-Host ""
 Write-Host "EventCo démarre dans deux nouvelles fenêtres (backend / frontend) :" -ForegroundColor Green
 Write-Host "  - API      : https://localhost:7166"
-Write-Host "  - Frontend : http://localhost:5173"
+Write-Host "  - Frontend : http://localhost:5173 (et accessible sur le réseau local, cf. URL 'Network' affichée par Vite)"
 Write-Host "  - pgAdmin (optionnel) : docker compose --profile tools up -d pgadmin -> http://localhost:5050"
+Write-Host ""
+Write-Host "Pour tester depuis un téléphone sur le même réseau : set 'Frontend:BaseUrl' (user-secrets) sur l'IP LAN du PC," -ForegroundColor DarkGray
+Write-Host "sinon les liens de connexion (magic link) pointeront vers localhost." -ForegroundColor DarkGray
