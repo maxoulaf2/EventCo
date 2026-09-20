@@ -94,13 +94,12 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Category | enum | `Courses`, `Logistique`, `Autre` |
 | Quantity | string? | texte libre (ex: "2", "1kg") |
 | AssignedToUserId | Guid? | null = non assignée |
-| IsDone | bool | |
 | CreatedAt | DateTime | |
 
 ### 3.2 Règles de gestion des rôles
 - Le **créateur** (`Event.CreatedByUserId`) a les droits ultimes : suppression de l'événement, gestion des rôles des autres participants, retrait de n'importe qui.
 - Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les tâches, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
-- Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement, s'auto-assigner des tâches, et cocher ses propres tâches comme faites.
+- Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement et s'auto-assigner des tâches.
 - Le créateur possède automatiquement une entrée `EventParticipant` avec `Role = Organizer` ; la distinction "droits ultimes" se fait via la comparaison avec `Event.CreatedByUserId`.
 
 ---
@@ -139,8 +138,8 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 ## 5. Contraintes transverses
 
 - **Responsive / mobile-first** : conception et CSS pensés d'abord pour petit écran (Tailwind CSS), adaptation ensuite vers desktop.
-- **Ergonomie tactile** : zones cliquables larges, actions rapides (ex: cocher une tâche en un geste), formulaires courts adaptés à la saisie mobile.
-- **Temps réel** : toute mise à jour d'une tâche (création, assignation, statut) doit être propagée instantanément à tous les participants connectés via SignalR, groupés par événement (un "groupe SignalR" par `EventId`).
+- **Ergonomie tactile** : zones cliquables larges, actions rapides (ex: s'assigner une tâche en un geste), formulaires courts adaptés à la saisie mobile.
+- **Temps réel** : toute mise à jour d'une tâche (création, assignation) doit être propagée instantanément à tous les participants connectés via SignalR, groupés par événement (un "groupe SignalR" par `EventId`).
 - **Sécurité** : tokens de magic link hashés en base, cookies de session en httpOnly, validation stricte des droits par rôle sur chaque action API.
 
 ---
@@ -159,7 +158,7 @@ Ce découpage vise à séquencer le travail de façon à obtenir rapidement une 
 - Gestion des participants et rôles (invitation par email, acceptation)
 
 **Lot 3 — Tâches et temps réel**
-- CRUD des tâches (catégorie, quantité, assignation, statut)
+- CRUD des tâches (catégorie, quantité, assignation)
 - Intégration SignalR pour la synchronisation en temps réel
 
 **Lot 4 — Finitions MVP**

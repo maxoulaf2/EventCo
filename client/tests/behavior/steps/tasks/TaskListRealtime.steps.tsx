@@ -39,7 +39,6 @@ const defaultTasks = [
     category: 'Courses',
     quantity: '1',
     assignedToUserId: null,
-    isDone: false,
     createdAt: '2026-09-01T00:00:00Z',
   },
   {
@@ -49,7 +48,6 @@ const defaultTasks = [
     category: 'Logistique',
     quantity: null,
     assignedToUserId: null,
-    isDone: false,
     createdAt: '2026-09-02T00:00:00Z',
   },
 ]
@@ -88,7 +86,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         category: 'Courses',
         quantity: null,
         assignedToUserId: null,
-        isDone: false,
         createdAt: '2026-09-03T00:00:00Z',
       })
     })
@@ -99,24 +96,24 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
   })
 
-  Scenario('Le statut d\'une tâche se met à jour automatiquement', ({ When, And, Then }) => {
+  Scenario('L\'assignation d\'une tâche se met à jour automatiquement', ({ When, And, Then }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
 
-    And('un autre participant marque la tâche "Bûche au chocolat" comme faite', async () => {
+    And('un autre participant assigne la tâche "Bûche au chocolat"', async () => {
       await screen.findByTestId('task-item-task-1')
-      emit('TaskStatusChanged', { ...defaultTasks[0], taskId: defaultTasks[0].id, isDone: true })
+      emit('TaskAssigned', { ...defaultTasks[0], taskId: defaultTasks[0].id, assignedToUserId: 'user-2' })
     })
 
-    And('je vais sur l\'onglet "Faites"', async () => {
+    And('je vais sur l\'onglet "Assignées"', async () => {
       await waitFor(() => expect(screen.queryByTestId('task-item-task-1')).not.toBeInTheDocument())
       const user = userEvent.setup()
-      await user.click(screen.getByTestId('task-list-tab-done'))
+      await user.click(screen.getByTestId('task-list-tab-assigned'))
     })
 
-    Then('la tâche "Bûche au chocolat" apparaît comme faite', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-checkbox-task-1')).toBeChecked())
+    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "Assignées"', async () => {
+      await waitFor(() => expect(screen.getByTestId('task-item-task-1')).toBeInTheDocument())
     })
   })
 

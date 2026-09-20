@@ -110,9 +110,6 @@ public sealed class CreateTaskSteps
     [Then(@"la tâche créée a pour catégorie ""(.*)""")]
     public void AlorsLaTacheCreeeAPourCategorie(string category) => Assert.Equal(category, _lastResult!.Category);
 
-    [Then(@"la tâche créée n'est pas encore faite")]
-    public void AlorsLaTacheCreeeNestPasEncoreFaite() => Assert.False(_lastResult!.IsDone);
-
     [Then(@"une notification temps réel de création de tâche est diffusée")]
     public void AlorsUneNotificationTempsReelDeCreationDeTacheEstDiffusee()
     {

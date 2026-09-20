@@ -11,7 +11,6 @@ const feature = await loadFeature('tests/behavior/features/tasks/UnassignTask.fe
 const TAB_KEY: Record<string, string> = {
   'À prendre': 'todo',
   Assignées: 'assigned',
-  Faites: 'done',
 }
 
 function buildTasks() {
@@ -23,7 +22,6 @@ function buildTasks() {
       category: 'Courses',
       quantity: '1',
       assignedToUserId: null as string | null,
-      isDone: false,
       createdAt: '2026-09-01T00:00:00Z',
     },
     {
@@ -33,7 +31,6 @@ function buildTasks() {
       category: 'Logistique',
       quantity: null,
       assignedToUserId: null as string | null,
-      isDone: false,
       createdAt: '2026-09-02T00:00:00Z',
     },
   ]

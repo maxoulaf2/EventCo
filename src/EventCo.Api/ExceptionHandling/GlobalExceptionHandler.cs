@@ -36,9 +36,6 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             ParticipantCannotAssignTaskToOthersException forbiddenAssignException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenAssignException.Message }),
-            ParticipantCannotToggleOthersTaskException forbiddenToggleException => (
-                StatusCodes.Status403Forbidden,
-                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenToggleException.Message }),
             ParticipantCannotUnassignOthersTaskException forbiddenUnassignException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenUnassignException.Message }),

@@ -7,5 +7,4 @@ public sealed record CreateTaskResult(
     string Category,
     string? Quantity,
     Guid? AssignedToUserId,
-    bool IsDone,
     DateTime CreatedAt);

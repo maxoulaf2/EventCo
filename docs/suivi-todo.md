@@ -72,6 +72,7 @@
 - [x] Endpoint + Command : création d'une tâche (`POST /api/events/{id}/tasks`)
 - [x] Endpoint + Command : assignation d'une tâche à un participant
 - [x] Endpoint + Command : marquer une tâche comme faite/non faite
+  > **Revenu sur ce concept le 2026-09-20, à la demande explicite du développeur (rule 5)** : le système de tâches ne garde que l'assignation (assigné/non assigné) — la notion de tâche "faite" disparaît entièrement, jugée redondante avec l'assignation. Supprimé en conséquence : Domain (`EventTask.IsDone`/`MarkDone`/`MarkNotDone`, `Event.CompleteTask`/`ReopenTask`/`EnsureActingUserCanToggleTaskDone`, `TaskStatusChangedDomainEvent`, `ParticipantCannotToggleOthersTaskException`), Application (Commands `CompleteTask`/`ReopenTask` et leurs handlers, `TaskStatusChangedDomainEventHandler`, `ITaskRealtimeNotifier.NotifyTaskStatusChanged`), Api (endpoints `POST .../complete` et `.../reopen`, champ `IsDone` des réponses), Infrastructure (colonne `EventTasks.IsDone`, migration `RemoveEventTaskIsDone`) et Frontend (checkbox de la liste des tâches, onglet "Faites", hook `useToggleTaskDone`, message SignalR `TaskStatusChanged`). Concerne aussi la diffusion temps réel des tâches ci-dessous (le "statut" n'y est plus diffusé) et l'interaction rapide de coche ci-dessous (supprimée, seule reste l'assignation/désassignation).
 - [x] Endpoint + Command : suppression d'une tâche
 - [x] Configuration SignalR : Hub `EventHub`, groupement des connexions par `EventId`
 - [x] Diffusion temps réel des événements de tâches (création, assignation, statut, suppression) vers le groupe SignalR concerné
@@ -85,6 +86,7 @@
 - [x] Frontend : connexion au Hub SignalR et mise à jour réactive de la liste de tâches
 - [x] Frontend : formulaire d'ajout de tâche (titre, catégorie, quantité)
 - [x] Frontend : interaction rapide pour cocher une tâche (optimisée mobile)
+  > Supprimée le 2026-09-20 avec le concept de tâche faite/non faite, cf. note ci-dessus.
 - [x] Endpoint + Command : désassignation d'une tâche par un participant (`POST /api/events/{id}/tasks/{taskId}/unassign`) + bouton "Laisser" frontend
   > Tâche identifiée en cours de route (rule 5, 2026-09-18), à la demande explicite du développeur : `Event.UnassignTask` existait côté Domain depuis ce même lot mais n'était exercée par aucun Command (cf. décision du 2026-09-10 dans `conventions-code.md` §1.2). Cf. `docs/journal-avancement.md` du 2026-09-18 pour le détail.
 

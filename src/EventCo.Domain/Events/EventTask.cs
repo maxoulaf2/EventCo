@@ -10,7 +10,6 @@ public class EventTask : Entity
     public TaskCategory Category { get; private set; }
     public string? Quantity { get; private set; }
     public Guid? AssignedToUserId { get; private set; }
-    public bool IsDone { get; private set; }
     public Guid CreatedByUserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
@@ -28,7 +27,7 @@ public class EventTask : Entity
         CreatedAt = createdAt;
     }
 
-    private EventTask(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, Guid createdByUserId, DateTime createdAt)
+    private EventTask(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, Guid createdByUserId, DateTime createdAt)
         : base(id)
     {
         EventId = eventId;
@@ -36,19 +35,14 @@ public class EventTask : Entity
         Category = category;
         Quantity = quantity;
         AssignedToUserId = assignedToUserId;
-        IsDone = isDone;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    internal static EventTask Reconstitute(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, bool isDone, Guid createdByUserId, DateTime createdAt) =>
-        new(id, eventId, title, category, quantity, assignedToUserId, isDone, createdByUserId, createdAt);
+    internal static EventTask Reconstitute(Guid id, Guid eventId, string title, TaskCategory category, string? quantity, Guid? assignedToUserId, Guid createdByUserId, DateTime createdAt) =>
+        new(id, eventId, title, category, quantity, assignedToUserId, createdByUserId, createdAt);
 
     internal void AssignTo(Guid userId) => AssignedToUserId = userId;
 
     internal void Unassign() => AssignedToUserId = null;
-
-    internal void MarkDone() => IsDone = true;
-
-    internal void MarkNotDone() => IsDone = false;
 }

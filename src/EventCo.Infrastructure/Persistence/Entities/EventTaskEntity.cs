@@ -10,7 +10,6 @@ public class EventTaskEntity
     public TaskCategory Category { get; set; }
     public string? Quantity { get; set; }
     public Guid? AssignedToUserId { get; set; }
-    public bool IsDone { get; set; }
     public Guid CreatedByUserId { get; set; }
     public DateTime CreatedAt { get; set; }
 }

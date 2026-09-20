@@ -11,7 +11,7 @@ internal static class EventMapper
             EventParticipant.Reconstitute(p.Id, p.EventId, p.UserId, p.Role, p.InvitedAt, p.ParticipationStatus));
 
         var tasks = entity.Tasks.Select(t =>
-            EventTask.Reconstitute(t.Id, t.EventId, t.Title, t.Category, t.Quantity, t.AssignedToUserId, t.IsDone, t.CreatedByUserId, t.CreatedAt));
+            EventTask.Reconstitute(t.Id, t.EventId, t.Title, t.Category, t.Quantity, t.AssignedToUserId, t.CreatedByUserId, t.CreatedAt));
 
         return Event.Reconstitute(
             entity.Id, entity.Title, entity.Description, entity.EventDate, entity.Location, entity.ImageUrl, entity.InviteLinkToken,
@@ -61,7 +61,6 @@ internal static class EventMapper
         Category = domain.Category,
         Quantity = domain.Quantity,
         AssignedToUserId = domain.AssignedToUserId,
-        IsDone = domain.IsDone,
         CreatedByUserId = domain.CreatedByUserId,
         CreatedAt = domain.CreatedAt,
     };

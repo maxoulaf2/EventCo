@@ -12,7 +12,6 @@ public sealed class TaskRealtimeNotificationsSteps(RealtimeHubConnectionContext 
 
     private readonly TaskCompletionSource<TaskRealtimeDto> _taskCreated = new();
     private readonly TaskCompletionSource<TaskRealtimeDto> _taskAssigned = new();
-    private readonly TaskCompletionSource<TaskRealtimeDto> _taskStatusChanged = new();
     private readonly TaskCompletionSource<TaskDeletedRealtimeDto> _taskDeleted = new();
 
     [Given(@"j'écoute les notifications temps réel de tâches")]
@@ -22,29 +21,18 @@ public sealed class TaskRealtimeNotificationsSteps(RealtimeHubConnectionContext 
 
         connection.On<TaskRealtimeDto>("TaskCreated", task => _taskCreated.TrySetResult(task));
         connection.On<TaskRealtimeDto>("TaskAssigned", task => _taskAssigned.TrySetResult(task));
-        connection.On<TaskRealtimeDto>("TaskStatusChanged", task => _taskStatusChanged.TrySetResult(task));
         connection.On<TaskDeletedRealtimeDto>("TaskDeleted", task => _taskDeleted.TrySetResult(task));
     }
 
     [Then(@"une notification temps réel de création de tâche est reçue pour cette tâche")]
-    public async Task AlorsUneNotificationTempsReelDeCreationDeTacheEstRecuePourCetteTache()
-    {
-        var task = await AttendreReception(_taskCreated.Task);
-        Assert.False(task.IsDone);
-    }
+    public async Task AlorsUneNotificationTempsReelDeCreationDeTacheEstRecuePourCetteTache() =>
+        await AttendreReception(_taskCreated.Task);
 
     [Then(@"une notification temps réel d'assignation de tâche est reçue pour cette tâche")]
     public async Task AlorsUneNotificationTempsReelDassignationDeTacheEstRecuePourCetteTache()
     {
         var task = await AttendreReception(_taskAssigned.Task);
         Assert.NotNull(task.AssignedToUserId);
-    }
-
-    [Then(@"une notification temps réel de changement de statut est reçue pour cette tâche")]
-    public async Task AlorsUneNotificationTempsReelDeChangementDeStatutEstRecuePourCetteTache()
-    {
-        var task = await AttendreReception(_taskStatusChanged.Task);
-        Assert.True(task.IsDone);
     }
 
     [Then(@"une notification temps réel de suppression de tâche est reçue pour cette tâche")]

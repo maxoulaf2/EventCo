@@ -9,7 +9,6 @@ public sealed record TaskRealtimeDto(
     string Category,
     string? Quantity,
     Guid? AssignedToUserId,
-    bool IsDone,
     DateTime CreatedAt)
 {
     public static TaskRealtimeDto FromTask(EventTask task) => new(
@@ -19,6 +18,5 @@ public sealed record TaskRealtimeDto(
         task.Category.ToString(),
         task.Quantity,
         task.AssignedToUserId,
-        task.IsDone,
         task.CreatedAt);
 }

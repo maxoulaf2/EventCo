@@ -16,7 +16,7 @@ Fonctionnalité: Consultation des tâches d'un événement
     Quand je consulte les tâches de cet événement
     Alors la consultation des tâches réussit
     Et l'événement consulté a 2 tâches
-    Et l'événement consulté a une tâche "Bûche au chocolat" de catégorie "Courses" non faite
+    Et l'événement consulté a une tâche "Bûche au chocolat" de catégorie "Courses"
 
   Scénario: Consultation des tâches d'un événement inexistant
     Quand je consulte les tâches d'un événement inexistant

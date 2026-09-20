@@ -24,7 +24,6 @@ public sealed class GetEventTasksQueryHandler(
                 t.Category.ToString(),
                 t.Quantity,
                 t.AssignedToUserId,
-                t.IsDone,
                 t.CreatedAt))
             .ToList();
 

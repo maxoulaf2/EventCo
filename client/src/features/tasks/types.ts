@@ -13,7 +13,6 @@ export interface EventTask {
   category: TaskCategory
   quantity: string | null
   assignedToUserId: string | null
-  isDone: boolean
   createdAt: string
 }
 
@@ -26,7 +25,6 @@ export interface TaskRealtimePayload {
   category: TaskCategory
   quantity: string | null
   assignedToUserId: string | null
-  isDone: boolean
   createdAt: string
 }
 

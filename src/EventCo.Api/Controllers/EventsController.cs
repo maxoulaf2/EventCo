@@ -1,7 +1,6 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.AssignTask;
-using EventCo.Application.Events.CompleteTask;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateTask;
 using EventCo.Application.Events.DeleteEvent;
@@ -15,7 +14,6 @@ using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.JoinEventViaInviteLink;
 using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.RegenerateEventInviteLink;
-using EventCo.Application.Events.ReopenTask;
 using EventCo.Application.Events.SetParticipationStatus;
 using EventCo.Application.Events.UnassignTask;
 using EventCo.Application.Events.UpdateEvent;
@@ -180,7 +178,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             t.Category,
             t.Quantity,
             t.AssignedToUserId,
-            t.IsDone,
             t.CreatedAt));
 
         return Ok(response);
@@ -200,7 +197,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.Category,
             result.Quantity,
             result.AssignedToUserId,
-            result.IsDone,
             result.CreatedAt);
 
         return Created($"api/events/{id}/tasks/{result.TaskId}", response);
@@ -218,22 +214,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> UnassignTask(Guid id, Guid taskId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new UnassignTaskCommand(id, taskId), cancellationToken);
-
-        return NoContent();
-    }
-
-    [HttpPost("{id:guid}/tasks/{taskId:guid}/complete")]
-    public async Task<IActionResult> CompleteTask(Guid id, Guid taskId, CancellationToken cancellationToken)
-    {
-        await commandDispatcher.Send(new CompleteTaskCommand(id, taskId), cancellationToken);
-
-        return NoContent();
-    }
-
-    [HttpPost("{id:guid}/tasks/{taskId:guid}/reopen")]
-    public async Task<IActionResult> ReopenTask(Guid id, Guid taskId, CancellationToken cancellationToken)
-    {
-        await commandDispatcher.Send(new ReopenTaskCommand(id, taskId), cancellationToken);
 
         return NoContent();
     }

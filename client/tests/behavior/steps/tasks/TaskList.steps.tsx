@@ -11,7 +11,6 @@ const feature = await loadFeature('tests/behavior/features/tasks/TaskList.featur
 const TAB_KEY: Record<string, string> = {
   'À prendre': 'todo',
   Assignées: 'assigned',
-  Faites: 'done',
 }
 
 function buildTasks() {
@@ -23,7 +22,6 @@ function buildTasks() {
       category: 'Courses',
       quantity: '1',
       assignedToUserId: null as string | null,
-      isDone: false,
       createdAt: '2026-09-01T00:00:00Z',
     },
     {
@@ -33,7 +31,6 @@ function buildTasks() {
       category: 'Logistique',
       quantity: null,
       assignedToUserId: null as string | null,
-      isDone: false,
       createdAt: '2026-09-02T00:00:00Z',
     },
   ]
@@ -95,37 +92,18 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
   })
 
-  Scenario('Une tâche faite apparaît sur l\'onglet "Faites"', ({ Given, When, And, Then }) => {
-    Given('la tâche "Réserver la salle" est faite', () => {
-      tasks[1].isDone = true
+  Scenario('Aucune tâche sur un onglet', ({ Given, When, And, Then }) => {
+    Given('cet événement n\'a aucune tâche assignée', () => {
+      // Les deux tâches par défaut (buildTasks) sont déjà non assignées.
     })
 
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
 
-    And('je vais sur l\'onglet "Faites"', async () => {
+    And('je vais sur l\'onglet "Assignées"', async () => {
       await screen.findByTestId('task-item-task-1')
-      await goToTab('Faites')
-    })
-
-    Then('je vois la tâche "Réserver la salle" sur l\'onglet "Faites"', () => {
-      expect(screen.getByTestId('task-item-task-2')).toBeInTheDocument()
-    })
-
-    And('je ne vois pas la tâche "Bûche au chocolat"', () => {
-      expect(screen.queryByTestId('task-item-task-1')).not.toBeInTheDocument()
-    })
-  })
-
-  Scenario('Aucune tâche sur un onglet', ({ When, And, Then }) => {
-    When('j\'arrive sur le détail de l\'événement', () => {
-      renderApp('/events/event-1')
-    })
-
-    And('je vais sur l\'onglet "Faites"', async () => {
-      await screen.findByTestId('task-item-task-1')
-      await goToTab('Faites')
+      await goToTab('Assignées')
     })
 
     Then('je vois un message indiquant qu\'il n\'y a aucune tâche sur cet onglet', async () => {

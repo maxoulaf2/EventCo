@@ -14,9 +14,6 @@ internal sealed class TaskRealtimeNotifier(IHubContext<EventHub> hubContext) : I
     public Task NotifyTaskUnassigned(TaskRealtimeDto task, CancellationToken cancellationToken) =>
         Send(task.EventId, "TaskUnassigned", task, cancellationToken);
 
-    public Task NotifyTaskStatusChanged(TaskRealtimeDto task, CancellationToken cancellationToken) =>
-        Send(task.EventId, "TaskStatusChanged", task, cancellationToken);
-
     public Task NotifyTaskDeleted(TaskDeletedRealtimeDto task, CancellationToken cancellationToken) =>
         Send(task.EventId, "TaskDeleted", task, cancellationToken);
 

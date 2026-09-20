@@ -38,7 +38,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
               category: body.category,
               quantity: body.quantity,
               assignedToUserId: null,
-              isDone: false,
               createdAt: '2026-09-17T00:00:00Z',
             },
             { status: 201 },

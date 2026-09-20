@@ -49,9 +49,6 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case TaskUnassignedDomainEvent e:
                     await UpdateTaskAssignment(e.Task, cancellationToken);
                     break;
-                case TaskStatusChangedDomainEvent e:
-                    await UpdateTaskStatus(e.Task, cancellationToken);
-                    break;
                 case TaskDeletedDomainEvent e:
                     await DeleteTask(e.TaskId, cancellationToken);
                     break;
@@ -124,12 +121,6 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entity = await FindTaskEntityAsync(task.Id, cancellationToken);
         entity.AssignedToUserId = task.AssignedToUserId;
-    }
-
-    private async Task UpdateTaskStatus(EventTask task, CancellationToken cancellationToken)
-    {
-        var entity = await FindTaskEntityAsync(task.Id, cancellationToken);
-        entity.IsDone = task.IsDone;
     }
 
     private async Task DeleteTask(Guid taskId, CancellationToken cancellationToken)

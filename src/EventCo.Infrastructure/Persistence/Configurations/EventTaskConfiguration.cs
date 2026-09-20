@@ -27,8 +27,6 @@ public class EventTaskConfiguration : IEntityTypeConfiguration<EventTaskEntity>
         builder.Property(t => t.Quantity)
             .HasMaxLength(100);
 
-        builder.Property(t => t.IsDone).IsRequired();
-
         builder.Property(t => t.CreatedByUserId).IsRequired();
 
         builder.Property(t => t.CreatedAt).IsRequired();

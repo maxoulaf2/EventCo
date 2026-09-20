@@ -30,7 +30,6 @@ const tasks = [
     category: 'Courses',
     quantity: '1',
     assignedToUserId: null,
-    isDone: false,
     createdAt: '2026-09-01T00:00:00Z',
   },
   {
@@ -40,7 +39,6 @@ const tasks = [
     category: 'Logistique',
     quantity: null,
     assignedToUserId: null,
-    isDone: true,
     createdAt: '2026-09-02T00:00:00Z',
   },
 ]

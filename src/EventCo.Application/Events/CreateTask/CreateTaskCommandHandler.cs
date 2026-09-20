@@ -29,7 +29,6 @@ public sealed class CreateTaskCommandHandler(
             task.Category.ToString(),
             task.Quantity,
             task.AssignedToUserId,
-            task.IsDone,
             task.CreatedAt);
     }
 }

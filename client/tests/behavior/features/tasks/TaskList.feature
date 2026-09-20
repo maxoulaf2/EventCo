@@ -1,7 +1,7 @@
 # language: fr
 Fonctionnalité: Liste des tâches d'un événement
   En tant que participant d'un événement je veux voir ses tâches réparties par
-  statut (à prendre / assignées / faites) afin de savoir en un coup d'œil ce
+  assignation (à prendre / assignées) afin de savoir en un coup d'œil ce
   qu'il reste à faire
 
   Scénario: Affichage des tâches à prendre
@@ -16,16 +16,10 @@ Fonctionnalité: Liste des tâches d'un événement
     Alors je vois la tâche "Bûche au chocolat" sur l'onglet "Assignées"
     Et je ne vois pas la tâche "Réserver la salle"
 
-  Scénario: Une tâche faite apparaît sur l'onglet "Faites"
-    Etant donné que la tâche "Réserver la salle" est faite
-    Quand j'arrive sur le détail de l'événement
-    Et je vais sur l'onglet "Faites"
-    Alors je vois la tâche "Réserver la salle" sur l'onglet "Faites"
-    Et je ne vois pas la tâche "Bûche au chocolat"
-
   Scénario: Aucune tâche sur un onglet
+    Etant donné que cet événement n'a aucune tâche assignée
     Quand j'arrive sur le détail de l'événement
-    Et je vais sur l'onglet "Faites"
+    Et je vais sur l'onglet "Assignées"
     Alors je vois un message indiquant qu'il n'y a aucune tâche sur cet onglet
 
   Scénario: Événement sans tâche

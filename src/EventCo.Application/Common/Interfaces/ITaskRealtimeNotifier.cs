@@ -8,7 +8,5 @@ public interface ITaskRealtimeNotifier
 
     Task NotifyTaskUnassigned(TaskRealtimeDto task, CancellationToken cancellationToken);
 
-    Task NotifyTaskStatusChanged(TaskRealtimeDto task, CancellationToken cancellationToken);
-
     Task NotifyTaskDeleted(TaskDeletedRealtimeDto task, CancellationToken cancellationToken);
 }

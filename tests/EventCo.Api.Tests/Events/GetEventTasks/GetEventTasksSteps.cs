@@ -50,10 +50,7 @@ public sealed class GetEventTasksSteps(SessionContext sessionContext, EventConte
     public void AlorsLesTachesConsulteesRetourneesContiennentTaches(int count) =>
         Assert.Equal(count, _consultedTasks!.Count);
 
-    [Then(@"les tâches consultées retournées contiennent une tâche ""(.*)"" non faite")]
-    public void AlorsLesTachesConsulteesRetourneesContiennentUneTacheNonFaite(string title)
-    {
-        var task = Assert.Single(_consultedTasks!, t => t.Title == title);
-        Assert.False(task.IsDone);
-    }
+    [Then(@"les tâches consultées retournées contiennent une tâche ""(.*)""")]
+    public void AlorsLesTachesConsulteesRetourneesContiennentUneTache(string title) =>
+        Assert.Single(_consultedTasks!, t => t.Title == title);
 }

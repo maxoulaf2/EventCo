@@ -9,7 +9,6 @@ Fonctionnalité: Création d'une tâche sur un événement
     Alors la création de la tâche réussit
     Et la tâche créée a pour titre "Bûche au chocolat"
     Et la tâche créée a pour catégorie "Courses"
-    Et la tâche créée n'est pas encore faite
     Et une notification temps réel de création de tâche est diffusée
 
   Scénario: Création d'une tâche par un participant simple (non organisateur)

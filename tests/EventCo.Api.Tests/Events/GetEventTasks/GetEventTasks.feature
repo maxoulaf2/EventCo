@@ -10,7 +10,7 @@ Fonctionnalité: Consultation des tâches d'un événement via l'API
     Quand je consulte les tâches de cet événement via l'API
     Alors la réponse de consultation des tâches a le statut 200
     Et les tâches consultées retournées contiennent 1 tâche
-    Et les tâches consultées retournées contiennent une tâche "Bûche au chocolat" non faite
+    Et les tâches consultées retournées contiennent une tâche "Bûche au chocolat"
 
   Scénario: Consultation des tâches d'un événement inexistant
     Etant donné une session ouverte via l'API pour "get-event-tasks-missing-event-api-test@example.com"

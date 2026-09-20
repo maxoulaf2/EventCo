@@ -7,5 +7,4 @@ public sealed record EventTaskResponse(
     string Category,
     string? Quantity,
     Guid? AssignedToUserId,
-    bool IsDone,
     DateTime CreatedAt);

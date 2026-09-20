@@ -2,6 +2,7 @@
 
 > Ajouter une ligne par tâche terminée, format : `- AAAA-MM-JJ — [Lot X] Description concise de la tâche (+ décision notable si applicable)`
 
+- 2026-09-20 — [Lot 3] Suppression du concept de tâche faite/non faite, à la demande explicite du développeur : le système de tâches ne garde que l'assignation (assigné/non assigné). **Décision notable** : retiré entièrement plutôt que masqué côté UI seul, symétriquement à la suppression de `HasJoined` du 2026-09-18 (cf. `docs/suivi-todo.md`, Lot 2) — Domain (`EventTask.IsDone`, `Event.CompleteTask`/`ReopenTask`, `TaskStatusChangedDomainEvent`), Application (Commands `CompleteTask`/`ReopenTask`), Api (endpoints `.../complete`/`.../reopen`), Infrastructure (colonne EF `IsDone`, migration `RemoveEventTaskIsDone`) et Frontend (checkbox de `TaskList`, onglet "Faites", hook `useToggleTaskDone`, message SignalR `TaskStatusChanged`) supprimés en bloc. Détail dans `docs/suivi-todo.md` (Lot 3).
 - 2026-09-16 — [Lot 1] Correction bug : connexion via lien magique inopérante en navigation privée. **Décision notable** : abandon du cross-origin dev (`SameSite=None`) au profit d'un frontend/API same-origin via proxy Vite (`client/vite.config.ts`, `/api` + `/hubs`), cookie de session repassé en `SameSite=Lax` (`Secure` conditionné à `!IsDevelopment()`) dans `AuthController`.
 - 2026-08-31 — [Lot 1] Initialisation de la solution .NET (Clean Architecture Domain/Application/Infrastructure/Api + projets de tests xUnit)
 - 2026-08-31 — [Lot 1] Initialisation du projet React (Vite + TypeScript + Tailwind CSS v4)

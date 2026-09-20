@@ -90,11 +90,10 @@ public sealed class GetEventTasksSteps
     [Then(@"l'événement consulté a (\d+) tâches?")]
     public void AlorsLevenementConsulteATaches(int count) => Assert.Equal(count, _lastResult!.Tasks.Count);
 
-    [Then(@"l'événement consulté a une tâche ""(.*)"" de catégorie ""(.*)"" non faite")]
-    public void AlorsLevenementConsulteAUneTacheDeCategorieNonFaite(string title, string category)
+    [Then(@"l'événement consulté a une tâche ""(.*)"" de catégorie ""(.*)""")]
+    public void AlorsLevenementConsulteAUneTacheDeCategorie(string title, string category)
     {
         var task = Assert.Single(_lastResult!.Tasks, t => t.Title == title);
         Assert.Equal(category, task.Category);
-        Assert.False(task.IsDone);
     }
 }

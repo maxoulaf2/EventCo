@@ -21,15 +21,6 @@ Fonctionnalité: Diffusion temps réel des événements de tâches
     Quand j'assigne cette tâche à ce participant via l'API
     Alors une notification temps réel d'assignation de tâche est reçue pour cette tâche
 
-  Scénario: Le marquage d'une tâche comme faite est diffusé au groupe temps réel
-    Etant donné une session ouverte via l'API pour "realtime-complete-task-api-test@example.com"
-    Et un événement "Repas de Noël" créé via l'API
-    Et une tâche "Bûche au chocolat" ajoutée à cet événement via l'API
-    Et je me connecte au hub temps réel et que je rejoins cet événement
-    Et j'écoute les notifications temps réel de tâches
-    Quand je marque cette tâche comme faite via l'API
-    Alors une notification temps réel de changement de statut est reçue pour cette tâche
-
   Scénario: La suppression d'une tâche est diffusée au groupe temps réel
     Etant donné une session ouverte via l'API pour "realtime-delete-task-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API

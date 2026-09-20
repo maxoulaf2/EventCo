@@ -202,22 +202,6 @@ public class Event : Entity
         AddDomainEvent(new TaskUnassignedDomainEvent(task));
     }
 
-    public void CompleteTask(Guid actingUserId, Guid taskId)
-    {
-        var task = GetTask(taskId);
-        EnsureActingUserCanToggleTaskDone(actingUserId, task);
-        task.MarkDone();
-        AddDomainEvent(new TaskStatusChangedDomainEvent(task));
-    }
-
-    public void ReopenTask(Guid actingUserId, Guid taskId)
-    {
-        var task = GetTask(taskId);
-        EnsureActingUserCanToggleTaskDone(actingUserId, task);
-        task.MarkNotDone();
-        AddDomainEvent(new TaskStatusChangedDomainEvent(task));
-    }
-
     public void RemoveTask(Guid actingUserId, Guid taskId)
     {
         var task = GetTask(taskId);
@@ -247,14 +231,6 @@ public class Event : Entity
     {
         if (_participants.All(p => p.UserId != actingUserId))
             throw new UserNotEventParticipantException(Id, actingUserId);
-    }
-
-    private void EnsureActingUserCanToggleTaskDone(Guid actingUserId, EventTask task)
-    {
-        EnsureActingUserIsParticipant(actingUserId);
-
-        if (task.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
-            throw new ParticipantCannotToggleOthersTaskException(Id, task.Id, actingUserId);
     }
 
     private void EnsureActingUserCanDeleteTask(Guid actingUserId, EventTask task)

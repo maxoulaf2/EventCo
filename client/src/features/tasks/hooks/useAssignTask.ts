@@ -7,8 +7,8 @@ interface AssignTaskInput {
   userId: string
 }
 
-// Auto-assignation ("Je prends") : optimiste comme useToggleTaskDone, même raison
-// (réactivité mobile), useTaskRealtime confirme ensuite via le Hub.
+// Auto-assignation ("Je prends") : optimiste pour la réactivité mobile,
+// useTaskRealtime confirme ensuite via le Hub.
 export function useAssignTask(eventId: string) {
   const queryClient = useQueryClient()
   const queryKey = ['events', eventId, 'tasks']
