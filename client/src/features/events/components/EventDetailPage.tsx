@@ -308,7 +308,10 @@ export function EventDetailPage() {
               )}
 
               {canInvite && event.inviteLinkToken && (
-                <InviteLinkShareBox eventId={eventId!} token={event.inviteLinkToken} />
+                <div className="flex flex-col gap-2.5">
+                  <p className="ml-4 text-[10px] tracking-[0.11em] text-accent-700 uppercase">Lien d&rsquo;invitation</p>
+                  <InviteLinkShareBox eventId={eventId!} token={event.inviteLinkToken} />
+                </div>
               )}
 
               {canInvite && <InviteParticipantForm eventId={eventId!} />}
