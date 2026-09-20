@@ -30,5 +30,10 @@ public class MagicLinkTokenConfiguration : IEntityTypeConfiguration<MagicLinkTok
 
         builder.Property(t => t.EventInviteLinkToken)
             .HasMaxLength(64);
+
+        builder.Property(t => t.CreatedAt).IsRequired();
+
+        // Utilisé pour compter les demandes récentes par email (anti-spam, cf. TooManyMagicLinkRequestsException).
+        builder.HasIndex(t => new { t.Email, t.CreatedAt });
     }
 }

@@ -20,6 +20,17 @@ public sealed class RequestLinkSteps
         _response = await client.PostAsJsonAsync(path, new RequestMagicLinkRequest(email));
     }
 
+    [When(@"j'envoie (\d+) requêtes POST à ""(.*)"" avec l'email ""(.*)""")]
+    public async Task QuandJenvoieRequetesPostAAvecLemail(int requestCount, string path, string email)
+    {
+        var client = Hooks.Factory.CreateClient();
+
+        for (var i = 0; i < requestCount; i++)
+        {
+            _response = await client.PostAsJsonAsync(path, new RequestMagicLinkRequest(email));
+        }
+    }
+
     [Then(@"la réponse a le statut (\d+)")]
     public void AlorsLaReponseALeStatut(int expectedStatusCode)
     {

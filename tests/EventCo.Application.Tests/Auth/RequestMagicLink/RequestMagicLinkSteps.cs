@@ -4,6 +4,7 @@ using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
+using EventCo.Domain.Auth.Exceptions;
 using EventCo.Infrastructure.Persistence;
 using EventCo.Infrastructure.Persistence.Repositories;
 using FluentValidation;
@@ -89,5 +90,17 @@ public sealed class RequestMagicLinkSteps
     public void AlorsAucunEmailNestEnvoye()
     {
         Assert.Empty(_emailSender.SentEmails);
+    }
+
+    [Then(@"la demande échoue avec une erreur de trop de requêtes")]
+    public void AlorsLaDemandeEchoueAvecUneErreurDeTropDeRequetes()
+    {
+        Assert.IsType<TooManyMagicLinkRequestsException>(_thrownException);
+    }
+
+    [Then(@"exactement (\d+) emails ont été envoyés à ""(.*)""")]
+    public void AlorsExactementEmailsOntEteEnvoyesA(int expectedCount, string email)
+    {
+        Assert.Equal(expectedCount, _emailSender.SentEmails.Count(e => e.ToEmail == email.ToLowerInvariant()));
     }
 }

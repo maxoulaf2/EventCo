@@ -3,6 +3,7 @@ using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
 using EventCo.Application.Common.Security;
 using EventCo.Domain.Auth;
+using EventCo.Domain.Auth.Exceptions;
 using EventCo.Domain.ValueObjects;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +20,11 @@ public sealed class RequestMagicLinkCommandHandler(
         var email = Email.From(request.Email);
         var now = dateTimeProvider.UtcNow;
         var magicLinkOptions = options.Value;
+
+        var windowStart = now.AddMinutes(-magicLinkOptions.RateLimitWindowMinutes);
+        var recentRequestCount = await magicLinkTokenRepository.CountCreatedSinceAsync(email, windowStart, cancellationToken);
+        if (recentRequestCount >= magicLinkOptions.MaxRequestsPerWindow)
+            throw new TooManyMagicLinkRequestsException(email.Value, magicLinkOptions.MaxRequestsPerWindow, magicLinkOptions.RateLimitWindowMinutes);
 
         var rawToken = SecureTokenGenerator.GenerateUrlSafeToken();
         var tokenHash = MagicLinkTokenHasher.Hash(rawToken);

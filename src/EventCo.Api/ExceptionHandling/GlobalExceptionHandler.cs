@@ -1,3 +1,4 @@
+using EventCo.Domain.Auth.Exceptions;
 using EventCo.Domain.Common;
 using EventCo.Domain.Events.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
@@ -42,6 +43,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             ParticipantCannotDeleteOthersTaskException forbiddenDeleteException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenDeleteException.Message }),
+            TooManyMagicLinkRequestsException tooManyRequestsException => (
+                StatusCodes.Status429TooManyRequests,
+                new ProblemDetails { Title = "Trop de requêtes", Detail = tooManyRequestsException.Message }),
             DomainException domainException => (
                 StatusCodes.Status400BadRequest,
                 new ProblemDetails { Title = "Règle métier violée", Detail = domainException.Message }),

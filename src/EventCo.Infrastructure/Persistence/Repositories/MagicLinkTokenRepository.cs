@@ -2,6 +2,7 @@ using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 using EventCo.Domain.Auth;
 using EventCo.Domain.Auth.DomainEvents;
+using EventCo.Domain.ValueObjects;
 using EventCo.Infrastructure.Persistence.Mapping;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,9 @@ internal sealed class MagicLinkTokenRepository(EventCoDbContext dbContext, Domai
         var entity = await dbContext.MagicLinkTokens.SingleOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
         return entity is null ? null : MagicLinkTokenMapper.ToDomain(entity);
     }
+
+    public Task<int> CountCreatedSinceAsync(Email email, DateTime since, CancellationToken cancellationToken) =>
+        dbContext.MagicLinkTokens.CountAsync(t => t.Email == email.Value && t.CreatedAt >= since, cancellationToken);
 
     public async Task ApplyAsync(MagicLinkToken token, CancellationToken cancellationToken)
     {

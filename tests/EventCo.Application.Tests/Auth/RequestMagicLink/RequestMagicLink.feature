@@ -18,3 +18,13 @@ Fonctionnalité: Demande de lien de connexion (magic link)
     Quand je demande un lien de connexion pour "pas-un-email"
     Alors la demande échoue avec une erreur de validation
     Et aucun email n'est envoyé
+
+  Scénario: Trop de demandes pour le même email dans la même fenêtre
+    Quand je demande un lien de connexion pour "spam@example.com"
+    Et je demande un lien de connexion pour "spam@example.com"
+    Et je demande un lien de connexion pour "spam@example.com"
+    Et je demande un lien de connexion pour "spam@example.com"
+    Et je demande un lien de connexion pour "spam@example.com"
+    Et je demande un lien de connexion pour "spam@example.com"
+    Alors la demande échoue avec une erreur de trop de requêtes
+    Et exactement 5 emails ont été envoyés à "spam@example.com"

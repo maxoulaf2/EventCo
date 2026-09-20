@@ -7,3 +7,7 @@ Fonctionnalité: Demande de lien de connexion (magic link) via l'API
     Quand j'envoie une requête POST à "/api/auth/request-link" avec l'email "api-test@example.com"
     Alors la réponse a le statut 202
     Et un token de connexion est persisté en base pour "api-test@example.com"
+
+  Scénario: Trop de demandes pour le même email
+    Quand j'envoie 6 requêtes POST à "/api/auth/request-link" avec l'email "api-spam@example.com"
+    Alors la réponse a le statut 429

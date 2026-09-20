@@ -111,7 +111,9 @@
 - [x] Audit et ajustement du responsive sur toutes les pages (mobile-first)
   > Audité via un script Playwright ad hoc (mocks réseau, données extrêmes en plus des jeux courts existants) à 320/375/768/1440px sur les pages principales, en complément des captures de non-régression visuelle existantes (dont plusieurs sont déjà connues comme obsolètes, cf. tâches précédentes). Trois défauts de mise en page trouvés et corrigés (ligne de participant qui pouvait masquer son bouton d'action avec un nom long, icône de lieu écrasée par Flexbox avec une adresse longue, forme de pilule disproportionnée sur une ligne de tâche avec un titre long) — aucun dépassement horizontal de page constaté. Détail dans `docs/journal-avancement.md` du 2026-09-19.
 - [x] Configuration PWA : `manifest.json`, icônes, service worker basique
-- [ ] Test d'installation PWA sur mobile (Android/iOS)
+- [x] Test d'installation PWA sur mobile (Android/iOS)
+- [x] Rate limiting sur la demande de lien de connexion (`POST /api/auth/request-link`), pour limiter le spam d'emails avant la mise en place de l'envoi réel ci-dessous
+  > Tâche identifiée en cours de route (rule 5, 2026-09-20), à la demande explicite du développeur (cf. aussi `TODO.md` note "Mettre un rate limit sur l'envoi de mail pour éviter le spam"), avant de basculer sur un vrai fournisseur SMTP pour la tâche suivante — sans ça, l'endpoint (non authentifié) permet de déclencher un envoi d'email illimité vers n'importe quelle adresse.
 - [ ] Notification email : invitation à un événement
 - [ ] Notification email : tâche assignée
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
