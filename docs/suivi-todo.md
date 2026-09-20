@@ -109,7 +109,7 @@
   > Tâche identifiée en cours de route (rule 5, 2026-09-19), à la demande explicite du développeur, en complément de l'invitation par email existante (`InviteParticipant`). L'intention de rejoindre un événement survit le détour par le login magic-link existant via un nouveau champ optionnel `MagicLinkToken.EventInviteLinkToken`, résolu côté serveur à la vérification du lien plutôt que porté dans l'URL de vérification.
 - [x] Audit et ajustement du responsive sur toutes les pages (mobile-first)
   > Audité via un script Playwright ad hoc (mocks réseau, données extrêmes en plus des jeux courts existants) à 320/375/768/1440px sur les pages principales, en complément des captures de non-régression visuelle existantes (dont plusieurs sont déjà connues comme obsolètes, cf. tâches précédentes). Trois défauts de mise en page trouvés et corrigés (ligne de participant qui pouvait masquer son bouton d'action avec un nom long, icône de lieu écrasée par Flexbox avec une adresse longue, forme de pilule disproportionnée sur une ligne de tâche avec un titre long) — aucun dépassement horizontal de page constaté. Détail dans `docs/journal-avancement.md` du 2026-09-19.
-- [ ] Configuration PWA : `manifest.json`, icônes, service worker basique
+- [x] Configuration PWA : `manifest.json`, icônes, service worker basique
 - [ ] Test d'installation PWA sur mobile (Android/iOS)
 - [ ] Notification email : invitation à un événement
 - [ ] Notification email : tâche assignée
