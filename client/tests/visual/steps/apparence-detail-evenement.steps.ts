@@ -86,13 +86,18 @@ Given("je suis sur le détail d'un événement en tant que simple participant", 
   await expect(page.getByTestId('participant-row-user-2')).toBeVisible()
 })
 
-Given("je suis sur le détail d'un événement avec l'onglet des tâches faites", async ({ page }) => {
+Given("je suis sur le détail d'un événement avec l'onglet des tâches assignées", async ({ page }) => {
   await mockEventDetail(page)
+  await page.route('**/api/events/event-1/tasks', (route) =>
+    route.fulfill({
+      json: tasks.map((task) => (task.id === 'task-2' ? { ...task, assignedToUserId: 'user-2' } : task)),
+    }),
+  )
   await page.route('**/api/auth/me', (route) =>
     route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
   )
   await page.goto('/events/event-1')
-  await page.getByTestId('task-list-tab-done').click()
+  await page.getByTestId('task-list-tab-assigned').click()
   await expect(page.getByTestId('task-item-task-2')).toBeVisible()
 })
 
