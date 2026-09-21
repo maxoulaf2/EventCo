@@ -191,4 +191,7 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
 
         return entities.Select(EventMapper.ToDomain).ToList();
     }
+
+    public Task<int> CountInvitationsForUserSinceAsync(Guid userId, DateTime since, CancellationToken cancellationToken) =>
+        dbContext.Set<EventParticipantEntity>().CountAsync(p => p.UserId == userId && p.InvitedAt >= since, cancellationToken);
 }

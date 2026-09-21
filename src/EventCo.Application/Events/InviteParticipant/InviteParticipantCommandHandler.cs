@@ -1,8 +1,10 @@
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
+using EventCo.Application.Common.Options;
 using EventCo.Domain.Events.Exceptions;
 using EventCo.Domain.Users;
 using EventCo.Domain.ValueObjects;
+using Microsoft.Extensions.Options;
 
 namespace EventCo.Application.Events.InviteParticipant;
 
@@ -10,7 +12,10 @@ public sealed class InviteParticipantCommandHandler(
     ICurrentUserService currentUserService,
     IEventRepository eventRepository,
     IUserRepository userRepository,
-    IDateTimeProvider dateTimeProvider) : ICommandHandler<InviteParticipantCommand, InviteParticipantResult>
+    IEmailSender emailSender,
+    IDateTimeProvider dateTimeProvider,
+    IOptions<InvitationOptions> invitationOptions,
+    IOptions<FrontendOptions> frontendOptions) : ICommandHandler<InviteParticipantCommand, InviteParticipantResult>
 {
     public async Task<InviteParticipantResult> Handle(InviteParticipantCommand request, CancellationToken cancellationToken)
     {
@@ -27,9 +32,23 @@ public sealed class InviteParticipantCommandHandler(
             await userRepository.ApplyAsync(user, cancellationToken);
         }
 
+        var invitationOptionsValue = invitationOptions.Value;
+        var windowStart = now.AddMinutes(-invitationOptionsValue.RateLimitWindowMinutes);
+        var recentInvitationCount = await eventRepository.CountInvitationsForUserSinceAsync(user.Id, windowStart, cancellationToken);
+        if (recentInvitationCount >= invitationOptionsValue.MaxEmailsPerWindow)
+            throw new TooManyInvitationEmailsException(user.Id, invitationOptionsValue.MaxEmailsPerWindow, invitationOptionsValue.RateLimitWindowMinutes);
+
         var participant = @event.InviteParticipant(currentUserService.UserId!.Value, user.Id, now);
 
         await eventRepository.ApplyAsync(@event, cancellationToken);
+
+        var inviteLink = $"{frontendOptions.Value.BaseUrl}/invite/{@event.InviteLinkToken}";
+        await emailSender.SendAsync(
+            user.Email.Value,
+            $"Invitation à « {@event.Title} »",
+            $"<p>Vous avez été invité(e) à l'événement « {@event.Title} » sur EventCo.</p>"
+            + $"<p><a href=\"{inviteLink}\">{inviteLink}</a></p>",
+            cancellationToken);
 
         return new InviteParticipantResult(
             @event.Id,

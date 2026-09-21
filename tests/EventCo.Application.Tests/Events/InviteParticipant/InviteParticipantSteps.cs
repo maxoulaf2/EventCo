@@ -20,6 +20,7 @@ namespace EventCo.Application.Tests.Events.InviteParticipant;
 public sealed class InviteParticipantSteps
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly RecordingEmailSender _emailSender;
     private readonly EventCoDbContext _dbContext;
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
 
@@ -30,11 +31,13 @@ public sealed class InviteParticipantSteps
     public InviteParticipantSteps(CurrentUserContext currentUserContext)
     {
         var builder = new ApplicationTestHostBuilder();
+        _emailSender = new RecordingEmailSender();
 
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
+        builder.Services.AddSingleton<IEmailSender>(_emailSender);
 
         _serviceProvider = builder.Build();
         _dbContext = _serviceProvider.GetRequiredService<EventCoDbContext>();
@@ -130,5 +133,24 @@ public sealed class InviteParticipantSteps
     {
         var users = _dbContext.Users.Where(u => u.Email == email.ToLowerInvariant()).ToList();
         Assert.Single(users);
+    }
+
+    [Then(@"un email d'invitation est envoyé à ""(.*)""")]
+    public void AlorsUnEmailDinvitationEstEnvoyeA(string email)
+    {
+        var sentEmail = _emailSender.SentEmails.Last();
+
+        Assert.Equal(email.ToLowerInvariant(), sentEmail.ToEmail);
+        Assert.Contains("http://localhost:5173/invite/", sentEmail.HtmlBody);
+    }
+
+    [Then(@"l'invitation échoue avec une erreur de trop de requêtes")]
+    public void AlorsLinvitationEchoueAvecUneErreurDeTropDeRequetes() =>
+        Assert.IsType<TooManyInvitationEmailsException>(_thrownException);
+
+    [Then(@"exactement (\d+) emails d'invitation ont été envoyés à ""(.*)""")]
+    public void AlorsExactementEmailsDinvitationOntEteEnvoyesA(int expectedCount, string email)
+    {
+        Assert.Equal(expectedCount, _emailSender.SentEmails.Count(e => e.ToEmail == email.ToLowerInvariant()));
     }
 }

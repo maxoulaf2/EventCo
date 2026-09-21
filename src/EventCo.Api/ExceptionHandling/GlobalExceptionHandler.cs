@@ -46,6 +46,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             TooManyMagicLinkRequestsException tooManyRequestsException => (
                 StatusCodes.Status429TooManyRequests,
                 new ProblemDetails { Title = "Trop de requêtes", Detail = tooManyRequestsException.Message }),
+            TooManyInvitationEmailsException tooManyInvitationsException => (
+                StatusCodes.Status429TooManyRequests,
+                new ProblemDetails { Title = "Trop de requêtes", Detail = tooManyInvitationsException.Message }),
             DomainException domainException => (
                 StatusCodes.Status400BadRequest,
                 new ProblemDetails { Title = "Règle métier violée", Detail = domainException.Message }),

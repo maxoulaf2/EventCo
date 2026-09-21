@@ -114,7 +114,8 @@
 - [x] Test d'installation PWA sur mobile (Android/iOS)
 - [x] Rate limiting sur la demande de lien de connexion (`POST /api/auth/request-link`), pour limiter le spam d'emails avant la mise en place de l'envoi réel ci-dessous
   > Tâche identifiée en cours de route (rule 5, 2026-09-20), à la demande explicite du développeur (cf. aussi `TODO.md` note "Mettre un rate limit sur l'envoi de mail pour éviter le spam"), avant de basculer sur un vrai fournisseur SMTP pour la tâche suivante — sans ça, l'endpoint (non authentifié) permet de déclencher un envoi d'email illimité vers n'importe quelle adresse.
-- [ ] Notification email : invitation à un événement
+- [x] Notification email : invitation à un événement
+  > Traité en même temps que le rate limiting demandé explicitement dessus (rule 5, 2026-09-20) : jusqu'ici `InviteParticipant` créait le participant sans notifier personne, aucun email n'était envoyé.
 - [ ] Notification email : tâche assignée
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
 - [ ] Revue globale de sécurité (validation des rôles sur chaque endpoint, expiration des tokens, cookies httpOnly)

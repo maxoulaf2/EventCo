@@ -30,3 +30,19 @@ Fonctionnalité: Invitation d'un participant via l'API
     Et une session ouverte via l'API pour "invite-event-other-user-api-test@example.com"
     Quand j'invite "invite-guest-api-test@example.com" à cet événement via l'API
     Alors la réponse d'invitation a le statut 403
+
+  Scénario: Trop d'invitations envoyées à la même personne, tous événements confondus
+    Etant donné une session ouverte via l'API pour "invite-spam-organizer-api-test@example.com"
+    Et un événement "Repas 1" créé via l'API
+    Quand j'invite "invite-spam-guest-api-test@example.com" à cet événement via l'API
+    Etant donné un événement "Repas 2" créé via l'API
+    Quand j'invite "invite-spam-guest-api-test@example.com" à cet événement via l'API
+    Etant donné un événement "Repas 3" créé via l'API
+    Quand j'invite "invite-spam-guest-api-test@example.com" à cet événement via l'API
+    Etant donné un événement "Repas 4" créé via l'API
+    Quand j'invite "invite-spam-guest-api-test@example.com" à cet événement via l'API
+    Etant donné un événement "Repas 5" créé via l'API
+    Quand j'invite "invite-spam-guest-api-test@example.com" à cet événement via l'API
+    Etant donné un événement "Repas 6" créé via l'API
+    Quand j'invite "invite-spam-guest-api-test@example.com" à cet événement via l'API
+    Alors la réponse d'invitation a le statut 429

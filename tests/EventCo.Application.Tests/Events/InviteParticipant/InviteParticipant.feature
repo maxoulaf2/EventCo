@@ -10,6 +10,7 @@ Fonctionnalité: Invitation d'un participant par email
     Et la personne invitée a le rôle "Participant"
     Et la personne invitée n'a pas encore indiqué de statut de participation
     Et un compte est créé pour la personne invitée "amie@example.com"
+    Et un email d'invitation est envoyé à "amie@example.com"
 
   Scénario: Invitation d'une personne ayant déjà un compte
     Etant donné un événement ouvert aux invitations "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
@@ -38,3 +39,19 @@ Fonctionnalité: Invitation d'un participant par email
     Et je change d'utilisateur courant
     Quand j'invite "amie@example.com" à cet événement
     Alors l'invitation échoue avec une erreur d'autorisation
+
+  Scénario: Trop d'invitations envoyées à la même personne, tous événements confondus
+    Etant donné un événement ouvert aux invitations "Repas 1" prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'invite "spam@example.com" à cet événement
+    Etant donné un événement ouvert aux invitations "Repas 2" prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'invite "spam@example.com" à cet événement
+    Etant donné un événement ouvert aux invitations "Repas 3" prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'invite "spam@example.com" à cet événement
+    Etant donné un événement ouvert aux invitations "Repas 4" prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'invite "spam@example.com" à cet événement
+    Etant donné un événement ouvert aux invitations "Repas 5" prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'invite "spam@example.com" à cet événement
+    Etant donné un événement ouvert aux invitations "Repas 6" prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'invite "spam@example.com" à cet événement
+    Alors l'invitation échoue avec une erreur de trop de requêtes
+    Et exactement 5 emails d'invitation ont été envoyés à "spam@example.com"
