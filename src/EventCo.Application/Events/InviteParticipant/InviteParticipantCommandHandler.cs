@@ -1,3 +1,4 @@
+using System.Net;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
@@ -43,10 +44,14 @@ public sealed class InviteParticipantCommandHandler(
         await eventRepository.ApplyAsync(@event, cancellationToken);
 
         var inviteLink = $"{frontendOptions.Value.BaseUrl}/invite/{@event.InviteLinkToken}";
+        // Le titre est un texte libre choisi par le créateur de l'événement (pas de restriction de
+        // caractères, cf. CreateEventCommandValidator) : encodage HTML nécessaire avant interpolation
+        // dans le corps de l'email pour éviter une injection HTML vers l'invité destinataire.
+        var encodedTitle = WebUtility.HtmlEncode(@event.Title);
         await emailSender.SendAsync(
             user.Email.Value,
             $"Invitation à « {@event.Title} »",
-            $"<p>Vous avez été invité(e) à l'événement « {@event.Title} » sur EventCo.</p>"
+            $"<p>Vous avez été invité(e) à l'événement « {encodedTitle} » sur EventCo.</p>"
             + $"<p><a href=\"{inviteLink}\">{inviteLink}</a></p>",
             cancellationToken);
 

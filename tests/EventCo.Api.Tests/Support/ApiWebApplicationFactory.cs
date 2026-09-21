@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Testcontainers.PostgreSql;
 
 namespace EventCo.Api.Tests.Support;
@@ -28,11 +29,14 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment(Environments.Production);
+
         builder.ConfigureAppConfiguration((_, configBuilder) =>
         {
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Default"] = _postgres.GetConnectionString(),
+                ["Session:Secret"] = "api-tests-secret-simulant-un-secret-de-production",
             });
         });
 

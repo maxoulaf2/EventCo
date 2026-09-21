@@ -11,6 +11,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 const string FrontendCorsPolicy = "Frontend";
+// Valeur committée dans appsettings.json (base, chargée dans tous les environnements) pour permettre
+// `dotnet run`/docker-compose en dev sans configuration supplémentaire — jamais destinée à signer des
+// sessions en production. Cf. garde plus bas.
+const string DevSessionSecretPlaceholder = "dev-secret-a-remplacer-en-production-via-variable-environnement";
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -39,6 +43,18 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Échoue au démarrage plutôt que de signer silencieusement des sessions (cf. SessionTokenService,
+// HMAC) avec le secret de dev committé — sans cette garde, oublier de définir Session:Secret en
+// dehors de Development permettrait à quiconque connaît ce secret (public, dans ce repo) de forger
+// un token de session valide pour n'importe quel utilisateur.
+if (!app.Environment.IsDevelopment())
+{
+    var sessionSecret = app.Configuration["Session:Secret"];
+    if (string.IsNullOrWhiteSpace(sessionSecret) || sessionSecret == DevSessionSecretPlaceholder)
+        throw new InvalidOperationException(
+            "Session:Secret doit être défini via une variable d'environnement (ou un secret manager) en dehors de Development.");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

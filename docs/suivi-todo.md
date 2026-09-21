@@ -116,9 +116,8 @@
   > Tâche identifiée en cours de route (rule 5, 2026-09-20), à la demande explicite du développeur (cf. aussi `TODO.md` note "Mettre un rate limit sur l'envoi de mail pour éviter le spam"), avant de basculer sur un vrai fournisseur SMTP pour la tâche suivante — sans ça, l'endpoint (non authentifié) permet de déclencher un envoi d'email illimité vers n'importe quelle adresse.
 - [x] Notification email : invitation à un événement
   > Traité en même temps que le rate limiting demandé explicitement dessus (rule 5, 2026-09-20) : jusqu'ici `InviteParticipant` créait le participant sans notifier personne, aucun email n'était envoyé.
-- [ ] Notification email : tâche assignée
-- [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
-- [ ] Revue globale de sécurité (validation des rôles sur chaque endpoint, expiration des tokens, cookies httpOnly)
+- [x] Revue globale de sécurité (validation des rôles sur chaque endpoint, expiration des tokens, cookies httpOnly)
+  > Audit manuel de tous les endpoints `EventsController`/`AuthController`, de l'agrégat `Event` (règles d'autorisation), de `SessionTokenService`/`MagicLinkToken` et du cookie de session. Rôles/expiration/cookies déjà solides (autorisation centralisée dans l'agrégat `Event`, tokens de session et magic link tous à expiration vérifiée, cookie `HttpOnly`/`Secure` conditionné/`SameSite=Lax`) — deux failles concrètes trouvées et corrigées, détail dans `docs/journal-avancement.md` du 2026-09-21.
 - [ ] Revue globale des tests (couverture Domain/Application/Api)
 
 ## Lot 5 — Enrichissements (post-MVP, non priorisé)
@@ -129,3 +128,6 @@
 - [ ] Photos partagées post-événement
 - [ ] Catégories de tâches personnalisables par événement
 - [ ] Commentaires / chat par événement
+- [ ] Notification email : tâche assignée
+- [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
+
