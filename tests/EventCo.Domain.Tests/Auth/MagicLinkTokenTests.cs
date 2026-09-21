@@ -16,6 +16,22 @@ public class MagicLinkTokenTests
     }
 
     [Fact]
+    public void Create_EmptyTokenHash_ThrowsMagicLinkTokenHashEmptyException()
+    {
+        Assert.Throws<MagicLinkTokenHashEmptyException>(
+            () => MagicLinkToken.Create(Email.From("test@example.com"), " ", DateTime.UtcNow.AddMinutes(15), DateTime.UtcNow));
+    }
+
+    [Fact]
+    public void IsExpired_NowEqualsExpiresAt_ReturnsTrue()
+    {
+        var expiresAt = DateTime.UtcNow.AddMinutes(15);
+        var token = CreateToken(expiresAt);
+
+        Assert.True(token.IsExpired(expiresAt));
+    }
+
+    [Fact]
     public void Consume_NotExpiredAndNotConsumed_SetsConsumedAt()
     {
         var token = CreateToken();

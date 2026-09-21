@@ -25,3 +25,9 @@ Fonctionnalité: Modification d'un événement via l'API
     Et une session ouverte via l'API pour "update-event-other-user-api-test@example.com"
     Quand je modifie cet événement via l'API avec le titre "Réveillon de Noël" au lieu "Chez Bob"
     Alors la réponse de modification d'événement a le statut 403
+
+  Scénario: Modification avec un titre vide
+    Etant donné une session ouverte via l'API pour "update-event-empty-title-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Quand je modifie cet événement via l'API avec le titre "" au lieu "Chez Bob"
+    Alors la réponse de modification d'événement a le statut 400

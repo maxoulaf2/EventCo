@@ -34,3 +34,9 @@ Fonctionnalité: Rétrogradation d'un co-organisateur en participant via l'API
     Et un événement "Repas de Noël" créé via l'API
     Quand je rétrograde le créateur de l'événement via l'API
     Alors la réponse de rétrogradation a le statut 400
+
+  Scénario: Rétrogradation d'un utilisateur qui ne participe pas à l'événement
+    Etant donné une session ouverte via l'API pour "demote-not-participant-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Quand je rétrograde un utilisateur qui ne participe pas à cet événement via l'API
+    Alors la réponse de rétrogradation a le statut 400

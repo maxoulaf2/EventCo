@@ -45,3 +45,11 @@ Fonctionnalité: Assignation d'une tâche à un participant via l'API
   Scénario: Assignation sans cookie de session
     Quand j'assigne une tâche à un événement inexistant via l'API sans cookie de session
     Alors la réponse d'assignation a le statut 401
+
+  Scénario: Assignation par un utilisateur qui ne participe pas à l'événement
+    Etant donné une session ouverte via l'API pour "assign-task-organizer5-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une tâche "Bûche au chocolat" ajoutée à cet événement via l'API
+    Et une session ouverte via l'API pour "assign-task-non-participant5-api-test@example.com"
+    Quand j'assigne cette tâche à un utilisateur qui n'est pas participant via l'API
+    Alors la réponse d'assignation a le statut 403

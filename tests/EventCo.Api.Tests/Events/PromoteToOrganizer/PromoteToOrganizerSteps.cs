@@ -23,6 +23,10 @@ public sealed class PromoteToOrganizerSteps(SessionContext sessionContext, Event
     public async Task QuandJePromeusUnParticipantSurUnEvenementInexistantViaLapiSansCookieDeSession() =>
         await Promouvoir(Guid.NewGuid(), Guid.NewGuid(), null);
 
+    [When(@"je promeus un utilisateur qui ne participe pas à cet événement via l'API")]
+    public async Task QuandJePromeusUnUtilisateurQuiNeParticipePasACetEvenementViaLapi() =>
+        await Promouvoir(eventContext.EventId!.Value, Guid.NewGuid(), sessionContext.Cookie);
+
     private async Task Promouvoir(Guid eventId, Guid userId, string? cookieHeader)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);

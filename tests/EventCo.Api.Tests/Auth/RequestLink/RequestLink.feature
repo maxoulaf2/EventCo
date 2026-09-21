@@ -11,3 +11,7 @@ Fonctionnalité: Demande de lien de connexion (magic link) via l'API
   Scénario: Trop de demandes pour le même email
     Quand j'envoie 6 requêtes POST à "/api/auth/request-link" avec l'email "api-spam@example.com"
     Alors la réponse a le statut 429
+
+  Scénario: Email invalide
+    Quand j'envoie une requête POST à "/api/auth/request-link" avec l'email "pas-un-email"
+    Alors la réponse a le statut 400

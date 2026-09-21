@@ -26,3 +26,9 @@ Fonctionnalité: Promotion d'un participant en co-organisateur via l'API
     Et une session ouverte via l'API pour "promote-event-other-user-api-test@example.com"
     Quand je promeus ce participant en co-organisateur via l'API
     Alors la réponse de promotion a le statut 403
+
+  Scénario: Promotion d'un utilisateur qui ne participe pas à l'événement
+    Etant donné une session ouverte via l'API pour "promote-not-participant-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Quand je promeus un utilisateur qui ne participe pas à cet événement via l'API
+    Alors la réponse de promotion a le statut 400

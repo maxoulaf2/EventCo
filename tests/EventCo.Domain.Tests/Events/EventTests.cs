@@ -47,6 +47,30 @@ public class EventTests
     }
 
     [Fact]
+    public void Cancel_SetsStatusAndRaisesDomainEvent()
+    {
+        var @event = CreateEvent(out _);
+        @event.ClearDomainEvents();
+
+        @event.Cancel();
+
+        Assert.Equal(EventStatus.Cancelled, @event.Status);
+        Assert.Contains(@event.DomainEvents, e => e is EventStatusChangedDomainEvent);
+    }
+
+    [Fact]
+    public void Complete_SetsStatusAndRaisesDomainEvent()
+    {
+        var @event = CreateEvent(out _);
+        @event.ClearDomainEvents();
+
+        @event.Complete();
+
+        Assert.Equal(EventStatus.Completed, @event.Status);
+        Assert.Contains(@event.DomainEvents, e => e is EventStatusChangedDomainEvent);
+    }
+
+    [Fact]
     public void InviteParticipant_UserAlreadyInvited_ThrowsParticipantAlreadyInvitedException()
     {
         var @event = CreateEvent(out var creatorId);
@@ -261,6 +285,15 @@ public class EventTests
     }
 
     [Fact]
+    public void UpdateDetails_EmptyTitle_ThrowsEventTitleEmptyException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventTitleEmptyException>(
+            () => @event.UpdateDetails(creatorId, " ", null, DateTime.UtcNow.AddDays(31), "Lyon"));
+    }
+
+    [Fact]
     public void UpdateDetails_ActingUserIsOrganizer_UpdatesDetails()
     {
         var @event = CreateEvent(out var creatorId);
@@ -348,6 +381,14 @@ public class EventTests
     }
 
     [Fact]
+    public void AssignTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventTaskNotFoundException>(() => @event.AssignTask(creatorId, Guid.NewGuid(), creatorId));
+    }
+
+    [Fact]
     public void AssignTask_SimpleParticipantAssignsToAnotherParticipant_ThrowsParticipantCannotAssignTaskToOthersException()
     {
         var @event = CreateEvent(out var creatorId);
@@ -359,6 +400,14 @@ public class EventTests
 
         Assert.Throws<ParticipantCannotAssignTaskToOthersException>(
             () => @event.AssignTask(regularParticipantId, task.Id, otherParticipantId));
+    }
+
+    [Fact]
+    public void UnassignTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventTaskNotFoundException>(() => @event.UnassignTask(creatorId, Guid.NewGuid()));
     }
 
     [Fact]

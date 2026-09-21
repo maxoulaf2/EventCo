@@ -97,6 +97,10 @@ public sealed class AssignTaskSteps
     public async Task QuandJassigneUneTacheAUnEvenementInexistant() =>
         await Assigner(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
+    [When(@"j'assigne une tâche inexistante à moi-même")]
+    public async Task QuandJassigneUneTacheInexistanteAMoiMeme() =>
+        await Assigner(_existingEventId!.Value, Guid.NewGuid(), _currentUserContext.UserId);
+
     private async Task Assigner(Guid eventId, Guid taskId, Guid userId)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
@@ -130,6 +134,10 @@ public sealed class AssignTaskSteps
     [Then(@"l'assignation échoue avec une erreur d'événement introuvable")]
     public void AlorsLassignationEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"l'assignation échoue avec une erreur de tâche introuvable")]
+    public void AlorsLassignationEchoueAvecUneErreurDeTacheIntrouvable() =>
+        Assert.IsType<EventTaskNotFoundException>(_thrownException);
 
     [Then(@"la tâche est assignée à ce participant")]
     public async Task AlorsLaTacheEstAssigneeACeParticipant()

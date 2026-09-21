@@ -41,3 +41,17 @@ Fonctionnalité: Suppression d'une tâche via l'API
   Scénario: Suppression sans cookie de session
     Quand je supprime une tâche sur un événement inexistant via l'API sans cookie de session
     Alors la réponse de suppression de tâche a le statut 401
+
+  Scénario: Suppression d'une tâche inexistante sur un événement existant
+    Etant donné une session ouverte via l'API pour "delete-task-missing-task-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Quand je supprime une tâche inexistante sur cet événement via l'API
+    Alors la réponse de suppression de tâche a le statut 400
+
+  Scénario: Suppression par un utilisateur qui ne participe pas du tout à l'événement
+    Etant donné une session ouverte via l'API pour "delete-task-organizer4-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une tâche "Bûche au chocolat" ajoutée à cet événement via l'API
+    Et une session ouverte via l'API pour "delete-task-non-participant4-api-test@example.com"
+    Quand je supprime cette tâche via l'API
+    Alors la réponse de suppression de tâche a le statut 403

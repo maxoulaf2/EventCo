@@ -12,3 +12,8 @@ Fonctionnalité: Création d'un événement via l'API
   Scénario: Création sans cookie de session
     Quand je crée l'événement "Repas de Noël"
     Alors la réponse de création d'événement a le statut 401
+
+  Scénario: Création avec un titre vide
+    Etant donné une session ouverte via l'API pour "create-event-empty-title-api-test@example.com"
+    Quand je crée l'événement ""
+    Alors la réponse de création d'événement a le statut 400

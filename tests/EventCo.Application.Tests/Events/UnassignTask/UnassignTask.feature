@@ -32,3 +32,8 @@ Fonctionnalité: Désassignation d'une tâche
   Scénario: Désassignation sur un événement inexistant
     Quand je désassigne une tâche sur un événement inexistant
     Alors la désassignation échoue avec une erreur d'événement introuvable
+
+  Scénario: Désassignation d'une tâche inexistante
+    Etant donné un événement "Repas de Noël" avec une tâche "Bûche au chocolat" déjà assignée à un participant, prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand je désassigne une tâche inexistante sur cet événement
+    Alors la désassignation échoue avec une erreur de tâche introuvable

@@ -23,3 +23,8 @@ Fonctionnalité: Rétrogradation d'un co-organisateur en participant
   Scénario: Rétrogradation sur un événement inexistant
     Quand je rétrograde un co-organisateur sur un événement inexistant
     Alors la rétrogradation échoue avec une erreur d'événement introuvable
+
+  Scénario: Rétrogradation d'un utilisateur qui ne participe pas à l'événement
+    Etant donné un événement "Repas de Noël" avec un co-organisateur "ami@example.com", prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand je rétrograde un utilisateur qui ne participe pas à l'événement
+    Alors la rétrogradation échoue avec une erreur de participant introuvable

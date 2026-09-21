@@ -91,6 +91,10 @@ public sealed class UnassignTaskSteps
     public async Task QuandJeDesassigneUneTacheSurUnEvenementInexistant() =>
         await Desassigner(Guid.NewGuid(), Guid.NewGuid());
 
+    [When(@"je désassigne une tâche inexistante sur cet événement")]
+    public async Task QuandJeDesassigneUneTacheInexistanteSurCetEvenement() =>
+        await Desassigner(_existingEventId!.Value, Guid.NewGuid());
+
     private async Task Desassigner(Guid eventId, Guid taskId)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
@@ -120,6 +124,10 @@ public sealed class UnassignTaskSteps
     [Then(@"la désassignation échoue avec une erreur d'événement introuvable")]
     public void AlorsLaDesassignationEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"la désassignation échoue avec une erreur de tâche introuvable")]
+    public void AlorsLaDesassignationEchoueAvecUneErreurDeTacheIntrouvable() =>
+        Assert.IsType<EventTaskNotFoundException>(_thrownException);
 
     [Then(@"la tâche n'est plus assignée")]
     public async Task AlorsLaTacheNestPlusAssignee()

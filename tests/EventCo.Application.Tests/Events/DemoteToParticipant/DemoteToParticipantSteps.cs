@@ -68,6 +68,10 @@ public sealed class DemoteToParticipantSteps
     public async Task QuandJeRetrogradeUnCoOrganisateurSurUnEvenementInexistant() =>
         await Retrograder(Guid.NewGuid(), Guid.NewGuid());
 
+    [When(@"je rétrograde un utilisateur qui ne participe pas à l'événement")]
+    public async Task QuandJeRetrogradeUnUtilisateurQuiNeParticipePasALevenement() =>
+        await Retrograder(_existingEventId!.Value, Guid.NewGuid());
+
     private async Task Retrograder(Guid eventId, Guid targetUserId)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
@@ -96,6 +100,10 @@ public sealed class DemoteToParticipantSteps
     [Then(@"la rétrogradation échoue avec une erreur d'événement introuvable")]
     public void AlorsLaRetrogradationEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"la rétrogradation échoue avec une erreur de participant introuvable")]
+    public void AlorsLaRetrogradationEchoueAvecUneErreurDeParticipantIntrouvable() =>
+        Assert.IsType<ParticipantNotFoundException>(_thrownException);
 
     [Then(@"le co-organisateur rétrogradé a le rôle ""(.*)""")]
     public async Task AlorsLeCoOrganisateurRetrogradeALeRole(string role)

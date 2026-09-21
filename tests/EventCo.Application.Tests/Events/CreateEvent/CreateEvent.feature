@@ -22,3 +22,7 @@ Fonctionnalité: Création d'un événement
     Quand je crée l'événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
     Alors la création réussit
     Et l'événement créé n'a pas d'image
+
+  Scénario: Création avec une URL d'image trop longue
+    Quand je crée l'événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice" avec une URL d'image trop longue
+    Alors la création échoue avec une erreur de validation

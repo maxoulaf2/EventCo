@@ -33,3 +33,8 @@ Fonctionnalité: Suppression d'une tâche
   Scénario: Suppression sur un événement inexistant
     Quand je supprime une tâche sur un événement inexistant
     Alors la suppression de la tâche échoue avec une erreur d'événement introuvable
+
+  Scénario: Suppression d'une tâche inexistante
+    Etant donné un événement "Repas de Noël" avec une tâche créée par un participant invité "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand je supprime une tâche inexistante sur cet événement
+    Alors la suppression de la tâche échoue avec une erreur de tâche introuvable

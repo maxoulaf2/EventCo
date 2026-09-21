@@ -16,17 +16,21 @@ public sealed class RegenerateEventInviteLinkSteps(SessionContext sessionContext
 
     [When(@"je régénère le lien d'invitation de cet événement via l'API")]
     public async Task QuandJeRegenereLeLienDinvitationDeCetEvenementViaLapi() =>
-        await Regenerer(sessionContext.Cookie);
+        await Regenerer(eventContext.EventId!.Value, sessionContext.Cookie);
 
     [When(@"je régénère le lien d'invitation de cet événement via l'API sans cookie de session")]
     public async Task QuandJeRegenereLeLienDinvitationDeCetEvenementViaLapiSansCookieDeSession() =>
-        await Regenerer(null);
+        await Regenerer(eventContext.EventId!.Value, null);
 
-    private async Task Regenerer(string? cookieHeader)
+    [When(@"je régénère le lien d'invitation d'un événement inexistant via l'API")]
+    public async Task QuandJeRegenereLeLienDinvitationDunEvenementInexistantViaLapi() =>
+        await Regenerer(Guid.NewGuid(), sessionContext.Cookie);
+
+    private async Task Regenerer(Guid eventId, string? cookieHeader)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
 
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/events/{eventContext.EventId}/invite-link/regenerate");
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/events/{eventId}/invite-link/regenerate");
         if (cookieHeader is not null)
         {
             httpRequest.Headers.Add("Cookie", cookieHeader);

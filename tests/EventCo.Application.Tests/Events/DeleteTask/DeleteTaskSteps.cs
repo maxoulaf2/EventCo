@@ -90,6 +90,10 @@ public sealed class DeleteTaskSteps
     public async Task QuandJeSupprimeUneTacheSurUnEvenementInexistant() =>
         await Supprimer(Guid.NewGuid(), Guid.NewGuid());
 
+    [When(@"je supprime une tâche inexistante sur cet événement")]
+    public async Task QuandJeSupprimeUneTacheInexistanteSurCetEvenement() =>
+        await Supprimer(_existingEventId!.Value, Guid.NewGuid());
+
     private async Task Supprimer(Guid eventId, Guid taskId)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
@@ -119,6 +123,10 @@ public sealed class DeleteTaskSteps
     [Then(@"la suppression de la tâche échoue avec une erreur d'événement introuvable")]
     public void AlorsLaSuppressionDeLaTacheEchoueAvecUneErreurDevenementIntrouvable() =>
         Assert.IsType<EventNotFoundException>(_thrownException);
+
+    [Then(@"la suppression de la tâche échoue avec une erreur de tâche introuvable")]
+    public void AlorsLaSuppressionDeLaTacheEchoueAvecUneErreurDeTacheIntrouvable() =>
+        Assert.IsType<EventTaskNotFoundException>(_thrownException);
 
     [Then(@"la tâche n'existe plus")]
     public async Task AlorsLaTacheNexistePlus()

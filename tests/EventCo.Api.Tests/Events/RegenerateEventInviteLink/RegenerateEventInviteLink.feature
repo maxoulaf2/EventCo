@@ -22,3 +22,8 @@ Fonctionnalité: Régénération du lien d'invitation via l'API
     Et un événement "Repas de Noël" créé via l'API
     Quand je régénère le lien d'invitation de cet événement via l'API sans cookie de session
     Alors la réponse de régénération a le statut 401
+
+  Scénario: Régénération sur un événement inexistant
+    Etant donné une session ouverte via l'API pour "regenerate-link-missing-event-api-test@example.com"
+    Quand je régénère le lien d'invitation d'un événement inexistant via l'API
+    Alors la réponse de régénération a le statut 404

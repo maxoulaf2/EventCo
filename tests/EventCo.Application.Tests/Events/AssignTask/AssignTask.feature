@@ -42,3 +42,8 @@ Fonctionnalité: Assignation d'une tâche à un participant
   Scénario: Assignation sur un événement inexistant
     Quand j'assigne une tâche à un événement inexistant
     Alors l'assignation échoue avec une erreur d'événement introuvable
+
+  Scénario: Assignation d'une tâche inexistante
+    Etant donné un événement "Repas de Noël" avec une tâche "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand j'assigne une tâche inexistante à moi-même
+    Alors l'assignation échoue avec une erreur de tâche introuvable

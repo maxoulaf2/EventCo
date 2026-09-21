@@ -23,6 +23,10 @@ public sealed class DeleteTaskSteps(SessionContext sessionContext, EventContext 
     public async Task QuandJeSupprimeUneTacheSurUnEvenementInexistantViaLapiSansCookieDeSession() =>
         await Supprimer(Guid.NewGuid(), Guid.NewGuid(), null);
 
+    [When(@"je supprime une tâche inexistante sur cet événement via l'API")]
+    public async Task QuandJeSupprimeUneTacheInexistanteSurCetEvenementViaLapi() =>
+        await Supprimer(eventContext.EventId!.Value, Guid.NewGuid(), sessionContext.Cookie);
+
     private async Task Supprimer(Guid eventId, Guid taskId, string? cookieHeader)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);

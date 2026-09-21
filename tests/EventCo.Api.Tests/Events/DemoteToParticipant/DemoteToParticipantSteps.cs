@@ -27,6 +27,10 @@ public sealed class DemoteToParticipantSteps(SessionContext sessionContext, Even
     public async Task QuandJeRetrogradeUnCoOrganisateurSurUnEvenementInexistantViaLapiSansCookieDeSession() =>
         await Retrograder(Guid.NewGuid(), Guid.NewGuid(), null);
 
+    [When(@"je rétrograde un utilisateur qui ne participe pas à cet événement via l'API")]
+    public async Task QuandJeRetrogradeUnUtilisateurQuiNeParticipePasACetEvenementViaLapi() =>
+        await Retrograder(eventContext.EventId!.Value, Guid.NewGuid(), sessionContext.Cookie);
+
     private async Task Retrograder(Guid eventId, Guid userId, string? cookieHeader)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);

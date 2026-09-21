@@ -70,6 +70,24 @@ public sealed class CreateEventSteps
         }
     }
 
+    [When(@"je crée l'événement ""(.*)"" prévu le ""(.*)"" au lieu ""([^""]*)"" avec une URL d'image trop longue")]
+    public async Task JeCreeLevenementPrevuLeAuLieuAvecUneUrlDimageTropLongue(string title, string eventDate, string location)
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        var tooLongImageUrl = "https://example.com/" + new string('a', 2048);
+
+        try
+        {
+            _lastResult = await dispatcher.Send(
+                new CreateEventCommand(title, null, DateTime.Parse(eventDate), location, tooLongImageUrl),
+                CancellationToken.None);
+        }
+        catch (Exception exception)
+        {
+            _thrownException = exception;
+        }
+    }
+
     [Then(@"la création réussit")]
     public void AlorsLaCreationReussit() => Assert.Null(_thrownException);
 

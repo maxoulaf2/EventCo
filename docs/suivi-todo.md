@@ -118,7 +118,7 @@
   > Traité en même temps que le rate limiting demandé explicitement dessus (rule 5, 2026-09-20) : jusqu'ici `InviteParticipant` créait le participant sans notifier personne, aucun email n'était envoyé.
 - [x] Revue globale de sécurité (validation des rôles sur chaque endpoint, expiration des tokens, cookies httpOnly)
   > Audit manuel de tous les endpoints `EventsController`/`AuthController`, de l'agrégat `Event` (règles d'autorisation), de `SessionTokenService`/`MagicLinkToken` et du cookie de session. Rôles/expiration/cookies déjà solides (autorisation centralisée dans l'agrégat `Event`, tokens de session et magic link tous à expiration vérifiée, cookie `HttpOnly`/`Secure` conditionné/`SameSite=Lax`) — deux failles concrètes trouvées et corrigées, détail dans `docs/journal-avancement.md` du 2026-09-21.
-- [ ] Revue globale des tests (couverture Domain/Application/Api)
+- [x] Revue globale des tests (couverture Domain/Application/Api)
 
 ## Lot 5 — Enrichissements (post-MVP, non priorisé)
 
