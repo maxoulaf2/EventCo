@@ -27,5 +27,8 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
 
         builder.Property(u => u.CreatedAt)
             .IsRequired();
+
+        builder.Property(u => u.IsAdmin)
+            .IsRequired();
     }
 }

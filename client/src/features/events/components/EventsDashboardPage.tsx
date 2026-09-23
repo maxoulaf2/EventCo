@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { AccountModal } from '../../auth/components/AccountModal'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { ApiError } from '../../../shared/lib/api'
-import { btnPrimary } from '../../../shared/lib/ui'
+import { btnPrimary, btnSecondary } from '../../../shared/lib/ui'
 import { routes } from '../../../shared/lib/routes'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { Tag } from '../../../shared/components/Tag'
@@ -57,6 +57,14 @@ export function EventsDashboardPage() {
       </div>
 
       <AccountModal open={isAccountModalOpen} onClose={() => setIsAccountModalOpen(false)} />
+
+      {currentUser?.isAdmin && (
+        <div className="px-5.5 pt-4">
+          <Link to={routes.adminEvents} data-testid="events-dashboard-admin-link" className={`${btnSecondary} w-full`}>
+            Tous les événements (administration)
+          </Link>
+        </div>
+      )}
 
       <div className="flex flex-1 flex-col gap-3.5 px-5.5 pt-6">
         {isPending && (

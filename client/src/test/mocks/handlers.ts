@@ -21,6 +21,7 @@ export const handlers = [
       userId: 'user-1',
       email: 'test@example.com',
       displayName: 'Test',
+      isAdmin: false,
     }),
   ),
 
@@ -30,6 +31,7 @@ export const handlers = [
       userId: 'user-1',
       email: 'test@example.com',
       displayName: body.displayName,
+      isAdmin: false,
     })
   }),
 

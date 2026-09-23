@@ -145,4 +145,7 @@
   > Vérifié par le développeur (2026-09-23). Point ouvert : les emails arrivent en spam (adresse d'expéditeur personnelle, domaine non authentifiable SPF/DKIM/DMARC) — hors périmètre de ce lot.
 - [x] Correctif : heure d'événement décalée (+2 h en heure d'été à Paris) à l'affichage
   > Tâche identifiée en cours de route (rule 5, 2026-09-23), suite à un bug remonté par le développeur : un événement créé à 16h s'affichait à 18h (page d'invitation, détail). Cause : `createEvent` (`client/src/features/events/api.ts`) suffixait la date/heure saisie (heure locale) par `Z`, la faisant passer pour de l'UTC ; l'affichage (`toLocaleTimeString`) la reconvertissait ensuite en heure locale. Corrigé en convertissant la saisie locale en UTC (`new Date(...).toISOString()`). Les événements déjà créés avant le correctif restent décalés en base (pas de migration de données).
+- [x] Flag administrateur : un compte flaggé administrateur peut consulter tous les événements existants (liste, détail, tâches, temps réel) en lecture seule, sans apparaître en tant que participant
+  > Tâche identifiée en cours de route (rule 5, 2026-09-23), à la demande explicite du développeur. Le flag (`Users.IsAdmin`) n'est attribuable que directement en base (pas d'endpoint d'attribution, volontairement).
+  > Nouvelle référence visuelle (`tests/visual/features/apparence-administration.feature`) à générer via le workflow GitHub Actions `update-visual-baselines` (cf. `conventions-code.md` §2.3, jamais `test:visual:update` en local) puis à valider/committer par le développeur.
 

@@ -1,6 +1,7 @@
 using EventCo.Domain.Auth.Exceptions;
 using EventCo.Domain.Common;
 using EventCo.Domain.Events.Exceptions;
+using EventCo.Domain.Users.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using FluentValidation;
@@ -34,6 +35,9 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             UserNotEventParticipantException forbiddenParticipantException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenParticipantException.Message }),
+            UserNotAdminException forbiddenAdminException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenAdminException.Message }),
             ParticipantCannotAssignTaskToOthersException forbiddenAssignException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenAssignException.Message }),

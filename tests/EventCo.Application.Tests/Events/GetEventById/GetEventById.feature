@@ -26,3 +26,12 @@ Fonctionnalité: Consultation d'un événement
     Alors la consultation réussit
     Et l'événement consulté a 2 participants
     Et l'événement consulté a un participant "ami@example.com" avec le rôle "Participant" sans statut de participation indiqué
+
+  Scénario: Consultation par un administrateur qui n'est pas participant
+    Etant donné un événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice"
+    Et je change d'utilisateur courant pour un administrateur
+    Quand je consulte cet événement
+    Alors la consultation réussit
+    Et l'événement consulté a pour titre "Repas de Noël"
+    Et l'utilisateur courant ne figure pas parmi les participants de l'événement consulté
+    Et le lien d'invitation de l'événement consulté n'est pas fourni

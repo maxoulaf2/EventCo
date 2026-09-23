@@ -12,6 +12,10 @@ public class User : Entity
     public string? AvatarUrl { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
+    // Attribué uniquement en base (aucun use case ne le modifie) : donne un accès en lecture seule à tous
+    // les événements, sans faire de l'administrateur un participant (cf. Event.EnsureCanBeViewedBy).
+    public bool IsAdmin { get; private set; }
+
     private User(Guid id, Email email, string displayName, DateTime createdAt) : base(id)
     {
         Email = email;
@@ -29,8 +33,8 @@ public class User : Entity
         return user;
     }
 
-    internal static User Reconstitute(Guid id, Email email, string displayName, string? avatarUrl, DateTime createdAt) =>
-        new(id, email, displayName, createdAt) { AvatarUrl = avatarUrl };
+    internal static User Reconstitute(Guid id, Email email, string displayName, string? avatarUrl, DateTime createdAt, bool isAdmin) =>
+        new(id, email, displayName, createdAt) { AvatarUrl = avatarUrl, IsAdmin = isAdmin };
 
     public void UpdateProfile(string displayName, string? avatarUrl)
     {

@@ -19,3 +19,10 @@ Fonctionnalité: Connexion au groupe temps réel d'un événement (SignalR)
   Scénario: Impossible de se connecter au hub temps réel sans cookie de session
     Quand je me connecte au hub temps réel sans cookie de session
     Alors la connexion au hub temps réel est refusée
+
+  Scénario: Un administrateur qui n'est pas participant peut rejoindre le groupe temps réel
+    Etant donné une session ouverte via l'API pour "join-hub-admin-creator-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une session administrateur ouverte via l'API pour "join-hub-admin-api-test@example.com"
+    Quand je me connecte au hub temps réel et que je rejoins cet événement
+    Alors la connexion au groupe temps réel réussit

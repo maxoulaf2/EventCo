@@ -167,7 +167,15 @@ public class Event : Entity
 
     public void EnsureCanBeDeletedBy(Guid actingUserId) => EnsureActingUserIsCreator(actingUserId);
 
-    public void EnsureCanBeViewedBy(Guid actingUserId) => EnsureActingUserIsParticipant(actingUserId);
+    // Un administrateur peut consulter n'importe quel événement sans en être participant (lecture seule :
+    // toutes les autres méthodes de l'agrégat continuent d'exiger une participation).
+    public void EnsureCanBeViewedBy(Guid actingUserId, bool actingUserIsAdmin)
+    {
+        if (actingUserIsAdmin)
+            return;
+
+        EnsureActingUserIsParticipant(actingUserId);
+    }
 
     public EventTask AddTask(Guid actingUserId, string title, TaskCategory category, string? quantity, DateTime now)
     {

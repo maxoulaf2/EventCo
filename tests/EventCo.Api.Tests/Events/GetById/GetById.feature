@@ -35,3 +35,12 @@ Fonctionnalité: Consultation d'un événement via l'API
     Et l'événement consulté retourné a 2 participants
     Et l'événement consulté retourné a un participant "get-event-participants-creator-api-test@example.com" avec le rôle "Organizer"
     Et l'événement consulté retourné a un participant "get-event-participants-guest-api-test@example.com" avec le rôle "Participant"
+
+  Scénario: Consultation par un administrateur qui n'est pas participant
+    Etant donné une session ouverte via l'API pour "get-event-admin-creator-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et une session administrateur ouverte via l'API pour "get-event-admin-api-test@example.com"
+    Quand je consulte cet événement via l'API
+    Alors la réponse de consultation d'événement a le statut 200
+    Et l'événement consulté retourné a 1 participant
+    Et l'événement consulté retourné a un participant "get-event-admin-creator-api-test@example.com" avec le rôle "Organizer"

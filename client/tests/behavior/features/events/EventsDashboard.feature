@@ -17,3 +17,12 @@ Fonctionnalité: Tableau de bord des événements
     Etant donné que ma session a expiré
     Quand j'arrive sur le tableau de bord
     Alors je suis redirigé vers la page de connexion
+
+  Scénario: Un administrateur voit le lien vers tous les événements
+    Etant donné que je suis administrateur
+    Quand j'arrive sur le tableau de bord
+    Alors je vois le lien vers tous les événements
+
+  Scénario: Un utilisateur non administrateur ne voit pas le lien vers tous les événements
+    Quand j'arrive sur le tableau de bord
+    Alors je ne vois pas le lien vers tous les événements

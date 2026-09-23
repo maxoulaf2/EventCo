@@ -27,3 +27,11 @@ Fonctionnalité: Consultation des tâches d'un événement
     Et je change d'utilisateur courant
     Quand je consulte les tâches de cet événement
     Alors la consultation des tâches échoue avec une erreur d'autorisation
+
+  Scénario: Consultation des tâches par un administrateur qui n'est pas participant
+    Etant donné un événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice" dont je veux consulter les tâches
+    Et une tâche "Bûche au chocolat" de catégorie "Courses" est ajoutée à cet événement
+    Et je change d'utilisateur courant pour un administrateur
+    Quand je consulte les tâches de cet événement
+    Alors la consultation des tâches réussit
+    Et l'événement consulté a 1 tâche

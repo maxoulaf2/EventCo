@@ -258,7 +258,7 @@ public class EventTests
     {
         var @event = CreateEvent(out _);
 
-        Assert.Throws<UserNotEventParticipantException>(() => @event.EnsureCanBeViewedBy(Guid.NewGuid()));
+        Assert.Throws<UserNotEventParticipantException>(() => @event.EnsureCanBeViewedBy(Guid.NewGuid(), actingUserIsAdmin: false));
     }
 
     [Fact]
@@ -268,9 +268,40 @@ public class EventTests
         var invitedUserId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
 
-        var exception = Record.Exception(() => @event.EnsureCanBeViewedBy(invitedUserId));
+        var exception = Record.Exception(() => @event.EnsureCanBeViewedBy(invitedUserId, actingUserIsAdmin: false));
 
         Assert.Null(exception);
+    }
+
+    [Fact]
+    public void EnsureCanBeViewedBy_ActingUserIsAdminNotParticipant_DoesNotThrow()
+    {
+        var @event = CreateEvent(out _);
+
+        var exception = Record.Exception(() => @event.EnsureCanBeViewedBy(Guid.NewGuid(), actingUserIsAdmin: true));
+
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void EnsureCanBeViewedBy_ActingUserIsAdmin_DoesNotAddAdminAsParticipant()
+    {
+        var @event = CreateEvent(out _);
+        var adminUserId = Guid.NewGuid();
+
+        @event.EnsureCanBeViewedBy(adminUserId, actingUserIsAdmin: true);
+
+        Assert.DoesNotContain(@event.Participants, p => p.UserId == adminUserId);
+    }
+
+    [Fact]
+    public void AddTask_ActingUserIsAdminNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        // La consultation administrateur est en lecture seule : aucune action d'écriture n'est ouverte.
+        var @event = CreateEvent(out _);
+
+        Assert.Throws<UserNotEventParticipantException>(() =>
+            @event.AddTask(Guid.NewGuid(), "Bûche", TaskCategory.Courses, null, DateTime.UtcNow));
     }
 
     [Fact]

@@ -1,5 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { screen } from '@testing-library/react'
+import { cleanup, screen } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
@@ -10,6 +10,9 @@ const feature = await loadFeature('tests/behavior/features/events/EventsDashboar
 describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
   AfterEachScenario(() => {
     server.resetHandlers()
+    // Sans démontage explicite entre scénarios (aucun cleanup RTL global, cf. src/test/setup.ts),
+    // le DOM du scénario précédent reste présent en plus de celui du scénario suivant.
+    cleanup()
   })
 
   Scenario('Liste de mes événements, dont un que j\'organise', ({ When, Then, And }) => {
@@ -57,6 +60,35 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
 
     Then('je suis redirigé vers la page de connexion', async () => {
       await screen.findByTestId('login-page-title')
+    })
+  })
+
+  Scenario('Un administrateur voit le lien vers tous les événements', ({ Given, When, Then }) => {
+    Given('je suis administrateur', () => {
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-1', email: 'test@example.com', displayName: 'Test', isAdmin: true }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le tableau de bord', () => {
+      renderApp('/events')
+    })
+
+    Then('je vois le lien vers tous les événements', async () => {
+      expect(await screen.findByTestId('events-dashboard-admin-link')).toHaveAttribute('href', '/admin/events')
+    })
+  })
+
+  Scenario('Un utilisateur non administrateur ne voit pas le lien vers tous les événements', ({ When, Then }) => {
+    When('j\'arrive sur le tableau de bord', () => {
+      renderApp('/events')
+    })
+
+    Then('je ne vois pas le lien vers tous les événements', async () => {
+      await screen.findByTestId('events-dashboard-account-button')
+      expect(screen.queryByTestId('events-dashboard-admin-link')).not.toBeInTheDocument()
     })
   })
 })

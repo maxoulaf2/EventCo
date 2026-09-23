@@ -7,4 +7,5 @@ public class UserEntity
     public string DisplayName { get; set; } = null!;
     public string? AvatarUrl { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsAdmin { get; set; }
 }

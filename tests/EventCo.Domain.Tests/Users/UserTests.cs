@@ -20,6 +20,14 @@ public class UserTests
     }
 
     [Fact]
+    public void Create_ValidData_IsNotAdminByDefault()
+    {
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
+
+        Assert.False(user.IsAdmin);
+    }
+
+    [Fact]
     public void Create_EmptyDisplayName_ThrowsUserDisplayNameEmptyException()
     {
         var email = Email.From("test@example.com");

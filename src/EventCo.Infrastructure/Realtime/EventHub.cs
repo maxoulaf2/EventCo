@@ -10,7 +10,7 @@ namespace EventCo.Infrastructure.Realtime;
 // Une connexion = un utilisateur qui peut suivre plusieurs événements à la fois (plusieurs onglets/events
 // ouverts) : le regroupement se fait par événement (groupe SignalR), pas par utilisateur ou par connexion.
 [Authorize]
-public sealed class EventHub(IEventRepository eventRepository) : Hub
+public sealed class EventHub(IEventRepository eventRepository, IUserRepository userRepository) : Hub
 {
     public static string GroupName(Guid eventId) => $"event-{eventId}";
 
@@ -21,7 +21,9 @@ public sealed class EventHub(IEventRepository eventRepository) : Hub
             var @event = await eventRepository.GetByIdAsync(eventId, Context.ConnectionAborted)
                 ?? throw new EventNotFoundException(eventId);
 
-            @event.EnsureCanBeViewedBy(GetUserId());
+            var userId = GetUserId();
+            var user = await userRepository.GetByIdAsync(userId, Context.ConnectionAborted);
+            @event.EnsureCanBeViewedBy(userId, user?.IsAdmin == true);
         }
         catch (DomainException ex)
         {

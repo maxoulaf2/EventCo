@@ -59,6 +59,9 @@ export function EventDetailPage() {
   const isCreatorOrOrganizer = isCreator || currentParticipant?.role === 'Organizer'
   const canInvite = isCreatorOrOrganizer
   const isParticipant = isCreator || currentParticipant !== undefined
+  // Un administrateur peut consulter un événement sans y participer : lecture seule (toutes les actions
+  // restent conditionnées à la participation ci-dessus, et refusées côté API sinon).
+  const isAdminViewer = currentUser?.isAdmin === true && !isParticipant
 
   const organizers = event?.participants.filter((p) => p.role === 'Organizer') ?? []
   const attendees = event?.participants.filter((p) => p.role === 'Participant') ?? []
@@ -175,6 +178,11 @@ export function EventDetailPage() {
                 {(isCreator || currentParticipant?.role === 'Organizer') && (
                   <Tag variant="sage" className="mb-2.5">
                     {isCreator ? 'Vous organisez' : 'Co-organisateur·ice'}
+                  </Tag>
+                )}
+                {isAdminViewer && (
+                  <Tag variant="outline" className="mb-2.5">
+                    <span data-testid="event-detail-admin-viewer-badge">Consultation administrateur</span>
                   </Tag>
                 )}
                 <h1 data-testid="event-detail-title" className="mb-4 text-[28px] lg:text-[40px]">

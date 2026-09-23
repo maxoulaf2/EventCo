@@ -17,7 +17,8 @@ public sealed class GetEventByIdQueryHandler(
             ?? throw new EventNotFoundException(request.EventId);
 
         var currentUserId = currentUserService.UserId!.Value;
-        @event.EnsureCanBeViewedBy(currentUserId);
+        var currentUser = await userRepository.GetByIdAsync(currentUserId, cancellationToken);
+        @event.EnsureCanBeViewedBy(currentUserId, currentUser?.IsAdmin == true);
 
         var isCreatorOrOrganizer = @event.CreatedByUserId == currentUserId
             || @event.Participants.Any(p => p.UserId == currentUserId && p.Role == ParticipantRole.Organizer);

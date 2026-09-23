@@ -405,6 +405,30 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
   })
 
+  Scenario('Un administrateur non participant consulte l\'événement en lecture seule', ({ Given, When, Then, And }) => {
+    Given('je suis un administrateur qui ne participe pas à cet événement', () => {
+      server.use(
+        http.get('*/api/auth/me', () =>
+          HttpResponse.json({ userId: 'user-admin', email: 'admin@example.com', displayName: 'Admin', isAdmin: true }),
+        ),
+      )
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je vois un badge de consultation administrateur', async () => {
+      expect(await screen.findByTestId('event-detail-admin-viewer-badge')).toHaveTextContent('Consultation administrateur')
+    })
+
+    And('je ne vois ni formulaire de participation ni formulaire d\'ajout de tâche', async () => {
+      await screen.findByTestId('task-list-empty-message')
+      expect(screen.queryByTestId('event-detail-participation-status-select')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('add-task-form')).not.toBeInTheDocument()
+    })
+  })
+
   Scenario('Affichage de l\'image de l\'événement', ({ Given, When, Then }) => {
     Given('l\'événement a une image', () => {
       eventImageUrl.value = 'https://example.com/photo.jpg'

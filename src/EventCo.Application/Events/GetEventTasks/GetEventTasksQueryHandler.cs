@@ -6,14 +6,17 @@ namespace EventCo.Application.Events.GetEventTasks;
 
 public sealed class GetEventTasksQueryHandler(
     ICurrentUserService currentUserService,
-    IEventRepository eventRepository) : ICommandHandler<GetEventTasksQuery, GetEventTasksResult>
+    IEventRepository eventRepository,
+    IUserRepository userRepository) : ICommandHandler<GetEventTasksQuery, GetEventTasksResult>
 {
     public async Task<GetEventTasksResult> Handle(GetEventTasksQuery request, CancellationToken cancellationToken)
     {
         var @event = await eventRepository.GetByIdAsync(request.EventId, cancellationToken)
             ?? throw new EventNotFoundException(request.EventId);
 
-        @event.EnsureCanBeViewedBy(currentUserService.UserId!.Value);
+        var currentUserId = currentUserService.UserId!.Value;
+        var currentUser = await userRepository.GetByIdAsync(currentUserId, cancellationToken);
+        @event.EnsureCanBeViewedBy(currentUserId, currentUser?.IsAdmin == true);
 
         var tasks = @event.Tasks
             .OrderBy(t => t.CreatedAt)

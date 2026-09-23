@@ -59,6 +59,11 @@ public sealed class GetEventTasksSteps
     [When(@"je consulte les tâches de cet événement")]
     public async Task QuandJeConsulteLesTachesDeCetEvenement() => await ConsulterLesTaches(_existingEventId!.Value);
 
+    [Given(@"je change d'utilisateur courant pour un administrateur")]
+    [Scope(Feature = "Consultation des tâches d'un événement")]
+    public async Task EtantDonneJeChangeDutilisateurCourantPourUnAdministrateur() =>
+        _currentUserContext.UserId = await AdminUserSeeder.SeedAsync(_serviceProvider);
+
     [When(@"je consulte les tâches d'un événement inexistant")]
     public async Task QuandJeConsulteLesTachesDunEvenementInexistant() => await ConsulterLesTaches(Guid.NewGuid());
 

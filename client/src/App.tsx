@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AdminEventsPage } from './features/admin/components/AdminEventsPage'
 import { CheckEmailPage } from './features/auth/components/CheckEmailPage'
 import { LoginPage } from './features/auth/components/LoginPage'
 import { VerifyMagicLinkPage } from './features/auth/components/VerifyMagicLinkPage'
@@ -22,6 +23,7 @@ export function AppRoutes() {
       <Route path={routes.createEvent} element={<CreateEventPage />} />
       <Route path="/events/:eventId" element={<EventDetailPage />} />
       <Route path="/invite/:token" element={<InviteLinkPage />} />
+      <Route path={routes.adminEvents} element={<AdminEventsPage />} />
     </Routes>
   )
 }

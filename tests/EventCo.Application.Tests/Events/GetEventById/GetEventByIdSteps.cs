@@ -67,6 +67,11 @@ public sealed class GetEventByIdSteps
         _existingEventId = createResult.EventId;
     }
 
+    [Given(@"je change d'utilisateur courant pour un administrateur")]
+    [Scope(Feature = "Consultation d'un événement")]
+    public async Task EtantDonneJeChangeDutilisateurCourantPourUnAdministrateur() =>
+        _currentUserContext.UserId = await AdminUserSeeder.SeedAsync(_serviceProvider);
+
     [When(@"je consulte cet événement")]
     public async Task QuandJeConsulteCetEvenement()
     {
@@ -110,6 +115,13 @@ public sealed class GetEventByIdSteps
 
     [Then(@"l'événement consulté a pour titre ""(.*)""")]
     public void AlorsLevenementConsulteAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);
+
+    [Then(@"l'utilisateur courant ne figure pas parmi les participants de l'événement consulté")]
+    public void AlorsLutilisateurCourantNeFigurePasParmiLesParticipants() =>
+        Assert.DoesNotContain(_lastResult!.Participants, p => p.UserId == _currentUserContext.UserId);
+
+    [Then(@"le lien d'invitation de l'événement consulté n'est pas fourni")]
+    public void AlorsLeLienDinvitationNestPasFourni() => Assert.Null(_lastResult!.InviteLinkToken);
 
     [Then(@"l'événement consulté a (\d+) participants?")]
     public void AlorsLevenementConsulteAParticipants(int count) => Assert.Equal(count, _lastResult!.Participants.Count);

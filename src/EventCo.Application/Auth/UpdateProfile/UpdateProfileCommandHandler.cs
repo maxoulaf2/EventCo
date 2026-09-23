@@ -17,6 +17,6 @@ public sealed class UpdateProfileCommandHandler(
 
         await userRepository.ApplyAsync(user, cancellationToken);
 
-        return new UpdateProfileResult(user.Id, user.Email.Value, user.DisplayName);
+        return new UpdateProfileResult(user.Id, user.Email.Value, user.DisplayName, user.IsAdmin);
     }
 }

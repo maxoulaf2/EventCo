@@ -49,7 +49,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     {
         var result = await commandDispatcher.Send(new GetCurrentUserQuery(), cancellationToken);
 
-        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName));
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin));
     }
 
     [Authorize]
@@ -58,7 +58,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     {
         var result = await commandDispatcher.Send(new UpdateProfileCommand(request.DisplayName), cancellationToken);
 
-        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName));
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin));
     }
 
     // Le token de session est auto-porté (cf. SessionTokenService) : la déconnexion ne fait que

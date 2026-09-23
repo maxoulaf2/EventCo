@@ -11,6 +11,7 @@ export const routes = {
   createEvent: '/events/new',
   eventDetail: (eventId: string) => `/events/${eventId}`,
   inviteLink: (token: string) => `/invite/${token}`,
+  adminEvents: '/admin/events',
 } as const
 
 /**

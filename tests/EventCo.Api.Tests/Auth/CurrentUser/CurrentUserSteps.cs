@@ -53,4 +53,16 @@ public sealed class CurrentUserSteps(SessionContext sessionContext)
     {
         Assert.Equal(email, _currentUser!.Email);
     }
+
+    [Then(@"l'utilisateur courant retourné est administrateur")]
+    public void AlorsLutilisateurCourantRetourneEstAdministrateur()
+    {
+        Assert.True(_currentUser!.IsAdmin);
+    }
+
+    [Then(@"l'utilisateur courant retourné n'est pas administrateur")]
+    public void AlorsLutilisateurCourantRetourneNestPasAdministrateur()
+    {
+        Assert.False(_currentUser!.IsAdmin);
+    }
 }

@@ -181,6 +181,16 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         return entity is null ? null : EventMapper.ToDomain(entity);
     }
 
+    public async Task<IReadOnlyList<Event>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var entities = await dbContext.Events
+            .Include(e => e.Participants)
+            .OrderBy(e => e.EventDate)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(EventMapper.ToDomain).ToList();
+    }
+
     public async Task<IReadOnlyList<Event>> GetByParticipantUserIdAsync(Guid userId, CancellationToken cancellationToken)
     {
         var entities = await dbContext.Events

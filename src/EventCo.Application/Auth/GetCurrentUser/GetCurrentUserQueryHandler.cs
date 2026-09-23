@@ -13,6 +13,6 @@ public sealed class GetCurrentUserQueryHandler(
     {
         var user = await userRepository.GetByIdAsync(currentUserService.UserId!.Value, cancellationToken);
 
-        return new GetCurrentUserResult(user!.Id, user.Email.Value, user.DisplayName);
+        return new GetCurrentUserResult(user!.Id, user.Email.Value, user.DisplayName, user.IsAdmin);
     }
 }
