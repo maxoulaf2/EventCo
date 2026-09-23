@@ -161,7 +161,7 @@ jobs:
     needs: [backend-tests, frontend-unit-tests, frontend-visual-tests, frontend-e2e-tests]
     if: ${{ vars.RENDER_DEPLOY_ENABLED == 'true' }}
     runs-on: ubuntu-latest
-    environment: production
+    environment: prod
     steps:
       - uses: actions/checkout@v7
 
