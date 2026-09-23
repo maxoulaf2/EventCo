@@ -80,7 +80,7 @@ Le déploiement est piloté par le job `deploy` de `.github/workflows/ci.yml` : 
 ### Checklist de configuration initiale (à faire une seule fois, actions manuelles développeur — Claude Code ne peut pas créer de comptes tiers à sa place)
 
 1. **Neon** (https://neon.tech) : créer un compte + un projet, récupérer la connection string (ajouter `SSL Mode=Require;Trust Server Certificate=true` si le connection string fourni ne l'inclut pas déjà — Neon exige TLS).
-2. **Brevo** (https://www.brevo.com) : créer un compte, vérifier l'adresse d'envoi (pas de domaine nécessaire), générer une clé SMTP (menu SMTP & API) — hôte `smtp-relay.brevo.com`, port `587`, username = email du compte Brevo, password = la clé SMTP générée.
+2. **Brevo** (https://www.brevo.com) : créer un compte, vérifier l'adresse d'envoi (pas de domaine nécessaire), générer une clé SMTP (menu SMTP & API) — hôte `smtp-relay.brevo.com`, port `2525` (le 587 est bloqué en sortie sur le plan gratuit Render), username = email du compte Brevo, password = la clé SMTP générée.
 3. **Render** (https://render.com) : créer un compte, "New > Blueprint" pointé sur ce repo GitHub (utilise `render.yaml`). Noter l'URL du service (`https://<nom-du-service>.onrender.com`).
 4. Dans le dashboard Render du service, renseigner les variables d'environnement marquées `sync: false` dans `render.yaml` :
    - `ConnectionStrings__Default` : connection string Neon

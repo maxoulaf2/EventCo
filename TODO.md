@@ -11,3 +11,8 @@ Ce document est une liste de notes que le développeur se fait à lui même pour
 - Ajouter un moyen de reporter des bugs facilement
 - afficher des erreurs clair à l'utilisateur
 - Dans les tests front, faire en sorte qu'un appel à l'api non mocké throw une erreur pour éviter les oublis
+
+# Bugs
+
+- Mettre un evenement à 16h -> invitation -> l'heure affiché est 18h
+- Categorie des Taches (Autre) à enlever

@@ -21,7 +21,8 @@ internal sealed class SmtpEmailSender(IOptions<EmailOptions> options) : IEmailSe
         message.Subject = subject;
         message.Body = new TextPart("html") { Text = htmlBody };
 
-        using var client = new SmtpClient();
+        // Défaut MailKit = 2 min par opération : trop long pour bloquer une requête HTTP (ex. port SMTP filtré en sortie).
+        using var client = new SmtpClient { Timeout = (int)TimeSpan.FromSeconds(30).TotalMilliseconds };
         var smtp = emailOptions.Smtp;
 
         await client.ConnectAsync(smtp.Host, smtp.Port, SecureSocketOptions.Auto, cancellationToken);

@@ -28,7 +28,7 @@ services:
       - key: Email__Smtp__Host
         sync: false
       - key: Email__Smtp__Port
-        value: "587"
+        value: "2525"
       - key: Email__Smtp__Username
         sync: false
       - key: Email__Smtp__Password
