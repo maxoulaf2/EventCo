@@ -151,6 +151,41 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.e2e.yml down -v
 
+  # Déploiement production (Render), déclenché seulement après succès de tous les tests, sur push
+  # main. Migre d'abord la base de prod (Neon) puis déclenche le déploiement via le deploy hook Render
+  # (autoDeploy désactivé dans render.yaml, pour ne jamais déployer une version dont la migration
+  # a échoué). Ne s'exécute que si les secrets sont configurés (cf. CLAUDE.md § Déploiement) : sans
+  # ça, le job est ignoré plutôt que de faire échouer la CI avant que le développeur les ait renseignés.
+  deploy:
+    name: Déploiement production (Render)
+    needs: [backend-tests, frontend-unit-tests, frontend-visual-tests, frontend-e2e-tests]
+    if: ${{ vars.RENDER_DEPLOY_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Install dotnet-ef
+        run: |
+          dotnet tool install --global dotnet-ef --version 10.0.4
+          echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
+
+      - name: Appliquer les migrations EF Core sur la base de production
+        env:
+          ConnectionStrings__Default: ${{ secrets.PRODUCTION_DB_CONNECTION_STRING }}
+        run: dotnet ef database update --project src/EventCo.Infrastructure --startup-project src/EventCo.Api
+
+      - name: Déclencher le déploiement Render
+        run: curl --fail -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
   # Permet de relancer la régénération des captures de référence (workflow "Update visual
   # baselines") directement depuis ce run CI, sans aller chercher l'autre workflow dans
   # l'onglet Actions. Le job attend une approbation manuelle (bouton "Review deployments"

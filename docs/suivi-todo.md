@@ -131,3 +131,16 @@
 - [ ] Notification email : tâche assignée
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
 
+## Lot 6 — Mise en production
+
+> Lot identifié en cours de route (rule 5, 2026-09-21), à la demande explicite du développeur : mise en place d'un vrai envoi d'email (jusqu'ici Mailtrap en sandbox dev uniquement, cf. `LoggingEmailSender`/`SmtpEmailSender`) puis déploiement de l'application en production. Traité avant le Lot 5 (post-MVP, non priorisé) sur instruction explicite. Services choisis avec le développeur, contrainte prioritaire = gratuit : hébergement **Render** (API + frontend statique servi par l'API, same-origin — cf. décision déjà actée dans `AuthController`/`client/vite.config.ts`/`client/src/shared/lib/api.ts`, "comme en prod (frontend/API servis sous le même domaine)"), base de données **Neon** (PostgreSQL gratuit, ne s'auto-supprime pas contrairement au Postgres gratuit de Render qui expire à 30 jours), envoi d'email **Brevo** (SMTP gratuit 300 mails/jour, pas de domaine à vérifier — le développeur n'a pas de nom de domaine).
+
+- [x] Dockerfile : build du frontend (`npm run build`) intégré au build multi-stage, copié dans `wwwroot` de l'API pour être servi en statique en production
+- [x] API : fichiers statiques + fallback SPA (React Router) + endpoint `/health` (health check Render)
+- [x] CI/CD : job de déploiement (migrations EF Core sur la base de prod + déclenchement du déploiement Render via deploy hook) après succès de tous les tests, sur push `main`
+- [x] `render.yaml` (Render Blueprint) pour simplifier la création du service
+- [ ] Comptes et configuration des services externes (checklist manuelle développeur, cf. CLAUDE.md § Déploiement) : Neon, Brevo, Render, secrets GitHub Actions
+  > Bloqué : nécessite des actions que Claude Code ne peut pas effectuer à sa place (création de comptes tiers, vérification email, génération de clés). Checklist détaillée fournie au développeur.
+- [ ] Vérification post-déploiement : parcours nominal (magic link, création d'événement, invitation avec envoi d'email réel) sur l'environnement de production
+  > Bloqué : dépend de la tâche précédente.
+

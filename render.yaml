@@ -1,0 +1,35 @@
+# Render Blueprint — création du service via "New > Blueprint" sur render.com, pointé sur ce repo.
+# Les variables marquées sync: false sont à renseigner manuellement dans le dashboard Render après
+# création (secrets, ou valeurs dépendant du nom/URL choisis) : cf. CLAUDE.md § Déploiement.
+services:
+  - type: web
+    name: eventco
+    runtime: docker
+    dockerfilePath: src/EventCo.Api/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: false # le déploiement est déclenché par le job CI (migrations avant deploy), pas au push direct
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__Default
+        sync: false
+      - key: Session__Secret
+        sync: false
+      - key: Frontend__BaseUrl
+        sync: false
+      - key: MagicLink__VerificationUrlBase
+        sync: false
+      - key: Email__FromAddress
+        sync: false
+      - key: Email__FromName
+        value: EventCo
+      - key: Email__Smtp__Host
+        sync: false
+      - key: Email__Smtp__Port
+        value: "587"
+      - key: Email__Smtp__Username
+        sync: false
+      - key: Email__Smtp__Password
+        sync: false

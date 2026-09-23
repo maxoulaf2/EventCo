@@ -1,3 +1,12 @@
+# Frontend : buildé à part (same-origin en prod, cf. AuthController/vite.config.ts/api.ts) puis
+# copié dans wwwroot de l'API ci-dessous, sans VITE_API_URL pour garder les appels en relatif.
+FROM node:22-alpine AS client-build
+WORKDIR /client
+COPY client/package.json client/package-lock.json ./
+RUN npm ci
+COPY client/ ./
+RUN npm run build
+
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -13,5 +22,8 @@ RUN dotnet publish "src/EventCo.Api/EventCo.Api.csproj" -c Release -o /app/publi
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
+COPY --from=client-build /client/dist ./wwwroot
 EXPOSE 8080
-ENTRYPOINT ["dotnet", "EventCo.Api.dll"]
+# Render (et d'autres PaaS) injectent PORT et attendent que le service l'écoute ; ASPNETCORE_URLS
+# explicite (docker-compose.yml en dev) garde priorité s'il est déjà défini.
+ENTRYPOINT ["sh", "-c", "export ASPNETCORE_URLS=${ASPNETCORE_URLS:-http://+:${PORT:-8080}}; exec dotnet EventCo.Api.dll"]

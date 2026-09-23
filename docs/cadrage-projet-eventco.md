@@ -28,7 +28,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Base de données | **PostgreSQL + EF Core** | Standard robuste, excellent support EF Core, gratuit |
 | Authentification | **Passwordless (magic link)** | Réduction de friction pour des invités occasionnels ; pas de gestion de mots de passe (hashing, reset, politique de complexité) |
 | PWA | **Manifest + Service Worker basique** | Installable sur écran d'accueil mobile, tolérance réseau instable |
-| Déploiement | À définir (pistes : Railway, Render, Azure App Service) | Non bloquant pour le développement initial |
+| Déploiement | **Render** (API + frontend statique servi par l'API, same-origin), DB **Neon**, email **Brevo** — tous en offre gratuite (2026-09-21) | Décision prise au Lot 6, cf. `docs/suivi-todo.md` et `CLAUDE.md` § Déploiement |
 | Tests | xUnit (backend) | Cohérent avec l'écosystème .NET |
 | CI/CD | GitHub Actions (à affiner) | Standard, gratuit pour projets perso |
 

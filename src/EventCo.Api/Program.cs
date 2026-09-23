@@ -71,8 +71,21 @@ app.UseCors(FrontendCorsPolicy);
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Health check pour Render (et autres PaaS) : doit répondre avant toute dépendance à la base/l'auth.
+app.MapGet("/health", () => Results.Ok());
+
 app.MapControllers();
 app.MapHub<EventHub>("/hubs/events");
+
+// Sert le frontend buildé (wwwroot, cf. Dockerfile) en production : same-origin avec l'API, cf. note
+// dans AuthController sur SameSite=Lax. wwwroot est absent en dev (frontend servi par Vite), donc
+// ce bloc ne s'active qu'en présence du build statique.
+if (Directory.Exists(Path.Combine(app.Environment.ContentRootPath, "wwwroot")))
+{
+    app.UseDefaultFiles();
+    app.UseStaticFiles();
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();
 
