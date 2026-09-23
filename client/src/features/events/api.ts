@@ -9,7 +9,9 @@ export function createEvent(input: CreateEventInput): Promise<{ id: string }> {
   const { eventTime, ...rest } = input
   return apiFetch<{ id: string }>('/api/events', {
     method: 'POST',
-    body: JSON.stringify({ ...rest, eventDate: `${input.eventDate}T${eventTime || '00:00'}:00.000Z` }),
+    // Date et heure sont saisies en heure locale : `new Date` sans suffixe les interprète comme telles,
+    // `toISOString` les convertit en instant UTC (sinon 16h saisi à Paris est affiché 18h).
+    body: JSON.stringify({ ...rest, eventDate: new Date(`${input.eventDate}T${eventTime || '00:00'}`).toISOString() }),
   })
 }
 

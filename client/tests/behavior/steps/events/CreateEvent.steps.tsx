@@ -119,9 +119,9 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
       },
     )
 
-    Then('la requête de création envoyée au serveur contient la date "2026-12-24T19:30:00.000Z"', async () => {
+    Then('la requête de création envoyée au serveur contient la date "2026-12-24T18:30:00.000Z"', async () => {
       await screen.findByTestId('events-dashboard-title')
-      expect(requestBody?.eventDate).toBe('2026-12-24T19:30:00.000Z')
+      expect(requestBody?.eventDate).toBe('2026-12-24T18:30:00.000Z')
     })
   })
 
@@ -148,9 +148,9 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
       },
     )
 
-    Then('la requête de création envoyée au serveur contient la date "2026-12-24T00:00:00.000Z"', async () => {
+    Then('la requête de création envoyée au serveur contient la date "2026-12-23T23:00:00.000Z"', async () => {
       await screen.findByTestId('events-dashboard-title')
-      expect(requestBody?.eventDate).toBe('2026-12-24T00:00:00.000Z')
+      expect(requestBody?.eventDate).toBe('2026-12-23T23:00:00.000Z')
     })
   })
 })

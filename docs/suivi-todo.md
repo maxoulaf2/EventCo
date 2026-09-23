@@ -139,8 +139,10 @@
 - [x] API : fichiers statiques + fallback SPA (React Router) + endpoint `/health` (health check Render)
 - [x] CI/CD : job de déploiement (migrations EF Core sur la base de prod + déclenchement du déploiement Render via deploy hook) après succès de tous les tests, sur push `main`
 - [x] `render.yaml` (Render Blueprint) pour simplifier la création du service
-- [ ] Comptes et configuration des services externes (checklist manuelle développeur, cf. CLAUDE.md § Déploiement) : Neon, Brevo, Render, secrets GitHub Actions
-  > Bloqué : nécessite des actions que Claude Code ne peut pas effectuer à sa place (création de comptes tiers, vérification email, génération de clés). Checklist détaillée fournie au développeur.
-- [ ] Vérification post-déploiement : parcours nominal (magic link, création d'événement, invitation avec envoi d'email réel) sur l'environnement de production
-  > Bloqué : dépend de la tâche précédente.
+- [x] Comptes et configuration des services externes (checklist manuelle développeur, cf. CLAUDE.md § Déploiement) : Neon, Brevo, Render, secrets GitHub Actions
+  > Réalisé par le développeur (2026-09-23).
+- [x] Vérification post-déploiement : parcours nominal (magic link, création d'événement, invitation avec envoi d'email réel) sur l'environnement de production
+  > Vérifié par le développeur (2026-09-23). Point ouvert : les emails arrivent en spam (adresse d'expéditeur personnelle, domaine non authentifiable SPF/DKIM/DMARC) — hors périmètre de ce lot.
+- [x] Correctif : heure d'événement décalée (+2 h en heure d'été à Paris) à l'affichage
+  > Tâche identifiée en cours de route (rule 5, 2026-09-23), suite à un bug remonté par le développeur : un événement créé à 16h s'affichait à 18h (page d'invitation, détail). Cause : `createEvent` (`client/src/features/events/api.ts`) suffixait la date/heure saisie (heure locale) par `Z`, la faisant passer pour de l'UTC ; l'affichage (`toLocaleTimeString`) la reconvertissait ensuite en heure locale. Corrigé en convertissant la saisie locale en UTC (`new Date(...).toISOString()`). Les événements déjà créés avant le correctif restent décalés en base (pas de migration de données).
 

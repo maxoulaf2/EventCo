@@ -20,10 +20,11 @@ Fonctionnalité: Création d'un événement
     Quand je saisis le titre "Repas de Noël", la date "2026-12-24" et l'image "https://example.com/photo.jpg" puis je valide le formulaire
     Alors la requête de création envoyée au serveur contient l'image "https://example.com/photo.jpg"
 
+  # Date et heure saisies en heure locale (Europe/Paris dans les tests), envoyées au serveur en UTC.
   Scénario: Création avec une heure précisée
     Quand je saisis le titre "Repas de Noël", la date "2026-12-24" et l'heure "19:30" puis je valide le formulaire
-    Alors la requête de création envoyée au serveur contient la date "2026-12-24T19:30:00.000Z"
+    Alors la requête de création envoyée au serveur contient la date "2026-12-24T18:30:00.000Z"
 
   Scénario: Création sans heure précisée
     Quand je saisis le titre "Repas de Noël" et la date "2026-12-24" puis je valide le formulaire
-    Alors la requête de création envoyée au serveur contient la date "2026-12-24T00:00:00.000Z"
+    Alors la requête de création envoyée au serveur contient la date "2026-12-23T23:00:00.000Z"
