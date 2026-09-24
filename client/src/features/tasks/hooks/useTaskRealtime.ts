@@ -8,7 +8,6 @@ function toEventTask(payload: TaskRealtimePayload): EventTask {
     id: payload.taskId,
     eventId: payload.eventId,
     title: payload.title,
-    category: payload.category,
     quantity: payload.quantity,
     assignedToUserId: payload.assignedToUserId,
     createdAt: payload.createdAt,

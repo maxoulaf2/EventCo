@@ -1,8 +1,5 @@
-export type TaskCategory = 'Courses' | 'Logistique' | 'Autre'
-
 export interface CreateTaskInput {
   title: string
-  category: TaskCategory
   quantity?: string
 }
 
@@ -10,7 +7,6 @@ export interface EventTask {
   id: string
   eventId: string
   title: string
-  category: TaskCategory
   quantity: string | null
   assignedToUserId: string | null
   createdAt: string
@@ -22,7 +18,6 @@ export interface TaskRealtimePayload {
   taskId: string
   eventId: string
   title: string
-  category: TaskCategory
   quantity: string | null
   assignedToUserId: string | null
   createdAt: string

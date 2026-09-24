@@ -148,4 +148,7 @@
 - [x] Flag administrateur : un compte flaggé administrateur peut consulter tous les événements existants (liste, détail, tâches, temps réel) en lecture seule, sans apparaître en tant que participant
   > Tâche identifiée en cours de route (rule 5, 2026-09-23), à la demande explicite du développeur. Le flag (`Users.IsAdmin`) n'est attribuable que directement en base (pas d'endpoint d'attribution, volontairement).
   > Nouvelle référence visuelle (`tests/visual/features/apparence-administration.feature`) à générer via le workflow GitHub Actions `update-visual-baselines` (cf. `conventions-code.md` §2.3, jamais `test:visual:update` en local) puis à valider/committer par le développeur.
+- [x] Suppression complète de la catégorie de tâche (Domain, base de données, API, temps réel, frontend)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur : les tâches créées depuis le frontend partaient toutes en « Autre » (pas de choix de catégorie dans l'ajout rapide), rendant le regroupement par catégorie de `TaskList` inutile. Migration `RemoveEventTaskCategory` (suppression de la colonne `EventTasks.Category`, données perdues).
+  > Références visuelles de la page de détail d'un événement (`apparence-detail-evenement.feature`) devenues obsolètes (intitulés de catégorie retirés au-dessus des tâches) — à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.
 

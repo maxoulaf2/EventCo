@@ -16,9 +16,8 @@ public sealed class CreateTaskCommandHandler(
             ?? throw new EventNotFoundException(request.EventId);
 
         var now = dateTimeProvider.UtcNow;
-        var category = Enum.Parse<TaskCategory>(request.Category);
 
-        var task = @event.AddTask(currentUserService.UserId!.Value, request.Title, category, request.Quantity, now);
+        var task = @event.AddTask(currentUserService.UserId!.Value, request.Title, request.Quantity, now);
 
         await eventRepository.ApplyAsync(@event, cancellationToken);
 
@@ -26,7 +25,6 @@ public sealed class CreateTaskCommandHandler(
             task.Id,
             @event.Id,
             task.Title,
-            task.Category.ToString(),
             task.Quantity,
             task.AssignedToUserId,
             task.CreatedAt);

@@ -6,7 +6,6 @@ using EventCo.Application.Events.DeleteTask;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
-using EventCo.Domain.Events;
 using EventCo.Domain.Events.Exceptions;
 using EventCo.Infrastructure.Persistence.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -69,7 +68,7 @@ public sealed class DeleteTaskSteps
         _currentUserContext.UserId = _taskCreatorUserId.Value;
 
         var taskResult = await dispatcher.Send(
-            new CreateTaskCommand(_existingEventId.Value, taskTitle, nameof(TaskCategory.Courses), "1"),
+            new CreateTaskCommand(_existingEventId.Value, taskTitle, "1"),
             CancellationToken.None);
         _existingTaskId = taskResult.TaskId;
     }

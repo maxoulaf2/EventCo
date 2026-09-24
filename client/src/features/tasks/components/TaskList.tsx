@@ -6,9 +6,7 @@ import { useAssignTask } from '../hooks/useAssignTask'
 import { useEventTasks } from '../hooks/useEventTasks'
 import { useTaskRealtime } from '../hooks/useTaskRealtime'
 import { useUnassignTask } from '../hooks/useUnassignTask'
-import type { EventTask, TaskCategory } from '../types'
-
-const CATEGORIES: TaskCategory[] = ['Courses', 'Logistique', 'Autre']
+import type { EventTask } from '../types'
 
 type TaskTab = 'todo' | 'assigned'
 
@@ -48,10 +46,6 @@ export function TaskList({
   tasks?.forEach((task) => counts[tabOf(task)]++)
 
   const tabTasks = tasks?.filter((task) => tabOf(task) === tab) ?? []
-  const groups = CATEGORIES.map((category) => ({
-    category,
-    items: tabTasks.filter((task) => task.category === category),
-  })).filter((group) => group.items.length > 0)
 
   function canUnassign(task: EventTask) {
     return canManageAllTasks || task.assignedToUserId === currentUserId
@@ -112,61 +106,53 @@ export function TaskList({
                 Aucune tâche dans cet onglet.
               </p>
             ) : (
-              groups.map((group) => (
-                <div key={group.category} className="mb-6.5">
-                  <p className="mb-2.5 ml-4 text-[10px] tracking-[0.11em] text-accent-700 uppercase">{group.category}</p>
-                  <ul className="flex flex-col gap-2.5">
-                    {group.items.map((task) => {
-                      const showAssign = canSelfAssign && !task.assignedToUserId
-                      return (
-                        <li
-                          key={task.id}
-                          data-testid={`task-item-${task.id}`}
-                          className={`flex min-h-14 items-center gap-3 rounded-[1.75rem] bg-surface px-3.5 ${
-                            tab === 'todo' ? 'shadow-[inset_0_0_0_1.5px_var(--color-accent-600)]' : ''
-                          }`}
+              <ul className="flex flex-col gap-2.5">
+                {tabTasks.map((task) => {
+                  const showAssign = canSelfAssign && !task.assignedToUserId
+                  return (
+                    <li
+                      key={task.id}
+                      data-testid={`task-item-${task.id}`}
+                      className={`flex min-h-14 items-center gap-3 rounded-[1.75rem] bg-surface px-3.5 ${
+                        tab === 'todo' ? 'shadow-[inset_0_0_0_1.5px_var(--color-accent-600)]' : ''
+                      }`}
+                    >
+                      <span data-testid={`task-item-title-${task.id}`} className="flex-1 pl-3.5 text-[15px] text-ink">
+                        {task.title}
+                        {task.quantity && <span className="text-ink/50"> · {task.quantity}</span>}
+                      </span>
+                      {showAssign && (
+                        <button
+                          type="button"
+                          onClick={() => currentUserId && assignTask.mutate({ taskId: task.id, userId: currentUserId })}
+                          disabled={assignTask.isPending}
+                          data-testid={`task-item-assign-button-${task.id}`}
+                          className="inline-flex min-h-9.5 shrink-0 items-center rounded-full bg-accent-500 px-3.5 text-[13px] font-heading text-accent-900 transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-45"
                         >
-                          <span data-testid={`task-item-category-badge-${task.id}`} className="sr-only">
-                            {task.category}
-                          </span>
-                          <span data-testid={`task-item-title-${task.id}`} className="flex-1 pl-3.5 text-[15px] text-ink">
-                            {task.title}
-                            {task.quantity && <span className="text-ink/50"> · {task.quantity}</span>}
-                          </span>
-                          {showAssign && (
+                          Je prends
+                        </button>
+                      )}
+                      {!showAssign && task.assignedToUserId && (
+                        <div className="flex shrink-0 items-center gap-2">
+                          <Avatar name={participantName(task.assignedToUserId)} size="sm" />
+                          {canUnassign(task) && (
                             <button
                               type="button"
-                              onClick={() => currentUserId && assignTask.mutate({ taskId: task.id, userId: currentUserId })}
-                              disabled={assignTask.isPending}
-                              data-testid={`task-item-assign-button-${task.id}`}
-                              className="inline-flex min-h-9.5 shrink-0 items-center rounded-full bg-accent-500 px-3.5 text-[13px] font-heading text-accent-900 transition-colors hover:bg-accent-400 disabled:cursor-not-allowed disabled:opacity-45"
+                              onClick={() => unassignTask.mutate(task.id)}
+                              disabled={unassignTask.isPending}
+                              aria-label={`Se désassigner de "${task.title}"`}
+                              data-testid={`task-item-unassign-button-${task.id}`}
+                              className="inline-flex min-h-9.5 shrink-0 items-center rounded-full border border-ink/15 bg-surface px-3.5 text-[13px] font-heading text-ink/70 transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
                             >
-                              Je prends
+                              Laisser
                             </button>
                           )}
-                          {!showAssign && task.assignedToUserId && (
-                            <div className="flex shrink-0 items-center gap-2">
-                              <Avatar name={participantName(task.assignedToUserId)} size="sm" />
-                              {canUnassign(task) && (
-                                <button
-                                  type="button"
-                                  onClick={() => unassignTask.mutate(task.id)}
-                                  disabled={unassignTask.isPending}
-                                  aria-label={`Se désassigner de "${task.title}"`}
-                                  data-testid={`task-item-unassign-button-${task.id}`}
-                                  className="inline-flex min-h-9.5 shrink-0 items-center rounded-full border border-ink/15 bg-surface px-3.5 text-[13px] font-heading text-ink/70 transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
-                                >
-                                  Laisser
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </div>
-              ))
+                        </div>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
             )}
           </div>
         </>

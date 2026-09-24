@@ -19,11 +19,6 @@ public class EventTaskConfiguration : IEntityTypeConfiguration<EventTaskEntity>
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.Property(t => t.Category)
-            .HasConversion<string>()
-            .HasMaxLength(20)
-            .IsRequired();
-
         builder.Property(t => t.Quantity)
             .HasMaxLength(100);
 

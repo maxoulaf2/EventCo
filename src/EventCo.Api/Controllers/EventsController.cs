@@ -175,7 +175,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             t.TaskId,
             t.EventId,
             t.Title,
-            t.Category,
             t.Quantity,
             t.AssignedToUserId,
             t.CreatedAt));
@@ -187,14 +186,13 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> CreateTask(Guid id, CreateTaskRequest request, CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(
-            new CreateTaskCommand(id, request.Title, request.Category, request.Quantity),
+            new CreateTaskCommand(id, request.Title, request.Quantity),
             cancellationToken);
 
         var response = new EventTaskResponse(
             result.TaskId,
             result.EventId,
             result.Title,
-            result.Category,
             result.Quantity,
             result.AssignedToUserId,
             result.CreatedAt);

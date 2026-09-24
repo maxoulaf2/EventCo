@@ -91,7 +91,6 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Id | Guid | |
 | EventId | Guid | FK |
 | Title | string | ex: "Bûche au chocolat" |
-| Category | enum | `Courses`, `Logistique`, `Autre` |
 | Quantity | string? | texte libre (ex: "2", "1kg") |
 | AssignedToUserId | Guid? | null = non assignée |
 | CreatedAt | DateTime | |
@@ -111,7 +110,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Création d'événement (titre, description, date, lieu)
 - Invitation de participants par email
 - Distinction créateur / co-organisateur / participant
-- Liste de tâches partagée avec catégories, quantités et assignation
+- Liste de tâches partagée avec quantités et assignation
 - Mise à jour en temps réel (SignalR) des tâches entre participants
 - Vue événement centralisée (résumé, participants, tâches)
 - Design responsive mobile-first
@@ -158,7 +157,7 @@ Ce découpage vise à séquencer le travail de façon à obtenir rapidement une 
 - Gestion des participants et rôles (invitation par email, acceptation)
 
 **Lot 3 — Tâches et temps réel**
-- CRUD des tâches (catégorie, quantité, assignation)
+- CRUD des tâches (quantité, assignation)
 - Intégration SignalR pour la synchronisation en temps réel
 
 **Lot 4 — Finitions MVP**

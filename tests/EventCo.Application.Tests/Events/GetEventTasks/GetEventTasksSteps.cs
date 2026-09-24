@@ -49,11 +49,11 @@ public sealed class GetEventTasksSteps
         _existingEventId = createResult.EventId;
     }
 
-    [Given(@"une tâche ""(.*)"" de catégorie ""(.*)"" est ajoutée à cet événement")]
-    public async Task EtantDonneUneTacheDeCategorieEstAjouteeACetEvenement(string title, string category)
+    [Given(@"une tâche ""(.*)"" est ajoutée à cet événement")]
+    public async Task EtantDonneUneTacheEstAjouteeACetEvenement(string title)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-        await dispatcher.Send(new CreateTaskCommand(_existingEventId!.Value, title, category, null), CancellationToken.None);
+        await dispatcher.Send(new CreateTaskCommand(_existingEventId!.Value, title, null), CancellationToken.None);
     }
 
     [When(@"je consulte les tâches de cet événement")]
@@ -95,10 +95,7 @@ public sealed class GetEventTasksSteps
     [Then(@"l'événement consulté a (\d+) tâches?")]
     public void AlorsLevenementConsulteATaches(int count) => Assert.Equal(count, _lastResult!.Tasks.Count);
 
-    [Then(@"l'événement consulté a une tâche ""(.*)"" de catégorie ""(.*)""")]
-    public void AlorsLevenementConsulteAUneTacheDeCategorie(string title, string category)
-    {
-        var task = Assert.Single(_lastResult!.Tasks, t => t.Title == title);
-        Assert.Equal(category, task.Category);
-    }
+    [Then(@"l'événement consulté a une tâche ""(.*)""")]
+    public void AlorsLevenementConsulteAUneTache(string title) =>
+        Assert.Single(_lastResult!.Tasks, t => t.Title == title);
 }

@@ -6,7 +6,6 @@ public sealed record TaskRealtimeDto(
     Guid TaskId,
     Guid EventId,
     string Title,
-    string Category,
     string? Quantity,
     Guid? AssignedToUserId,
     DateTime CreatedAt)
@@ -15,7 +14,6 @@ public sealed record TaskRealtimeDto(
         task.Id,
         task.EventId,
         task.Title,
-        task.Category.ToString(),
         task.Quantity,
         task.AssignedToUserId,
         task.CreatedAt);

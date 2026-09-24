@@ -36,7 +36,6 @@ const defaultTasks = [
     id: 'task-1',
     eventId: 'event-1',
     title: 'Bûche au chocolat',
-    category: 'Courses',
     quantity: '1',
     assignedToUserId: null,
     createdAt: '2026-09-01T00:00:00Z',
@@ -45,7 +44,6 @@ const defaultTasks = [
     id: 'task-2',
     eventId: 'event-1',
     title: 'Réserver la salle',
-    category: 'Logistique',
     quantity: null,
     assignedToUserId: null,
     createdAt: '2026-09-02T00:00:00Z',
@@ -77,22 +75,21 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('un autre participant crée la tâche "Acheter des bougies" de catégorie "Courses"', async () => {
+    And('un autre participant crée la tâche "Acheter des bougies"', async () => {
       await screen.findByTestId('task-item-task-1')
       emit('TaskCreated', {
         taskId: 'task-3',
         eventId: 'event-1',
         title: 'Acheter des bougies',
-        category: 'Courses',
         quantity: null,
         assignedToUserId: null,
         createdAt: '2026-09-03T00:00:00Z',
       })
     })
 
-    Then('je vois la tâche "Acheter des bougies" de catégorie "Courses"', async () => {
+    Then('je vois la tâche "Acheter des bougies"', async () => {
       await screen.findByTestId('task-item-task-3')
-      expect(screen.getByTestId('task-item-category-badge-task-3')).toHaveTextContent('Courses')
+      expect(screen.getByTestId('task-item-title-task-3')).toHaveTextContent('Acheter des bougies')
     })
   })
 

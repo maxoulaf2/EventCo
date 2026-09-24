@@ -29,13 +29,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     When('j\'arrive sur le détail de l\'événement', () => {
       server.use(
         http.post('*/api/events/:id/tasks', async ({ request, params }) => {
-          const body = (await request.json()) as { title: string; category: string; quantity: string | null }
+          const body = (await request.json()) as { title: string; quantity: string | null }
           return HttpResponse.json(
             {
               id: 'task-new',
               eventId: params.id,
               title: body.title,
-              category: body.category,
               quantity: body.quantity,
               assignedToUserId: null,
               createdAt: '2026-09-17T00:00:00Z',

@@ -301,7 +301,7 @@ public class EventTests
         var @event = CreateEvent(out _);
 
         Assert.Throws<UserNotEventParticipantException>(() =>
-            @event.AddTask(Guid.NewGuid(), "Bûche", TaskCategory.Courses, null, DateTime.UtcNow));
+            @event.AddTask(Guid.NewGuid(), "Bûche", null, DateTime.UtcNow));
     }
 
     [Fact]
@@ -343,7 +343,7 @@ public class EventTests
         var @event = CreateEvent(out _);
 
         Assert.Throws<UserNotEventParticipantException>(
-            () => @event.AddTask(Guid.NewGuid(), "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow));
+            () => @event.AddTask(Guid.NewGuid(), "Bûche au chocolat", "1", DateTime.UtcNow));
     }
 
     [Fact]
@@ -353,7 +353,7 @@ public class EventTests
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
 
-        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         Assert.Contains(task, @event.Tasks);
     }
@@ -364,14 +364,14 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
 
         Assert.Throws<EventTaskTitleEmptyException>(
-            () => @event.AddTask(creatorId, " ", TaskCategory.Courses, "1", DateTime.UtcNow));
+            () => @event.AddTask(creatorId, " ", "1", DateTime.UtcNow));
     }
 
     [Fact]
     public void AssignTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         Assert.Throws<UserNotEventParticipantException>(() => @event.AssignTask(Guid.NewGuid(), task.Id, creatorId));
     }
@@ -380,7 +380,7 @@ public class EventTests
     public void AssignTask_TargetUserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         Assert.Throws<TaskAssigneeNotParticipantException>(() => @event.AssignTask(creatorId, task.Id, Guid.NewGuid()));
     }
@@ -391,7 +391,7 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         @event.AssignTask(creatorId, task.Id, regularParticipantId);
 
@@ -404,7 +404,7 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         @event.AssignTask(regularParticipantId, task.Id, regularParticipantId);
 
@@ -427,7 +427,7 @@ public class EventTests
         var otherParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
         @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         Assert.Throws<ParticipantCannotAssignTaskToOthersException>(
             () => @event.AssignTask(regularParticipantId, task.Id, otherParticipantId));
@@ -445,7 +445,7 @@ public class EventTests
     public void UnassignTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
         @event.AssignTask(creatorId, task.Id, creatorId);
 
         Assert.Throws<UserNotEventParticipantException>(() => @event.UnassignTask(Guid.NewGuid(), task.Id));
@@ -457,7 +457,7 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
         @event.AssignTask(creatorId, task.Id, regularParticipantId);
 
         @event.UnassignTask(regularParticipantId, task.Id);
@@ -471,7 +471,7 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
         @event.AssignTask(creatorId, task.Id, regularParticipantId);
 
         @event.UnassignTask(creatorId, task.Id);
@@ -487,7 +487,7 @@ public class EventTests
         var otherParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
         @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
         @event.AssignTask(creatorId, task.Id, otherParticipantId);
 
         Assert.Throws<ParticipantCannotUnassignOthersTaskException>(() => @event.UnassignTask(regularParticipantId, task.Id));
@@ -505,7 +505,7 @@ public class EventTests
     public void RemoveTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         Assert.Throws<UserNotEventParticipantException>(() => @event.RemoveTask(Guid.NewGuid(), task.Id));
     }
@@ -516,7 +516,7 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         @event.RemoveTask(regularParticipantId, task.Id);
 
@@ -529,7 +529,7 @@ public class EventTests
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         @event.RemoveTask(creatorId, task.Id);
 
@@ -544,7 +544,7 @@ public class EventTests
         var otherParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, taskCreatorId, DateTime.UtcNow);
         @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(taskCreatorId, "Bûche au chocolat", TaskCategory.Courses, "1", DateTime.UtcNow);
+        var task = @event.AddTask(taskCreatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
         Assert.Throws<ParticipantCannotDeleteOthersTaskException>(() => @event.RemoveTask(otherParticipantId, task.Id));
     }

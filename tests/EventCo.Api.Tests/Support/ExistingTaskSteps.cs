@@ -17,7 +17,7 @@ public sealed class ExistingTaskSteps(SessionContext sessionContext, EventContex
 
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, $"/api/events/{eventContext.EventId}/tasks")
         {
-            Content = JsonContent.Create(new CreateTaskRequest(title, "Courses", "1")),
+            Content = JsonContent.Create(new CreateTaskRequest(title, "1")),
         };
         httpRequest.Headers.Add("Cookie", sessionContext.Cookie!);
 

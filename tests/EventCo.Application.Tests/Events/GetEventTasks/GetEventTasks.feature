@@ -11,12 +11,12 @@ Fonctionnalité: Consultation des tâches d'un événement
 
   Scénario: Consultation des tâches d'un événement avec plusieurs tâches
     Etant donné un événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice" dont je veux consulter les tâches
-    Et une tâche "Bûche au chocolat" de catégorie "Courses" est ajoutée à cet événement
-    Et une tâche "Réserver la salle" de catégorie "Logistique" est ajoutée à cet événement
+    Et une tâche "Bûche au chocolat" est ajoutée à cet événement
+    Et une tâche "Réserver la salle" est ajoutée à cet événement
     Quand je consulte les tâches de cet événement
     Alors la consultation des tâches réussit
     Et l'événement consulté a 2 tâches
-    Et l'événement consulté a une tâche "Bûche au chocolat" de catégorie "Courses"
+    Et l'événement consulté a une tâche "Bûche au chocolat"
 
   Scénario: Consultation des tâches d'un événement inexistant
     Quand je consulte les tâches d'un événement inexistant
@@ -30,7 +30,7 @@ Fonctionnalité: Consultation des tâches d'un événement
 
   Scénario: Consultation des tâches par un administrateur qui n'est pas participant
     Etant donné un événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice" dont je veux consulter les tâches
-    Et une tâche "Bûche au chocolat" de catégorie "Courses" est ajoutée à cet événement
+    Et une tâche "Bûche au chocolat" est ajoutée à cet événement
     Et je change d'utilisateur courant pour un administrateur
     Quand je consulte les tâches de cet événement
     Alors la consultation des tâches réussit

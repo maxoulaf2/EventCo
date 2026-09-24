@@ -66,22 +66,22 @@ public sealed class CreateTaskSteps
     [Given(@"j'agis désormais en tant que ce participant")]
     public void EtantDonneJagisDesormaisEnTantQueCeParticipant() => _currentUserContext.UserId = _invitedParticipantUserId!.Value;
 
-    [When(@"j'ajoute la tâche ""(.*)"" de catégorie ""(.*)"" et de quantité ""(.*)"" à cet événement")]
-    public async Task QuandJajouteLaTacheDeCategorieEtDeQuantiteACetEvenement(string title, string category, string quantity) =>
-        await AjouterTache(_existingEventId!.Value, title, category, quantity);
+    [When(@"j'ajoute la tâche ""(.*)"" de quantité ""(.*)"" à cet événement")]
+    public async Task QuandJajouteLaTacheDeCategorieEtDeQuantiteACetEvenement(string title, string quantity) =>
+        await AjouterTache(_existingEventId!.Value, title, quantity);
 
-    [When(@"j'ajoute la tâche ""(.*)"" de catégorie ""(.*)"" et de quantité ""(.*)"" à un événement inexistant")]
-    public async Task QuandJajouteLaTacheDeCategorieEtDeQuantiteAUnEvenementInexistant(string title, string category, string quantity) =>
-        await AjouterTache(Guid.NewGuid(), title, category, quantity);
+    [When(@"j'ajoute la tâche ""(.*)"" de quantité ""(.*)"" à un événement inexistant")]
+    public async Task QuandJajouteLaTacheDeCategorieEtDeQuantiteAUnEvenementInexistant(string title, string quantity) =>
+        await AjouterTache(Guid.NewGuid(), title, quantity);
 
-    private async Task AjouterTache(Guid eventId, string title, string category, string quantity)
+    private async Task AjouterTache(Guid eventId, string title, string quantity)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
         _thrownException = null;
 
         try
         {
-            _lastResult = await dispatcher.Send(new CreateTaskCommand(eventId, title, category, quantity), CancellationToken.None);
+            _lastResult = await dispatcher.Send(new CreateTaskCommand(eventId, title, quantity), CancellationToken.None);
         }
         catch (Exception exception)
         {
@@ -106,9 +106,6 @@ public sealed class CreateTaskSteps
 
     [Then(@"la tâche créée a pour titre ""(.*)""")]
     public void AlorsLaTacheCreeeAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);
-
-    [Then(@"la tâche créée a pour catégorie ""(.*)""")]
-    public void AlorsLaTacheCreeeAPourCategorie(string category) => Assert.Equal(category, _lastResult!.Category);
 
     [Then(@"une notification temps réel de création de tâche est diffusée")]
     public void AlorsUneNotificationTempsReelDeCreationDeTacheEstDiffusee()

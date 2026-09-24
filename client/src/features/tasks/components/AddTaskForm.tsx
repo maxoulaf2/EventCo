@@ -5,8 +5,8 @@ interface AddTaskFormProps {
   eventId: string
 }
 
-// Ajout rapide, une seule zone de saisie (cf. maquette 1f) : la tâche part sans catégorie
-// précisée ("Autre" par défaut) et sans quantité — modifiable ensuite depuis le détail de la tâche.
+// Ajout rapide, une seule zone de saisie (cf. maquette 1f) : la tâche part sans quantité
+// — modifiable ensuite depuis le détail de la tâche.
 export function AddTaskForm({ eventId }: AddTaskFormProps) {
   const [title, setTitle] = useState('')
   const { mutate, isPending, error } = useCreateTask(eventId)
@@ -14,10 +14,7 @@ export function AddTaskForm({ eventId }: AddTaskFormProps) {
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!title.trim()) return
-    mutate(
-      { title, category: 'Autre' },
-      { onSuccess: () => setTitle('') },
-    )
+    mutate({ title }, { onSuccess: () => setTitle('') })
   }
 
   return (

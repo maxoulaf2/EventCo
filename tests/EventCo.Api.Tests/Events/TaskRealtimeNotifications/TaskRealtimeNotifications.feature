@@ -8,7 +8,7 @@ Fonctionnalité: Diffusion temps réel des événements de tâches
     Et un événement "Repas de Noël" créé via l'API
     Et je me connecte au hub temps réel et que je rejoins cet événement
     Et j'écoute les notifications temps réel de tâches
-    Quand j'ajoute la tâche "Bûche au chocolat" de catégorie "Courses" et de quantité "1" à cet événement via l'API
+    Quand j'ajoute la tâche "Bûche au chocolat" de quantité "1" à cet événement via l'API
     Alors une notification temps réel de création de tâche est reçue pour cette tâche
 
   Scénario: L'assignation d'une tâche est diffusée au groupe temps réel

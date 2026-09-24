@@ -177,11 +177,11 @@ public class Event : Entity
         EnsureActingUserIsParticipant(actingUserId);
     }
 
-    public EventTask AddTask(Guid actingUserId, string title, TaskCategory category, string? quantity, DateTime now)
+    public EventTask AddTask(Guid actingUserId, string title, string? quantity, DateTime now)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        var task = new EventTask(Id, title, category, quantity, actingUserId, now);
+        var task = new EventTask(Id, title, quantity, actingUserId, now);
         _tasks.Add(task);
         AddDomainEvent(new TaskCreatedDomainEvent(task));
         return task;
