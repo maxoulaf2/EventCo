@@ -22,6 +22,13 @@ jobs:
         working-directory: client
         run: npm ci
 
+      # Repart d'un dossier vide : Playwright (--update-snapshots) écrit les captures
+      # manquantes/modifiées mais ne supprime jamais celles devenues orphelines (scénario
+      # retiré ou renommé). Sans ce nettoyage, les anciennes captures issues du checkout
+      # seraient remontées dans l'artefact puis re-committées.
+      - name: Reset screenshots directory
+        run: rm -rf client/tests/visual/__screenshots__
+
       - name: Regenerate screenshots
         working-directory: client
         run: npm run test:visual:update
@@ -31,6 +38,7 @@ jobs:
         with:
           name: visual-baselines
           path: client/tests/visual/__screenshots__/
+          if-no-files-found: error
           retention-days: 15
 
   open-pull-request:
@@ -43,9 +51,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Repart d'un dossier vide avant d'extraire l'artefact : une capture supprimée côté
-      # regénération (scénario retiré) doit apparaître comme suppression dans le diff Git,
-      # pas rester orpheline.
+      # Repart d'un dossier vide avant d'extraire l'artefact (qui contient le jeu complet
+      # régénéré depuis zéro) : une capture absente de l'artefact (scénario retiré) doit
+      # apparaître comme suppression dans le diff Git, pas rester orpheline.
       - name: Reset screenshots directory
         run: rm -rf client/tests/visual/__screenshots__
 
