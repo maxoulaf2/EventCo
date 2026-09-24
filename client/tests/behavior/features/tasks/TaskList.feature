@@ -1,26 +1,24 @@
 # language: fr
 Fonctionnalité: Liste des tâches d'un événement
-  En tant que participant d'un événement je veux voir ses tâches réparties par
-  assignation (à prendre / assignées) afin de savoir en un coup d'œil ce
-  qu'il reste à faire
+  En tant que participant d'un événement je veux voir toutes ses tâches d'un
+  coup, réparties en deux sections (à prendre / assignées) afin de savoir en
+  un coup d'œil ce qu'il reste à faire
 
   Scénario: Affichage des tâches à prendre
     Quand j'arrive sur le détail de l'événement
-    Alors je vois la tâche "Bûche au chocolat" sur l'onglet "À prendre"
-    Et je vois la tâche "Réserver la salle" sur l'onglet "À prendre"
+    Alors je vois la tâche "Bûche au chocolat" dans la section "À prendre"
+    Et je vois la tâche "Réserver la salle" dans la section "À prendre"
 
-  Scénario: Une tâche assignée apparaît sur l'onglet "Assignées"
+  Scénario: Tâches à prendre et assignées affichées ensemble
     Etant donné que la tâche "Bûche au chocolat" est assignée à un participant
     Quand j'arrive sur le détail de l'événement
-    Et je vais sur l'onglet "Assignées"
-    Alors je vois la tâche "Bûche au chocolat" sur l'onglet "Assignées"
-    Et je ne vois pas la tâche "Réserver la salle"
+    Alors je vois la tâche "Bûche au chocolat" dans la section "Assignées"
+    Et je vois la tâche "Réserver la salle" dans la section "À prendre"
 
-  Scénario: Aucune tâche sur un onglet
+  Scénario: Aucune tâche dans une section
     Etant donné que cet événement n'a aucune tâche assignée
     Quand j'arrive sur le détail de l'événement
-    Et je vais sur l'onglet "Assignées"
-    Alors je vois un message indiquant qu'il n'y a aucune tâche sur cet onglet
+    Alors je vois un message indiquant qu'il n'y a aucune tâche dans la section "Assignées"
 
   Scénario: Événement sans tâche
     Etant donné que cet événement n'a aucune tâche

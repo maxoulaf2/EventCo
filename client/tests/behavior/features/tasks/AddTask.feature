@@ -6,7 +6,7 @@ Fonctionnalité: Ajout rapide d'une tâche à un événement
   Scénario: Ajout d'une tâche avec succès
     Quand j'arrive sur le détail de l'événement
     Et j'ajoute la tâche "Guirlandes"
-    Alors je vois la tâche "Guirlandes" sur l'onglet "À prendre"
+    Alors je vois la tâche "Guirlandes" dans la section "À prendre"
     Et le formulaire d'ajout de tâche est réinitialisé
 
   Scénario: Erreur lors de l'ajout d'une tâche

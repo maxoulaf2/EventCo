@@ -1,5 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen, waitFor } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
@@ -50,8 +50,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await addTask('Guirlandes')
     })
 
-    Then('je vois la tâche "Guirlandes" sur l\'onglet "À prendre"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-title-task-new')).toHaveTextContent('Guirlandes'))
+    Then('je vois la tâche "Guirlandes" dans la section "À prendre"', async () => {
+      await waitFor(() =>
+        expect(within(screen.getByTestId('task-list-section-todo')).getByTestId('task-item-title-task-new')).toHaveTextContent(
+          'Guirlandes',
+        ),
+      )
     })
 
     And('le formulaire d\'ajout de tâche est réinitialisé', () => {

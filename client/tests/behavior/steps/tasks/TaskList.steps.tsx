@@ -1,6 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { cleanup, screen, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
@@ -8,7 +7,7 @@ import { renderApp } from '../../../../src/test/render'
 
 const feature = await loadFeature('tests/behavior/features/tasks/TaskList.feature', { language: 'fr' })
 
-const TAB_KEY: Record<string, string> = {
+const SECTION_KEY: Record<string, string> = {
   'À prendre': 'todo',
   Assignées: 'assigned',
 }
@@ -47,10 +46,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     cleanup()
   })
 
-  async function goToTab(label: string) {
-    await screen.findByTestId(`task-list-tab-${TAB_KEY[label]}`)
-    const user = userEvent.setup()
-    await user.click(screen.getByTestId(`task-list-tab-${TAB_KEY[label]}`))
+  function section(label: string) {
+    return within(screen.getByTestId(`task-list-section-${SECTION_KEY[label]}`))
   }
 
   Scenario('Affichage des tâches à prendre', ({ When, Then, And }) => {
@@ -58,16 +55,17 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "À prendre"', async () => {
+    Then('je vois la tâche "Bûche au chocolat" dans la section "À prendre"', async () => {
       await screen.findByTestId('task-item-task-1')
+      expect(section('À prendre').getByTestId('task-item-task-1')).toBeInTheDocument()
     })
 
-    And('je vois la tâche "Réserver la salle" sur l\'onglet "À prendre"', () => {
-      expect(screen.getByTestId('task-item-task-2')).toBeInTheDocument()
+    And('je vois la tâche "Réserver la salle" dans la section "À prendre"', () => {
+      expect(section('À prendre').getByTestId('task-item-task-2')).toBeInTheDocument()
     })
   })
 
-  Scenario('Une tâche assignée apparaît sur l\'onglet "Assignées"', ({ Given, When, And, Then }) => {
+  Scenario('Tâches à prendre et assignées affichées ensemble', ({ Given, When, And, Then }) => {
     Given('la tâche "Bûche au chocolat" est assignée à un participant', () => {
       tasks[0].assignedToUserId = 'user-2'
     })
@@ -76,21 +74,17 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await screen.findByTestId('task-item-task-2')
-      await goToTab('Assignées')
+    Then('je vois la tâche "Bûche au chocolat" dans la section "Assignées"', async () => {
+      await screen.findByTestId('task-item-task-1')
+      expect(section('Assignées').getByTestId('task-item-task-1')).toBeInTheDocument()
     })
 
-    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "Assignées"', () => {
-      expect(screen.getByTestId('task-item-task-1')).toBeInTheDocument()
-    })
-
-    And('je ne vois pas la tâche "Réserver la salle"', () => {
-      expect(screen.queryByTestId('task-item-task-2')).not.toBeInTheDocument()
+    And('je vois la tâche "Réserver la salle" dans la section "À prendre"', () => {
+      expect(section('À prendre').getByTestId('task-item-task-2')).toBeInTheDocument()
     })
   })
 
-  Scenario('Aucune tâche sur un onglet', ({ Given, When, And, Then }) => {
+  Scenario('Aucune tâche dans une section', ({ Given, When, Then }) => {
     Given('cet événement n\'a aucune tâche assignée', () => {
       // Les deux tâches par défaut (buildTasks) sont déjà non assignées.
     })
@@ -99,13 +93,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await screen.findByTestId('task-item-task-1')
-      await goToTab('Assignées')
-    })
-
-    Then('je vois un message indiquant qu\'il n\'y a aucune tâche sur cet onglet', async () => {
-      await screen.findByTestId('task-list-empty-tab-message')
+    Then('je vois un message indiquant qu\'il n\'y a aucune tâche dans la section "Assignées"', async () => {
+      await screen.findByTestId('task-list-section-empty-message-assigned')
     })
   })
 

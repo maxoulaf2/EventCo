@@ -1,5 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen, waitFor } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
@@ -8,7 +8,7 @@ import { renderApp } from '../../../../src/test/render'
 
 const feature = await loadFeature('tests/behavior/features/tasks/UnassignTask.feature', { language: 'fr' })
 
-const TAB_KEY: Record<string, string> = {
+const SECTION_KEY: Record<string, string> = {
   'À prendre': 'todo',
   Assignées: 'assigned',
 }
@@ -50,10 +50,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     cleanup()
   })
 
-  async function goToTab(label: string) {
-    await screen.findByTestId(`task-list-tab-${TAB_KEY[label]}`)
-    const user = userEvent.setup()
-    await user.click(screen.getByTestId(`task-list-tab-${TAB_KEY[label]}`))
+  function section(label: string) {
+    return within(screen.getByTestId(`task-list-section-${SECTION_KEY[label]}`))
   }
 
   async function unassign(taskId: string) {
@@ -71,21 +69,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await screen.findByTestId('task-item-task-2')
-      await goToTab('Assignées')
-    })
-
     And('je désassigne la tâche "Bûche au chocolat"', async () => {
       await unassign('task-1')
     })
 
-    And('je vais sur l\'onglet "À prendre"', async () => {
-      await goToTab('À prendre')
-    })
-
-    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "À prendre"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-task-1')).toBeInTheDocument())
+    Then('je vois la tâche "Bûche au chocolat" dans la section "À prendre"', async () => {
+      await waitFor(() => expect(section('À prendre').getByTestId('task-item-task-1')).toBeInTheDocument())
     })
   })
 
@@ -103,25 +92,16 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await screen.findByTestId('task-item-task-2')
-      await goToTab('Assignées')
-    })
-
     And('je désassigne la tâche "Bûche au chocolat"', async () => {
       await unassign('task-1')
     })
 
-    And('je vais sur l\'onglet "À prendre"', async () => {
-      await goToTab('À prendre')
-    })
-
-    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "À prendre"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-task-1')).toBeInTheDocument())
+    Then('je vois la tâche "Bûche au chocolat" dans la section "À prendre"', async () => {
+      await waitFor(() => expect(section('À prendre').getByTestId('task-item-task-1')).toBeInTheDocument())
     })
   })
 
-  Scenario('Un participant ne peut pas désassigner la tâche d\'un autre', ({ Given, When, And, Then }) => {
+  Scenario('Un participant ne peut pas désassigner la tâche d\'un autre', ({ Given, When, Then }) => {
     Given('je suis un simple participant et que la tâche "Réserver la salle" est assignée à quelqu\'un d\'autre', () => {
       tasks[1].assignedToUserId = 'user-3'
       server.use(
@@ -133,11 +113,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
-    })
-
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await screen.findByTestId('task-item-task-1')
-      await goToTab('Assignées')
     })
 
     Then('je ne vois pas de bouton de désassignation pour la tâche "Réserver la salle"', async () => {
@@ -163,17 +138,12 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await screen.findByTestId('task-item-task-2')
-      await goToTab('Assignées')
-    })
-
     And('je désassigne la tâche "Bûche au chocolat"', async () => {
       await unassign('task-1')
     })
 
-    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "Assignées"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-task-1')).toBeInTheDocument())
+    Then('je vois la tâche "Bûche au chocolat" dans la section "Assignées"', async () => {
+      await waitFor(() => expect(section('Assignées').getByTestId('task-item-task-1')).toBeInTheDocument())
     })
   })
 })

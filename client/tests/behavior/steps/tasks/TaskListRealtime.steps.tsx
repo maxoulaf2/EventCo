@@ -1,6 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { act, cleanup, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { act, cleanup, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect, vi } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
@@ -103,14 +102,10 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       emit('TaskAssigned', { ...defaultTasks[0], taskId: defaultTasks[0].id, assignedToUserId: 'user-2' })
     })
 
-    And('je vais sur l\'onglet "Assignées"', async () => {
-      await waitFor(() => expect(screen.queryByTestId('task-item-task-1')).not.toBeInTheDocument())
-      const user = userEvent.setup()
-      await user.click(screen.getByTestId('task-list-tab-assigned'))
-    })
-
-    Then('je vois la tâche "Bûche au chocolat" sur l\'onglet "Assignées"', async () => {
-      await waitFor(() => expect(screen.getByTestId('task-item-task-1')).toBeInTheDocument())
+    Then('je vois la tâche "Bûche au chocolat" dans la section "Assignées"', async () => {
+      await waitFor(() =>
+        expect(within(screen.getByTestId('task-list-section-assigned')).getByTestId('task-item-task-1')).toBeInTheDocument(),
+      )
     })
   })
 
