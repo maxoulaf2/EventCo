@@ -26,17 +26,15 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Frontend | **React + Tailwind CSS** | Écosystème le plus large, génération de code IA la plus fiable ; Tailwind pour un responsive rapide et lisible en mobile-first |
 | Temps réel | **SignalR** | Solution native .NET, s'intègre nativement au backend ASP.NET Core, compatible avec un client React |
 | Base de données | **PostgreSQL + EF Core** | Standard robuste, excellent support EF Core, gratuit |
-| Authentification | **Passwordless (magic link)** | Réduction de friction pour des invités occasionnels ; pas de gestion de mots de passe (hashing, reset, politique de complexité) |
+| Authentification | **Passwordless (code de connexion à usage unique envoyé par email)** | Réduction de friction pour des invités occasionnels ; pas de gestion de mots de passe (hashing, reset, politique de complexité) |
 | PWA | **Manifest + Service Worker basique** | Installable sur écran d'accueil mobile, tolérance réseau instable |
 | Déploiement | **Render** (API + frontend statique servi par l'API, same-origin), DB **Neon**, email **Brevo** — tous en offre gratuite (2026-09-21) | Décision prise au Lot 6, cf. `docs/suivi-todo.md` et `CLAUDE.md` § Déploiement |
 | Tests | xUnit (backend) | Cohérent avec l'écosystème .NET |
 | CI/CD | GitHub Actions (à affiner) | Standard, gratuit pour projets perso |
 
 ### 2.1 Flow d'authentification (code de connexion par email)
-> Initialement un lien magique ; remplacé le 2026-09-24 par un code à 6 chiffres saisi dans l'application, à la demande du développeur (plus de bascule boîte mail → application, notamment en PWA). L'entité garde son nom historique `MagicLinkToken`.
-
 1. L'utilisateur saisit son email sur le formulaire de connexion (page de connexion ou page d'un lien d'invitation).
-2. Le backend génère un code aléatoire à 6 chiffres à durée de vie courte (15 min), le stocke hashé en base (`MagicLinkToken`), et l'envoie par email (Brevo en production).
+2. Le backend génère un code aléatoire à 6 chiffres à durée de vie courte (15 min), le stocke hashé en base (`LoginCode`), et l'envoie par email (Brevo en production).
 3. L'utilisateur saisit le code sur la page de confirmation → le backend le vérifie pour cet email (non expiré, non consommé, non bloqué). Chaque code erroné compte un essai raté sur les codes en cours de cet email ; au-delà de 5, le code est bloqué (anti force brute, un code ne comptant qu'un million de valeurs possibles).
 4. Une session est créée : cookie httpOnly contenant un JWT ou un identifiant de session, avec un refresh token pour maintenir la connexion dans la durée.
 5. Si l'email ne correspond à aucun `User` existant, un compte est créé automatiquement (première connexion = inscription).
@@ -56,12 +54,12 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | AvatarUrl | string? | optionnel (could have) |
 | CreatedAt | DateTime | |
 
-**MagicLinkToken**
+**LoginCode**
 | Champ | Type | Notes |
 |---|---|---|
 | Id | Guid | |
 | Email | string | pas nécessairement lié à un `User` existant |
-| TokenHash | string | le code brut n'est jamais stocké en clair (non unique : deux emails peuvent recevoir le même code) |
+| CodeHash | string | le code brut n'est jamais stocké en clair (non unique : deux emails peuvent recevoir le même code) |
 | ExpiresAt | DateTime | ex: +15 min |
 | ConsumedAt | DateTime? | null tant que non utilisé |
 | FailedAttempts | int | essais de code erronés ; bloqué à partir de 5 |
@@ -109,7 +107,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 ## 4. Fonctionnalités du MVP (MoSCoW)
 
 ### Must have
-- Authentification passwordless (magic link)
+- Authentification passwordless (code de connexion par email)
 - Création d'événement (titre, description, date, lieu)
 - Invitation de participants par email
 - Distinction créateur / co-organisateur / participant
@@ -142,7 +140,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - **Responsive / mobile-first** : conception et CSS pensés d'abord pour petit écran (Tailwind CSS), adaptation ensuite vers desktop.
 - **Ergonomie tactile** : zones cliquables larges, actions rapides (ex: s'assigner une tâche en un geste), formulaires courts adaptés à la saisie mobile.
 - **Temps réel** : toute mise à jour d'une tâche (création, assignation) doit être propagée instantanément à tous les participants connectés via SignalR, groupés par événement (un "groupe SignalR" par `EventId`).
-- **Sécurité** : tokens de magic link hashés en base, cookies de session en httpOnly, validation stricte des droits par rôle sur chaque action API.
+- **Sécurité** : codes de connexion hashés en base, cookies de session en httpOnly, validation stricte des droits par rôle sur chaque action API.
 
 ---
 

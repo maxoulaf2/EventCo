@@ -2,12 +2,12 @@ import { Link, Navigate } from 'react-router-dom'
 import { useLocationState } from '../../../shared/hooks/useLocationState'
 import { btnGhost, btnSecondary } from '../../../shared/lib/ui'
 import { routes, type CheckEmailNavigationState } from '../../../shared/lib/routes'
-import { useRequestMagicLink } from '../hooks/useRequestMagicLink'
+import { useRequestLoginCode } from '../hooks/useRequestLoginCode'
 import { VerifyLoginCodeForm } from './VerifyLoginCodeForm'
 
 export function CheckEmailPage() {
   const state = useLocationState<CheckEmailNavigationState>()
-  const { mutate, isPending, isSuccess } = useRequestMagicLink()
+  const { mutate, isPending, isSuccess } = useRequestLoginCode()
 
   if (!state) {
     return <Navigate to={routes.login} replace />

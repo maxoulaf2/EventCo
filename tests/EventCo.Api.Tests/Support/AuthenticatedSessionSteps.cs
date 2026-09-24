@@ -18,12 +18,12 @@ public sealed class AuthenticatedSessionSteps(SessionContext sessionContext)
     public async Task EtantDonneUneSessionOuverteViaLapiPour(string email)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        await client.PostAsJsonAsync("/api/auth/request-link", new RequestMagicLinkRequest(email));
+        await client.PostAsJsonAsync("/api/auth/request-code", new RequestLoginCodeRequest(email));
 
         var sentEmail = Hooks.Factory.EmailSender.SentEmails.Last(e => e.ToEmail == email.ToLowerInvariant());
         var code = ExtractCode(sentEmail.HtmlBody);
 
-        var verifyResponse = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(email, code));
+        var verifyResponse = await client.PostAsJsonAsync("/api/auth/verify", new VerifyLoginCodeRequest(email, code));
         Assert.True(verifyResponse.Headers.TryGetValues("Set-Cookie", out var cookies));
         sessionContext.Cookie = cookies!.Single(c => c.StartsWith("eventco_session=")).Split(';')[0];
     }

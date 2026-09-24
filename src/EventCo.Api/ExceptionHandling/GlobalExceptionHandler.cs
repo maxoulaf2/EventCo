@@ -47,7 +47,7 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             ParticipantCannotDeleteOthersTaskException forbiddenDeleteException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenDeleteException.Message }),
-            TooManyMagicLinkRequestsException tooManyRequestsException => (
+            TooManyLoginCodeRequestsException tooManyRequestsException => (
                 StatusCodes.Status429TooManyRequests,
                 new ProblemDetails { Title = "Trop de requêtes", Detail = tooManyRequestsException.Message }),
             TooManyInvitationEmailsException tooManyInvitationsException => (

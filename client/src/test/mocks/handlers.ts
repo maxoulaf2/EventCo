@@ -5,7 +5,7 @@ import { HttpResponse, http } from 'msw'
  * Les scénarios d'erreur surchargent un handler ponctuellement via `server.use(...)`.
  */
 export const handlers = [
-  http.post('*/api/auth/request-link', () => new HttpResponse(null, { status: 202 })),
+  http.post('*/api/auth/request-code', () => new HttpResponse(null, { status: 202 })),
 
   http.post('*/api/auth/verify', () =>
     HttpResponse.json({

@@ -1,6 +1,6 @@
-using EventCo.Application.Auth.RequestMagicLink;
+using EventCo.Application.Auth.RequestLoginCode;
 using EventCo.Application.Auth.UpdateProfile;
-using EventCo.Application.Auth.VerifyMagicLink;
+using EventCo.Application.Auth.VerifyLoginCode;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Common.Options;
@@ -32,14 +32,14 @@ public sealed class UpdateProfileSteps
 
         var builder = new ApplicationTestHostBuilder();
 
-        builder.Services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
+        builder.Services.AddScoped<ILoginCodeRepository, LoginCodeRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
         builder.Services.AddSingleton<IEmailSender>(_emailSender);
         builder.Services.AddSingleton<ISessionTokenService, SessionTokenService>();
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
-        builder.Services.AddSingleton(Options.Create(new MagicLinkOptions
+        builder.Services.AddSingleton(Options.Create(new LoginCodeOptions
         {
             ExpiryMinutes = 15,
         }));
@@ -57,9 +57,9 @@ public sealed class UpdateProfileSteps
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
 
-        await dispatcher.Send(new RequestMagicLinkCommand(email), CancellationToken.None);
+        await dispatcher.Send(new RequestLoginCodeCommand(email), CancellationToken.None);
         var code = ExtractCode(_emailSender.SentEmails.Last().HtmlBody);
-        var verifyResult = (VerifyMagicLinkResult.Succeeded)await dispatcher.Send(new VerifyMagicLinkCommand(email, code), CancellationToken.None);
+        var verifyResult = (VerifyLoginCodeResult.Succeeded)await dispatcher.Send(new VerifyLoginCodeCommand(email, code), CancellationToken.None);
 
         _currentUserContext.UserId = verifyResult.UserId;
     }

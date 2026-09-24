@@ -9,4 +9,4 @@ afterAll(() => server.close())
 // chaque étape Gherkin (Given/When/Then...) est son propre test vitest, donc un
 // `afterEach` réinitialiserait un `server.use(...)` avant même l'étape qui en dépend.
 // Le reset des handlers se fait par scénario, via `AfterEachScenario` dans chaque
-// fichier `.steps.tsx` (cf. RequestMagicLink.steps.tsx).
+// fichier `.steps.tsx` (cf. RequestLoginCode.steps.tsx).

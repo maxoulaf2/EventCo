@@ -7,8 +7,8 @@ using Microsoft.Extensions.Options;
 
 namespace EventCo.Infrastructure.Auth;
 
-// Token de session auto-porté (payload + signature HMAC), même famille de mécanisme que le hash des
-// magic links, plutôt qu'une dépendance JWT supplémentaire (cf. cadrage §2.1 : "JWT ou identifiant de session").
+// Token de session auto-porté (payload + signature HMAC), plutôt qu'une dépendance JWT
+// supplémentaire (cf. cadrage §2.1 : "JWT ou identifiant de session").
 internal sealed class SessionTokenService(IOptions<SessionOptions> options) : ISessionTokenService
 {
     public SessionToken CreateSessionToken(Guid userId, string email, DateTime now)

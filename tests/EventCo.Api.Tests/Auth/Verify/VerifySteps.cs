@@ -23,7 +23,7 @@ public sealed class VerifySteps
     public async Task UnCodeDeConnexionEstDemandeViaLapiPour(string email)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        await client.PostAsJsonAsync("/api/auth/request-link", new RequestMagicLinkRequest(email));
+        await client.PostAsJsonAsync("/api/auth/request-code", new RequestLoginCodeRequest(email));
 
         var sentEmail = Hooks.Factory.EmailSender.SentEmails.Last(e => e.ToEmail == email.ToLowerInvariant());
         _lastEmail = email;
@@ -34,7 +34,7 @@ public sealed class VerifySteps
     public async Task JeValideLeCodeDeConnexionRecuViaLapi()
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(_lastEmail!, _lastCode!));
+        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyLoginCodeRequest(_lastEmail!, _lastCode!));
     }
 
     [When(@"je valide un code erroné via l'API")]
@@ -42,14 +42,14 @@ public sealed class VerifySteps
     {
         var wrongCode = _lastCode == "000000" ? "000001" : "000000";
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(_lastEmail!, wrongCode));
+        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyLoginCodeRequest(_lastEmail!, wrongCode));
     }
 
     [When(@"je valide via l'API le code ""(.*)"" pour l'email ""(.*)""")]
     public async Task JeValideViaLapiLeCodePourLemail(string code, string email)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(email, code));
+        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyLoginCodeRequest(email, code));
     }
 
     [Then(@"la réponse de vérification a le statut (\d+)")]
@@ -86,7 +86,7 @@ public sealed class VerifySteps
     {
         using var scope = Hooks.Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<EventCoDbContext>();
-        var token = await dbContext.MagicLinkTokens.SingleAsync(t => t.Email == email);
+        var token = await dbContext.LoginCodes.SingleAsync(t => t.Email == email);
 
         Assert.Equal(expectedFailedAttempts, token.FailedAttempts);
     }

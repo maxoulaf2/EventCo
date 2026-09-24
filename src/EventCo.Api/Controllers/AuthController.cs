@@ -1,9 +1,9 @@
 using EventCo.Api.Auth;
 using EventCo.Api.Contracts.Auth;
 using EventCo.Application.Auth.GetCurrentUser;
-using EventCo.Application.Auth.RequestMagicLink;
+using EventCo.Application.Auth.RequestLoginCode;
 using EventCo.Application.Auth.UpdateProfile;
-using EventCo.Application.Auth.VerifyMagicLink;
+using EventCo.Application.Auth.VerifyLoginCode;
 using EventCo.Application.Common.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,22 +15,22 @@ namespace EventCo.Api.Controllers;
 [Route("api/auth")]
 public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEnvironment environment) : ControllerBase
 {
-    [HttpPost("request-link")]
-    public async Task<IActionResult> RequestLink(RequestMagicLinkRequest request, CancellationToken cancellationToken)
+    [HttpPost("request-code")]
+    public async Task<IActionResult> RequestCode(RequestLoginCodeRequest request, CancellationToken cancellationToken)
     {
-        await commandDispatcher.Send(new RequestMagicLinkCommand(request.Email, request.EventInviteLinkToken), cancellationToken);
+        await commandDispatcher.Send(new RequestLoginCodeCommand(request.Email, request.EventInviteLinkToken), cancellationToken);
 
         return Accepted();
     }
 
     [HttpPost("verify")]
-    public async Task<IActionResult> Verify(VerifyMagicLinkRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> Verify(VerifyLoginCodeRequest request, CancellationToken cancellationToken)
     {
-        var verifyResult = await commandDispatcher.Send(new VerifyMagicLinkCommand(request.Email, request.Code), cancellationToken);
+        var verifyResult = await commandDispatcher.Send(new VerifyLoginCodeCommand(request.Email, request.Code), cancellationToken);
 
         // Message volontairement unique (code faux, expiré, déjà utilisé ou bloqué) : ne rien révéler
         // de l'état des codes de cet email.
-        if (verifyResult is not VerifyMagicLinkResult.Succeeded result)
+        if (verifyResult is not VerifyLoginCodeResult.Succeeded result)
             return Problem(
                 title: "Code invalide",
                 detail: "Ce code est invalide ou a expiré.",
@@ -48,7 +48,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
             Expires = result.SessionExpiresAt,
         });
 
-        return Ok(new VerifyMagicLinkResponse(result.UserId, result.Email, result.DisplayName, result.EventId));
+        return Ok(new VerifyLoginCodeResponse(result.UserId, result.Email, result.DisplayName, result.EventId));
     }
 
     [Authorize]

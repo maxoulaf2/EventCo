@@ -23,7 +23,7 @@ public static class DependencyInjection
         services.AddDbContext<EventCoDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
-        services.AddScoped<IMagicLinkTokenRepository, MagicLinkTokenRepository>();
+        services.AddScoped<ILoginCodeRepository, LoginCodeRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -42,7 +42,7 @@ public static class DependencyInjection
                 : sp.GetRequiredService<SmtpEmailSender>();
         });
 
-        services.Configure<MagicLinkOptions>(configuration.GetSection(MagicLinkOptions.SectionName));
+        services.Configure<LoginCodeOptions>(configuration.GetSection(LoginCodeOptions.SectionName));
         services.Configure<SessionOptions>(configuration.GetSection(SessionOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<InvitationOptions>(configuration.GetSection(InvitationOptions.SectionName));

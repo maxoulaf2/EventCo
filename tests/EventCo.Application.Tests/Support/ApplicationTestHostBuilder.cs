@@ -21,7 +21,7 @@ public sealed class ApplicationTestHostBuilder
         // Dépendances de InviteParticipantCommandHandler, utilisé comme fixture par de nombreux autres
         // Steps (co-organisateur, participant...) sans qu'ils aient besoin de connaître ces détails :
         // valeurs par défaut ici, surchargeables (AddSingleton après Build()) par les Steps qui testent
-        // spécifiquement l'envoi d'email (ex: InviteParticipantSteps, RequestMagicLinkSteps).
+        // spécifiquement l'envoi d'email (ex: InviteParticipantSteps, RequestLoginCodeSteps).
         _services.AddSingleton<IEmailSender>(new RecordingEmailSender());
         _services.AddSingleton(Options.Create(new InvitationOptions()));
         _services.AddSingleton(Options.Create(new FrontendOptions { BaseUrl = "http://localhost:5173" }));

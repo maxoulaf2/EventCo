@@ -44,12 +44,12 @@ async function extraireCodeDepuisMailpit(email: string): Promise<string> {
 
 Given('je me connecte avec un code de connexion', async ({ page }) => {
   // Email unique par run pour rester indépendant des autres scénarios, même convention
-  // que demande-lien-connexion.steps.ts.
+  // que demande-code-connexion.steps.ts.
   const email = `e2e-events-${Date.now()}@example.com`
 
   await page.goto('/')
-  await page.getByTestId('request-magic-link-email-input').fill(email)
-  await page.getByTestId('request-magic-link-submit-button').click()
+  await page.getByTestId('request-login-code-email-input').fill(email)
+  await page.getByTestId('request-login-code-submit-button').click()
   await page.getByTestId('check-email-page-title').waitFor()
 
   const code = await extraireCodeDepuisMailpit(email)

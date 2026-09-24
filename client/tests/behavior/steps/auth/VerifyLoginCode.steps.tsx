@@ -33,8 +33,8 @@ describeFeature(feature, ({ AfterEachScenario, Background, Scenario }) => {
       renderApp('/')
 
       const user = userEvent.setup()
-      await user.type(await screen.findByTestId('request-magic-link-email-input'), 'test@example.com')
-      await user.click(screen.getByTestId('request-magic-link-submit-button'))
+      await user.type(await screen.findByTestId('request-login-code-email-input'), 'test@example.com')
+      await user.click(screen.getByTestId('request-login-code-submit-button'))
       await screen.findByTestId('check-email-page')
     })
   })

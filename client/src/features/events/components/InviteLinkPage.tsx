@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useParams } from 'react-router-dom'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
-import { RequestMagicLinkForm } from '../../auth/components/RequestMagicLinkForm'
+import { RequestLoginCodeForm } from '../../auth/components/RequestLoginCodeForm'
 import { useAppNavigate } from '../../../shared/hooks/useAppNavigate'
 import { useEventInvitePreview } from '../hooks/useEventInvitePreview'
 import { useJoinEventViaInviteLink } from '../hooks/useJoinEventViaInviteLink'
@@ -103,7 +103,7 @@ function PreviewAndRequestLogin({ token }: { token: string }) {
       <p data-testid="invite-link-preview-date" className="mb-8 text-base text-ink/70">
         {formatDate(preview.eventDate)}
       </p>
-      <RequestMagicLinkForm eventInviteLinkToken={token} />
+      <RequestLoginCodeForm eventInviteLinkToken={token} />
       <p className="mt-4.5 text-center text-[12.5px] text-ink/55">Première connexion = inscription.</p>
     </Layout>
   )

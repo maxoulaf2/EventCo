@@ -145,11 +145,16 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("EventTasks", (string)null);
                 });
 
-            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.MagicLinkTokenEntity", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.LoginCodeEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
 
                     b.Property<DateTime?>("ConsumedAt")
                         .HasColumnType("timestamp with time zone");
@@ -174,18 +179,13 @@ namespace EventCo.Infrastructure.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
-                    b.Property<string>("TokenHash")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("character varying(512)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("Email");
 
                     b.HasIndex("Email", "CreatedAt");
 
-                    b.ToTable("MagicLinkTokens", (string)null);
+                    b.ToTable("LoginCodes", (string)null);
                 });
 
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.UserEntity", b =>

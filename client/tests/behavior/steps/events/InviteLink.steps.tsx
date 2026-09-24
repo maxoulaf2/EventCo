@@ -57,8 +57,8 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
 
     When('je saisis l\'email "invite@example.com" et je valide le formulaire de connexion', async () => {
       const user = userEvent.setup()
-      await user.type(await screen.findByTestId('request-magic-link-email-input'), 'invite@example.com')
-      await user.click(screen.getByTestId('request-magic-link-submit-button'))
+      await user.type(await screen.findByTestId('request-login-code-email-input'), 'invite@example.com')
+      await user.click(screen.getByTestId('request-login-code-submit-button'))
     })
 
     Then('je suis redirigé vers la page de confirmation', async () => {
