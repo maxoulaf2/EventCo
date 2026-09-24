@@ -42,7 +42,6 @@ public sealed class UpdateProfileSteps
         builder.Services.AddSingleton(Options.Create(new MagicLinkOptions
         {
             ExpiryMinutes = 15,
-            VerificationUrlBase = "http://localhost:5173/auth/verify",
         }));
         builder.Services.AddSingleton(Options.Create(new SessionOptions
         {
@@ -59,8 +58,8 @@ public sealed class UpdateProfileSteps
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
 
         await dispatcher.Send(new RequestMagicLinkCommand(email), CancellationToken.None);
-        var rawToken = ExtractRawToken(_emailSender.SentEmails.Last().HtmlBody);
-        var verifyResult = await dispatcher.Send(new VerifyMagicLinkCommand(rawToken), CancellationToken.None);
+        var code = ExtractCode(_emailSender.SentEmails.Last().HtmlBody);
+        var verifyResult = (VerifyMagicLinkResult.Succeeded)await dispatcher.Send(new VerifyMagicLinkCommand(email, code), CancellationToken.None);
 
         _currentUserContext.UserId = verifyResult.UserId;
     }
@@ -90,9 +89,6 @@ public sealed class UpdateProfileSteps
     [Then(@"mon nom d'affichage est ""(.*)""")]
     public void AlorsMonNomDaffichageEst(string displayName) => Assert.Equal(displayName, _lastResult!.DisplayName);
 
-    private static string ExtractRawToken(string emailHtmlBody)
-    {
-        var match = System.Text.RegularExpressions.Regex.Match(emailHtmlBody, @"token=([^""&]+)");
-        return Uri.UnescapeDataString(match.Groups[1].Value);
-    }
+    private static string ExtractCode(string emailHtmlBody) =>
+        System.Text.RegularExpressions.Regex.Match(emailHtmlBody, @">(\d{6})<").Groups[1].Value;
 }

@@ -10,10 +10,16 @@ namespace EventCo.Infrastructure.Persistence.Repositories;
 
 internal sealed class MagicLinkTokenRepository(EventCoDbContext dbContext, DomainEventCollector domainEventCollector) : IMagicLinkTokenRepository
 {
-    public async Task<MagicLinkToken?> GetByTokenHashAsync(string tokenHash, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<MagicLinkToken>> GetUsableByEmailAsync(Email email, DateTime now, CancellationToken cancellationToken)
     {
-        var entity = await dbContext.MagicLinkTokens.SingleOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken);
-        return entity is null ? null : MagicLinkTokenMapper.ToDomain(entity);
+        var entities = await dbContext.MagicLinkTokens
+            .Where(t => t.Email == email.Value
+                && t.ConsumedAt == null
+                && t.ExpiresAt > now
+                && t.FailedAttempts < MagicLinkToken.MaxFailedAttempts)
+            .ToListAsync(cancellationToken);
+
+        return entities.Select(MagicLinkTokenMapper.ToDomain).ToList();
     }
 
     public Task<int> CountCreatedSinceAsync(Email email, DateTime since, CancellationToken cancellationToken) =>
@@ -29,7 +35,8 @@ internal sealed class MagicLinkTokenRepository(EventCoDbContext dbContext, Domai
                     await InsertToken(token, cancellationToken);
                     break;
                 case MagicLinkTokenConsumedDomainEvent:
-                    await UpdateTokenConsumedAt(token, cancellationToken);
+                case MagicLinkTokenFailedAttemptRegisteredDomainEvent:
+                    await UpdateTokenState(token, cancellationToken);
                     break;
                 default:
                     throw new InvalidOperationException(
@@ -46,7 +53,7 @@ internal sealed class MagicLinkTokenRepository(EventCoDbContext dbContext, Domai
         await dbContext.MagicLinkTokens.AddAsync(entity, cancellationToken);
     }
 
-    private async Task UpdateTokenConsumedAt(MagicLinkToken token, CancellationToken cancellationToken)
+    private async Task UpdateTokenState(MagicLinkToken token, CancellationToken cancellationToken)
     {
         var entity = await dbContext.MagicLinkTokens.FindAsync([token.Id], cancellationToken)
             ?? throw new InvalidOperationException($"MagicLinkTokenEntity {token.Id} introuvable.");

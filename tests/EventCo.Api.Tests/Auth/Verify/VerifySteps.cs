@@ -16,30 +16,40 @@ public sealed class VerifySteps
     private static readonly WebApplicationFactoryClientOptions ClientOptions = new() { HandleCookies = false };
 
     private HttpResponseMessage? _response;
-    private string? _lastRawToken;
+    private string? _lastEmail;
+    private string? _lastCode;
 
-    [When(@"un lien de connexion est demandé via l'API pour ""(.*)""")]
-    public async Task UnLienDeConnexionEstDemandeViaLapiPour(string email)
+    [When(@"un code de connexion est demandé via l'API pour ""(.*)""")]
+    public async Task UnCodeDeConnexionEstDemandeViaLapiPour(string email)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
         await client.PostAsJsonAsync("/api/auth/request-link", new RequestMagicLinkRequest(email));
 
         var sentEmail = Hooks.Factory.EmailSender.SentEmails.Last(e => e.ToEmail == email.ToLowerInvariant());
-        _lastRawToken = ExtractRawToken(sentEmail.HtmlBody);
+        _lastEmail = email;
+        _lastCode = ExtractCode(sentEmail.HtmlBody);
     }
 
-    [When(@"je valide le lien de connexion reçu via l'API")]
-    public async Task JeValideLeLienDeConnexionRecuViaLapi()
+    [When(@"je valide le code de connexion reçu via l'API")]
+    public async Task JeValideLeCodeDeConnexionRecuViaLapi()
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(_lastRawToken!));
+        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(_lastEmail!, _lastCode!));
     }
 
-    [When(@"j'envoie une requête POST à ""(.*)"" avec le token ""(.*)""")]
-    public async Task QuandJenvoieUneRequetePostAAvecLeToken(string path, string token)
+    [When(@"je valide un code erroné via l'API")]
+    public async Task JeValideUnCodeErroneViaLapi()
+    {
+        var wrongCode = _lastCode == "000000" ? "000001" : "000000";
+        var client = Hooks.Factory.CreateClient(ClientOptions);
+        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(_lastEmail!, wrongCode));
+    }
+
+    [When(@"je valide via l'API le code ""(.*)"" pour l'email ""(.*)""")]
+    public async Task JeValideViaLapiLeCodePourLemail(string code, string email)
     {
         var client = Hooks.Factory.CreateClient(ClientOptions);
-        _response = await client.PostAsJsonAsync(path, new VerifyMagicLinkRequest(token));
+        _response = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(email, code));
     }
 
     [Then(@"la réponse de vérification a le statut (\d+)")]
@@ -55,6 +65,12 @@ public sealed class VerifySteps
         Assert.Contains(cookies!, c => c.Contains("eventco_session=") && c.Contains("HttpOnly", StringComparison.OrdinalIgnoreCase));
     }
 
+    [Then(@"aucun cookie de session n'est présent dans la réponse")]
+    public void AlorsAucunCookieDeSessionNestPresentDansLaReponse()
+    {
+        Assert.False(_response!.Headers.TryGetValues("Set-Cookie", out _));
+    }
+
     [Then(@"un compte est persisté en base pour ""(.*)""")]
     public async Task AlorsUnCompteEstPersisteEnBasePour(string email)
     {
@@ -65,9 +81,16 @@ public sealed class VerifySteps
         Assert.Contains(users, u => u.Email == email);
     }
 
-    private static string ExtractRawToken(string emailHtmlBody)
+    [Then(@"(\d+) essai erroné est persisté en base pour ""(.*)""")]
+    public async Task AlorsEssaiErroneEstPersisteEnBasePour(int expectedFailedAttempts, string email)
     {
-        var match = Regex.Match(emailHtmlBody, @"token=([^""&]+)");
-        return Uri.UnescapeDataString(match.Groups[1].Value);
+        using var scope = Hooks.Factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EventCoDbContext>();
+        var token = await dbContext.MagicLinkTokens.SingleAsync(t => t.Email == email);
+
+        Assert.Equal(expectedFailedAttempts, token.FailedAttempts);
     }
+
+    private static string ExtractCode(string emailHtmlBody) =>
+        Regex.Match(emailHtmlBody, @">(\d{6})<").Groups[1].Value;
 }

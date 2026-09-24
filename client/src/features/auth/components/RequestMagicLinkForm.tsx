@@ -53,7 +53,7 @@ export function RequestMagicLinkForm({ eventInviteLinkToken }: RequestMagicLinkF
         data-testid="request-magic-link-submit-button"
         className="mt-1 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-accent-500 text-[17px] font-heading text-accent-900 transition-colors hover:bg-accent-400 active:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-45"
       >
-        {isPending ? 'Envoi en cours…' : 'Recevoir mon lien'}
+        {isPending ? 'Envoi en cours…' : 'Recevoir mon code'}
       </button>
     </form>
   )

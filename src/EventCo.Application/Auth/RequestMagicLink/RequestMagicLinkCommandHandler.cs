@@ -26,20 +26,19 @@ public sealed class RequestMagicLinkCommandHandler(
         if (recentRequestCount >= magicLinkOptions.MaxRequestsPerWindow)
             throw new TooManyMagicLinkRequestsException(email.Value, magicLinkOptions.MaxRequestsPerWindow, magicLinkOptions.RateLimitWindowMinutes);
 
-        var rawToken = SecureTokenGenerator.GenerateUrlSafeToken();
-        var tokenHash = MagicLinkTokenHasher.Hash(rawToken);
+        var code = SecureTokenGenerator.GenerateNumericCode();
+        var codeHash = MagicLinkTokenHasher.Hash(code);
 
-        var token = MagicLinkToken.Create(email, tokenHash, now.AddMinutes(magicLinkOptions.ExpiryMinutes), now, request.EventInviteLinkToken);
+        var token = MagicLinkToken.Create(email, codeHash, now.AddMinutes(magicLinkOptions.ExpiryMinutes), now, request.EventInviteLinkToken);
 
         await magicLinkTokenRepository.ApplyAsync(token, cancellationToken);
 
-        var verificationLink = $"{magicLinkOptions.VerificationUrlBase}?token={Uri.EscapeDataString(rawToken)}";
-
         await emailSender.SendAsync(
             email.Value,
-            "Votre lien de connexion EventCo",
-            $"<p>Cliquez sur ce lien pour vous connecter à EventCo (valable {magicLinkOptions.ExpiryMinutes} minutes) :</p>"
-            + $"<p><a href=\"{verificationLink}\">{verificationLink}</a></p>",
+            $"{code} est votre code de connexion EventCo",
+            $"<p>Voici votre code de connexion à EventCo (valable {magicLinkOptions.ExpiryMinutes} minutes) :</p>"
+            + $"<p style=\"font-size:32px;font-weight:bold;letter-spacing:6px\">{code}</p>"
+            + "<p>Si vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email.</p>",
             cancellationToken);
     }
 }

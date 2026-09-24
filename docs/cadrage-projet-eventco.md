@@ -32,10 +32,12 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Tests | xUnit (backend) | Cohérent avec l'écosystème .NET |
 | CI/CD | GitHub Actions (à affiner) | Standard, gratuit pour projets perso |
 
-### 2.1 Flow d'authentification (magic link)
-1. L'utilisateur saisit son email sur le formulaire de connexion.
-2. Le backend génère un token unique à durée de vie courte (~15 min), le stocke hashé en base (`MagicLinkToken`), et envoie un email contenant un lien avec ce token (via un service comme Resend ou SendGrid).
-3. L'utilisateur clique sur le lien → le backend vérifie la validité du token (non expiré, non consommé).
+### 2.1 Flow d'authentification (code de connexion par email)
+> Initialement un lien magique ; remplacé le 2026-09-24 par un code à 6 chiffres saisi dans l'application, à la demande du développeur (plus de bascule boîte mail → application, notamment en PWA). L'entité garde son nom historique `MagicLinkToken`.
+
+1. L'utilisateur saisit son email sur le formulaire de connexion (page de connexion ou page d'un lien d'invitation).
+2. Le backend génère un code aléatoire à 6 chiffres à durée de vie courte (15 min), le stocke hashé en base (`MagicLinkToken`), et l'envoie par email (Brevo en production).
+3. L'utilisateur saisit le code sur la page de confirmation → le backend le vérifie pour cet email (non expiré, non consommé, non bloqué). Chaque code erroné compte un essai raté sur les codes en cours de cet email ; au-delà de 5, le code est bloqué (anti force brute, un code ne comptant qu'un million de valeurs possibles).
 4. Une session est créée : cookie httpOnly contenant un JWT ou un identifiant de session, avec un refresh token pour maintenir la connexion dans la durée.
 5. Si l'email ne correspond à aucun `User` existant, un compte est créé automatiquement (première connexion = inscription).
 
@@ -59,9 +61,10 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 |---|---|---|
 | Id | Guid | |
 | Email | string | pas nécessairement lié à un `User` existant |
-| TokenHash | string | le token brut n'est jamais stocké en clair |
+| TokenHash | string | le code brut n'est jamais stocké en clair (non unique : deux emails peuvent recevoir le même code) |
 | ExpiresAt | DateTime | ex: +15 min |
 | ConsumedAt | DateTime? | null tant que non utilisé |
+| FailedAttempts | int | essais de code erronés ; bloqué à partir de 5 |
 
 **Event**
 | Champ | Type | Notes |

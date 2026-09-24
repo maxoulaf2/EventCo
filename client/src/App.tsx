@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AdminEventsPage } from './features/admin/components/AdminEventsPage'
 import { CheckEmailPage } from './features/auth/components/CheckEmailPage'
 import { LoginPage } from './features/auth/components/LoginPage'
-import { VerifyMagicLinkPage } from './features/auth/components/VerifyMagicLinkPage'
 import { CreateEventPage } from './features/events/components/CreateEventPage'
 import { EventDetailPage } from './features/events/components/EventDetailPage'
 import { EventsDashboardPage } from './features/events/components/EventsDashboardPage'
@@ -18,7 +17,6 @@ export function AppRoutes() {
     <Routes>
       <Route path={routes.login} element={<LoginPage />} />
       <Route path={routes.checkEmail} element={<CheckEmailPage />} />
-      <Route path={routes.verifyMagicLink} element={<VerifyMagicLinkPage />} />
       <Route path={routes.events} element={<EventsDashboardPage />} />
       <Route path={routes.createEvent} element={<CreateEventPage />} />
       <Route path="/events/:eventId" element={<EventDetailPage />} />

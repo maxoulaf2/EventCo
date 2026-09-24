@@ -3,6 +3,7 @@ import { useLocationState } from '../../../shared/hooks/useLocationState'
 import { btnGhost, btnSecondary } from '../../../shared/lib/ui'
 import { routes, type CheckEmailNavigationState } from '../../../shared/lib/routes'
 import { useRequestMagicLink } from '../hooks/useRequestMagicLink'
+import { VerifyLoginCodeForm } from './VerifyLoginCodeForm'
 
 export function CheckEmailPage() {
   const state = useLocationState<CheckEmailNavigationState>()
@@ -42,7 +43,7 @@ export function CheckEmailPage() {
           C&rsquo;est parti
         </h1>
         <p className="max-w-[300px] text-base text-ink/70">
-          Un lien de connexion vient de partir vers
+          Un code de connexion vient de partir vers
           <br />
           <span data-testid="check-email-page-email" className="font-semibold text-accent-700">
             {email}
@@ -52,7 +53,11 @@ export function CheckEmailPage() {
           Valable 15 minutes
         </span>
 
-        <div className="mt-9 flex w-full flex-col gap-1.5">
+        <div className="mt-9 w-full">
+          <VerifyLoginCodeForm email={email} />
+        </div>
+
+        <div className="mt-6 flex w-full flex-col gap-1.5">
           <button
             type="button"
             onClick={() => mutate({ email, eventInviteLinkToken })}
@@ -60,7 +65,7 @@ export function CheckEmailPage() {
             data-testid="check-email-page-resend-button"
             className={`${btnSecondary} w-full`}
           >
-            {isPending ? 'Envoi…' : isSuccess ? 'Lien renvoyé' : 'Renvoyer le lien'}
+            {isPending ? 'Envoi…' : isSuccess ? 'Code renvoyé' : 'Renvoyer le code'}
           </button>
           <Link to={routes.login} data-testid="check-email-page-back-link" className={`${btnGhost} w-full`}>
             Utiliser une autre adresse

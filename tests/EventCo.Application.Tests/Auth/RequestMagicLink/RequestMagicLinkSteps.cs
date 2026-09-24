@@ -34,15 +34,14 @@ public sealed class RequestMagicLinkSteps
         builder.Services.AddSingleton(Options.Create(new MagicLinkOptions
         {
             ExpiryMinutes = 15,
-            VerificationUrlBase = "http://localhost:5173/auth/verify",
         }));
 
         _serviceProvider = builder.Build();
         _dbContext = _serviceProvider.GetRequiredService<EventCoDbContext>();
     }
 
-    [When(@"je demande un lien de connexion pour ""(.*)""")]
-    public async Task QuandJeDemandeUnLienDeConnexionPour(string email)
+    [When(@"je demande un code de connexion pour ""(.*)""")]
+    public async Task QuandJeDemandeUnCodeDeConnexionPour(string email)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
 
@@ -68,22 +67,32 @@ public sealed class RequestMagicLinkSteps
         Assert.IsType<ValidationException>(_thrownException);
     }
 
-    [Then(@"un token de connexion est enregistré pour ""(.*)"" expirant dans (\d+) minutes")]
-    public void AlorsUnTokenEstEnregistrePourExpirantDans(string email, int minutes)
+    [Then(@"un code de connexion est enregistré pour ""(.*)"" expirant dans (\d+) minutes")]
+    public void AlorsUnCodeEstEnregistrePourExpirantDans(string email, int minutes)
     {
         var token = _dbContext.MagicLinkTokens.Single(t => t.Email == email.ToLowerInvariant());
 
         Assert.Equal(_now.AddMinutes(minutes), token.ExpiresAt);
         Assert.Null(token.ConsumedAt);
+        Assert.Equal(0, token.FailedAttempts);
     }
 
-    [Then(@"un email est envoyé à ""(.*)"" contenant un lien de vérification")]
-    public void AlorsUnEmailEstEnvoyeAContenantUnLienDeVerification(string email)
+    [Then(@"un email est envoyé à ""(.*)"" contenant un code à 6 chiffres")]
+    public void AlorsUnEmailEstEnvoyeAContenantUnCodeA6Chiffres(string email)
     {
         var sentEmail = Assert.Single(_emailSender.SentEmails);
 
         Assert.Equal(email.ToLowerInvariant(), sentEmail.ToEmail);
-        Assert.Contains("http://localhost:5173/auth/verify?token=", sentEmail.HtmlBody);
+        Assert.Matches(@">\d{6}<", sentEmail.HtmlBody);
+    }
+
+    [Then(@"le code envoyé n'est pas stocké en clair")]
+    public void AlorsLeCodeEnvoyeNestPasStockeEnClair()
+    {
+        var code = System.Text.RegularExpressions.Regex.Match(_emailSender.SentEmails.Single().HtmlBody, @">(\d{6})<").Groups[1].Value;
+        var token = _dbContext.MagicLinkTokens.Single();
+
+        Assert.NotEqual(code, token.TokenHash);
     }
 
     [Then(@"aucun email n'est envoyé")]

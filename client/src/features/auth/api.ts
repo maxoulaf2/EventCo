@@ -1,5 +1,5 @@
 import { apiFetch } from '../../shared/lib/api'
-import type { CurrentUser, VerifyMagicLinkResult } from './types'
+import type { CurrentUser, VerifyLoginCodeResult } from './types'
 
 export function requestMagicLink(email: string, eventInviteLinkToken?: string): Promise<void> {
   return apiFetch('/api/auth/request-link', {
@@ -8,10 +8,10 @@ export function requestMagicLink(email: string, eventInviteLinkToken?: string): 
   })
 }
 
-export function verifyMagicLink(token: string): Promise<VerifyMagicLinkResult> {
-  return apiFetch<VerifyMagicLinkResult>('/api/auth/verify', {
+export function verifyLoginCode(email: string, code: string): Promise<VerifyLoginCodeResult> {
+  return apiFetch<VerifyLoginCodeResult>('/api/auth/verify', {
     method: 'POST',
-    body: JSON.stringify({ token }),
+    body: JSON.stringify({ email, code }),
   })
 }
 

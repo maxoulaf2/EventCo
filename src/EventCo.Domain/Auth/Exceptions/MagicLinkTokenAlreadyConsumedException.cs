@@ -8,7 +8,7 @@ public sealed class MagicLinkTokenAlreadyConsumedException : DomainException
     public DateTime? ConsumedAt { get; }
 
     public MagicLinkTokenAlreadyConsumedException(Guid tokenId, DateTime? consumedAt)
-        : base($"Ce lien de connexion a déjà été utilisé (TokenId: {tokenId}, ConsumedAt: {consumedAt:O}).")
+        : base($"Ce code de connexion a déjà été utilisé (TokenId: {tokenId}, ConsumedAt: {consumedAt:O}).")
     {
         TokenId = tokenId;
         ConsumedAt = consumedAt;

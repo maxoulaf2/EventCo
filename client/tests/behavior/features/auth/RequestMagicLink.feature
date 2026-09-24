@@ -1,6 +1,6 @@
 # language: fr
-Fonctionnalité: Demande de lien de connexion (magic link)
-  En tant qu'utilisateur je veux demander un lien de connexion depuis le formulaire
+Fonctionnalité: Demande de code de connexion
+  En tant qu'utilisateur je veux demander un code de connexion depuis le formulaire
   afin de recevoir un email me permettant de me connecter sans mot de passe
 
   Contexte:

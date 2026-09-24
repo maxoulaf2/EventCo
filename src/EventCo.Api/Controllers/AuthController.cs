@@ -26,7 +26,15 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     [HttpPost("verify")]
     public async Task<IActionResult> Verify(VerifyMagicLinkRequest request, CancellationToken cancellationToken)
     {
-        var result = await commandDispatcher.Send(new VerifyMagicLinkCommand(request.Token), cancellationToken);
+        var verifyResult = await commandDispatcher.Send(new VerifyMagicLinkCommand(request.Email, request.Code), cancellationToken);
+
+        // Message volontairement unique (code faux, expiré, déjà utilisé ou bloqué) : ne rien révéler
+        // de l'état des codes de cet email.
+        if (verifyResult is not VerifyMagicLinkResult.Succeeded result)
+            return Problem(
+                title: "Code invalide",
+                detail: "Ce code est invalide ou a expiré.",
+                statusCode: StatusCodes.Status400BadRequest);
 
         // Same-origin en dev (proxy Vite, cf. client/vite.config.ts) comme en prod (frontend/API
         // servis sous le même domaine) : SameSite=Lax suffit et évite que le cookie soit traité comme

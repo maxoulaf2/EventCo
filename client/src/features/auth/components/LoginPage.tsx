@@ -40,7 +40,7 @@ export function LoginPage() {
           EventCo
         </h1>
         <p className="mb-10 max-w-[290px] text-base text-ink/70">
-          On organise à plusieurs. Pas de mot de passe : un lien arrive dans votre boîte mail.
+          On organise à plusieurs. Pas de mot de passe : un code arrive dans votre boîte mail.
         </p>
         <RequestMagicLinkForm />
         <p className="mt-4.5 text-center text-[12.5px] text-ink/55">Première connexion = inscription.</p>

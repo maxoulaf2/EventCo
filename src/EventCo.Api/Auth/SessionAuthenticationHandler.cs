@@ -8,7 +8,7 @@ namespace EventCo.Api.Auth;
 
 // Lit le cookie de session (SessionCookie.Name) et le valide via ISessionTokenService plutôt que de
 // s'appuyer sur un scheme cookie ASP.NET Core standard : le token n'est pas un ticket chiffré par
-// DataProtection mais le format maison payload+signature HMAC produit par VerifyMagicLinkCommand.
+// DataProtection mais le format maison payload+signature HMAC produit à la validation du code de connexion (VerifyMagicLinkCommand).
 public sealed class SessionAuthenticationHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
     ILoggerFactory logger,

@@ -95,4 +95,4 @@ Write-Host "  - Frontend : http://localhost:5173 (et accessible sur le réseau l
 Write-Host "  - pgAdmin (optionnel) : docker compose --profile tools up -d pgadmin -> http://localhost:5050"
 Write-Host ""
 Write-Host "Pour tester depuis un téléphone sur le même réseau : set 'Frontend:BaseUrl' (user-secrets) sur l'IP LAN du PC," -ForegroundColor DarkGray
-Write-Host "sinon les liens de connexion (magic link) pointeront vers localhost." -ForegroundColor DarkGray
+Write-Host "sinon les liens d'invitation envoyés par email pointeront vers localhost." -ForegroundColor DarkGray

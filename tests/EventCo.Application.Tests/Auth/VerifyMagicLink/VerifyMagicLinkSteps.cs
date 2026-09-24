@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using EventCo.Application.Auth.RequestMagicLink;
 using EventCo.Application.Auth.VerifyMagicLink;
 using EventCo.Application.Common.Interfaces;
@@ -7,7 +8,6 @@ using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.RegenerateEventInviteLink;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
-using EventCo.Domain.Auth.Exceptions;
 using EventCo.Domain.Users;
 using EventCo.Domain.ValueObjects;
 using EventCo.Infrastructure.Auth;
@@ -29,10 +29,10 @@ public sealed class VerifyMagicLinkSteps
     private readonly EventCoDbContext _dbContext;
     private readonly FixedCurrentUserService _organizerCurrentUserService = new(Guid.NewGuid());
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+    private readonly List<string> _receivedCodes = [];
 
-    private string? _lastRawToken;
+    private string? _lastEmail;
     private VerifyMagicLinkResult? _lastResult;
-    private Exception? _thrownException;
     private Guid? _eventId;
     private string? _eventInviteLinkToken;
 
@@ -49,11 +49,7 @@ public sealed class VerifyMagicLinkSteps
         builder.Services.AddSingleton<IDateTimeProvider>(_dateTimeProvider);
         builder.Services.AddSingleton<IEmailSender>(_emailSender);
         builder.Services.AddSingleton<ISessionTokenService, SessionTokenService>();
-        builder.Services.AddSingleton(Options.Create(new MagicLinkOptions
-        {
-            ExpiryMinutes = 15,
-            VerificationUrlBase = "http://localhost:5173/auth/verify",
-        }));
+        builder.Services.AddSingleton(Options.Create(new MagicLinkOptions { ExpiryMinutes = 15 }));
         builder.Services.AddSingleton(Options.Create(new SessionOptions
         {
             Secret = "test-secret-not-for-production",
@@ -64,12 +60,12 @@ public sealed class VerifyMagicLinkSteps
         _dbContext = _serviceProvider.GetRequiredService<EventCoDbContext>();
     }
 
-    [When(@"un(?: nouveau)? lien de connexion est demandé pour ""(.*)""")]
-    public async Task UnLienDeConnexionEstDemandePour(string email)
+    private VerifyMagicLinkResult.Succeeded SucceededResult => Assert.IsType<VerifyMagicLinkResult.Succeeded>(_lastResult);
+
+    [When(@"un(?: nouveau)? code de connexion est demandé pour ""(.*)""")]
+    public async Task UnCodeDeConnexionEstDemandePour(string email)
     {
-        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-        await dispatcher.Send(new RequestMagicLinkCommand(email), CancellationToken.None);
-        _lastRawToken = ExtractRawToken(_emailSender.SentEmails.Last().HtmlBody);
+        await DemanderCode(email, eventInviteLinkToken: null);
     }
 
     [Given(@"un événement ""(.*)"" avec un lien d'invitation actif")]
@@ -90,13 +86,11 @@ public sealed class VerifyMagicLinkSteps
         _eventInviteLinkToken = @event!.InviteLinkToken;
     }
 
-    [Given(@"un lien de connexion avec intention de rejoindre cet événement est demandé pour ""(.*)""")]
-    [When(@"un lien de connexion avec intention de rejoindre cet événement est demandé pour ""(.*)""")]
-    public async Task UnLienDeConnexionAvecIntentionDeRejoindreCetEvenementEstDemandePour(string email)
+    [Given(@"un code de connexion avec intention de rejoindre cet événement est demandé pour ""(.*)""")]
+    [When(@"un code de connexion avec intention de rejoindre cet événement est demandé pour ""(.*)""")]
+    public async Task UnCodeDeConnexionAvecIntentionDeRejoindreCetEvenementEstDemandePour(string email)
     {
-        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-        await dispatcher.Send(new RequestMagicLinkCommand(email, _eventInviteLinkToken), CancellationToken.None);
-        _lastRawToken = ExtractRawToken(_emailSender.SentEmails.Last().HtmlBody);
+        await DemanderCode(email, _eventInviteLinkToken);
     }
 
     [Given(@"le lien d'invitation de cet événement est régénéré")]
@@ -112,39 +106,63 @@ public sealed class VerifyMagicLinkSteps
         _dateTimeProvider.UtcNow = _dateTimeProvider.UtcNow.AddMinutes(minutes);
     }
 
-    [When(@"je valide le lien de connexion reçu")]
-    [When(@"je valide à nouveau le même lien de connexion")]
-    public async Task JeValideLeLienDeConnexionRecu()
+    [When(@"je saisis le code de connexion reçu")]
+    [When(@"je saisis à nouveau le même code de connexion")]
+    public async Task JeSaisisLeCodeDeConnexionRecu()
     {
-        await ValiderToken(_lastRawToken!);
+        await SaisirCode(_lastEmail!, _receivedCodes.Last());
     }
 
-    [When(@"je valide le token ""(.*)""")]
-    public async Task JeValideLeToken(string token)
+    [When(@"je saisis le premier code de connexion reçu")]
+    public async Task JeSaisisLePremierCodeDeConnexionRecu()
     {
-        await ValiderToken(token);
+        await SaisirCode(_lastEmail!, _receivedCodes.First());
+    }
+
+    [When(@"je saisis le code de connexion reçu pour l'email ""(.*)""")]
+    public async Task JeSaisisLeCodeDeConnexionRecuPourLemail(string email)
+    {
+        await SaisirCode(email, _receivedCodes.Last());
+    }
+
+    [When(@"je saisis le code ""(.*)"" pour ""(.*)""")]
+    public async Task JeSaisisLeCodePour(string code, string email)
+    {
+        await SaisirCode(email, code);
+    }
+
+    [When(@"je saisis un code erroné")]
+    public async Task JeSaisisUnCodeErrone()
+    {
+        await SaisirCode(_lastEmail!, CodeErrone());
+    }
+
+    [When(@"je saisis (\d+) fois un code erroné")]
+    public async Task JeSaisisFoisUnCodeErrone(int count)
+    {
+        for (var i = 0; i < count; i++)
+            await SaisirCode(_lastEmail!, CodeErrone());
     }
 
     [Then(@"la validation réussit")]
-    public void AlorsLaValidationReussit() => Assert.Null(_thrownException);
+    public void AlorsLaValidationReussit() => Assert.IsType<VerifyMagicLinkResult.Succeeded>(_lastResult);
 
-    [Then(@"la validation échoue avec une erreur de token invalide")]
-    public void AlorsLaValidationEchoueAvecUneErreurDeTokenInvalide() =>
-        Assert.IsType<MagicLinkTokenNotFoundException>(_thrownException);
+    [Then(@"la validation échoue avec un code invalide")]
+    public void AlorsLaValidationEchoueAvecUnCodeInvalide() => Assert.IsType<VerifyMagicLinkResult.Invalid>(_lastResult);
 
-    [Then(@"la validation échoue avec une erreur de token déjà utilisé")]
-    public void AlorsLaValidationEchoueAvecUneErreurDeTokenDejaUtilise() =>
-        Assert.IsType<MagicLinkTokenAlreadyConsumedException>(_thrownException);
-
-    [Then(@"la validation échoue avec une erreur d'expiration")]
-    public void AlorsLaValidationEchoueAvecUneErreurDexpiration() =>
-        Assert.IsType<MagicLinkTokenExpiredException>(_thrownException);
+    [Then(@"(\d+) essai erroné est comptabilisé sur le code de connexion pour ""(.*)""")]
+    public void AlorsEssaiErroneEstComptabilisePour(int expectedFailedAttempts, string email)
+    {
+        var token = _dbContext.MagicLinkTokens.Single(t => t.Email == email.ToLowerInvariant());
+        Assert.Equal(expectedFailedAttempts, token.FailedAttempts);
+        Assert.Null(token.ConsumedAt);
+    }
 
     [Then(@"un compte est créé pour ""(.*)""")]
     public void AlorsUnCompteEstCreePour(string email)
     {
         var user = _dbContext.Users.Single(u => u.Email == email.ToLowerInvariant());
-        Assert.Equal(_lastResult!.UserId, user.Id);
+        Assert.Equal(SucceededResult.UserId, user.Id);
     }
 
     [Then(@"un seul compte existe pour ""(.*)""")]
@@ -157,13 +175,14 @@ public sealed class VerifyMagicLinkSteps
     [Then(@"une session est ouverte pour ""(.*)""")]
     public void AlorsUneSessionEstOuvertePour(string email)
     {
-        Assert.Equal(email.ToLowerInvariant(), _lastResult!.Email);
-        Assert.False(string.IsNullOrWhiteSpace(_lastResult.SessionToken));
-        Assert.True(_lastResult.SessionExpiresAt > _now);
+        var result = SucceededResult;
+        Assert.Equal(email.ToLowerInvariant(), result.Email);
+        Assert.False(string.IsNullOrWhiteSpace(result.SessionToken));
+        Assert.True(result.SessionExpiresAt > _now);
     }
 
-    [Then(@"le lien de connexion pour ""(.*)"" est marqué comme utilisé")]
-    public void AlorsLeLienDeConnexionPourEstMarqueCommeUtilise(string email)
+    [Then(@"le code de connexion pour ""(.*)"" est marqué comme utilisé")]
+    public void AlorsLeCodeDeConnexionPourEstMarqueCommeUtilise(string email)
     {
         var token = _dbContext.MagicLinkTokens.Single(t => t.Email == email.ToLowerInvariant());
         Assert.NotNull(token.ConsumedAt);
@@ -172,37 +191,35 @@ public sealed class VerifyMagicLinkSteps
     [Then(@"je rejoins l'événement ""(.*)""")]
     public void AlorsJeRejoinsLevenement(string title)
     {
-        Assert.Equal(_eventId, _lastResult!.EventId);
+        var result = SucceededResult;
+        Assert.Equal(_eventId, result.EventId);
 
         var eventEntity = _dbContext.Events.Single(e => e.Id == _eventId);
         Assert.Equal(title, eventEntity.Title);
 
         var participant = _dbContext.Set<EventParticipantEntity>()
-            .SingleOrDefault(p => p.EventId == _eventId && p.UserId == _lastResult.UserId);
+            .SingleOrDefault(p => p.EventId == _eventId && p.UserId == result.UserId);
         Assert.NotNull(participant);
     }
 
     [Then(@"je ne rejoins aucun événement")]
-    public void AlorsJeNeRejoinsAucunEvenement() => Assert.Null(_lastResult!.EventId);
+    public void AlorsJeNeRejoinsAucunEvenement() => Assert.Null(SucceededResult.EventId);
 
-    private async Task ValiderToken(string token)
+    private async Task DemanderCode(string email, string? eventInviteLinkToken)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-        _thrownException = null;
-
-        try
-        {
-            _lastResult = await dispatcher.Send(new VerifyMagicLinkCommand(token), CancellationToken.None);
-        }
-        catch (Exception exception)
-        {
-            _thrownException = exception;
-        }
+        await dispatcher.Send(new RequestMagicLinkCommand(email, eventInviteLinkToken), CancellationToken.None);
+        _lastEmail = email;
+        _receivedCodes.Add(Regex.Match(_emailSender.SentEmails.Last().HtmlBody, @">(\d{6})<").Groups[1].Value);
     }
 
-    private static string ExtractRawToken(string emailHtmlBody)
+    private async Task SaisirCode(string email, string code)
     {
-        var match = System.Text.RegularExpressions.Regex.Match(emailHtmlBody, @"token=([^""&]+)");
-        return Uri.UnescapeDataString(match.Groups[1].Value);
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        _lastResult = await dispatcher.Send(new VerifyMagicLinkCommand(email, code), CancellationToken.None);
     }
+
+    // Premier code à 6 chiffres différent de tous ceux reçus : garantit un code erroné quel que soit le tirage.
+    private string CodeErrone() =>
+        Enumerable.Range(0, 1_000_000).Select(n => n.ToString("D6")).First(code => !_receivedCodes.Contains(code));
 }

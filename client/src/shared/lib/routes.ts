@@ -6,7 +6,6 @@
 export const routes = {
   login: '/',
   checkEmail: '/auth/check-email',
-  verifyMagicLink: '/auth/verify',
   events: '/events',
   createEvent: '/events/new',
   eventDetail: (eventId: string) => `/events/${eventId}`,

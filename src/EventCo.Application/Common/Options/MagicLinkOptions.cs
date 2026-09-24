@@ -6,8 +6,6 @@ public sealed class MagicLinkOptions
 
     public int ExpiryMinutes { get; init; } = 15;
 
-    public string VerificationUrlBase { get; init; } = string.Empty;
-
     // Anti-spam : au-delà de MaxRequestsPerWindow demandes pour le même email sur RateLimitWindowMinutes,
     // les demandes suivantes sont rejetées (cf. TooManyMagicLinkRequestsException).
     public int MaxRequestsPerWindow { get; init; } = 5;

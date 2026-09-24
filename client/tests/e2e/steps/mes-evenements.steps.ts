@@ -20,11 +20,11 @@ interface MailpitMessage {
 }
 
 // L'API e2e envoie réellement l'email (SmtpEmailSender, cf. docker-compose.e2e.yml) vers
-// mailpit-e2e, un faux serveur SMTP dont on interroge l'API HTTP pour récupérer le lien de
+// mailpit-e2e, un faux serveur SMTP dont on interroge l'API HTTP pour récupérer le code de
 // connexion — plus robuste qu'auparavant (lecture des logs Docker de l'API) : la recherche
 // par destinataire isole correctement chaque scénario, y compris exécutés en parallèle
 // (fullyParallel) contre le même conteneur.
-async function extraireTokenDepuisMailpit(email: string): Promise<string> {
+async function extraireCodeDepuisMailpit(email: string): Promise<string> {
   const rechercheUrl = `${mailpitUrl}/api/v1/search?query=${encodeURIComponent(`to:${email}`)}`
   const recherche = await fetch(rechercheUrl)
   const { messages } = (await recherche.json()) as { messages: MailpitMessageSummary[] }
@@ -35,14 +35,14 @@ async function extraireTokenDepuisMailpit(email: string): Promise<string> {
 
   const messageRes = await fetch(`${mailpitUrl}/api/v1/message/${dernierMessage.ID}`)
   const message = (await messageRes.json()) as MailpitMessage
-  const match = message.HTML.match(/token=([^"&\s]+)/)
+  const match = message.HTML.match(/>(\d{6})</)
   if (!match) {
-    throw new Error(`Token de connexion introuvable dans l'email Mailpit pour "${email}".`)
+    throw new Error(`Code de connexion introuvable dans l'email Mailpit pour "${email}".`)
   }
-  return decodeURIComponent(match[1])
+  return match[1]
 }
 
-Given('je me connecte avec un lien magique', async ({ page }) => {
+Given('je me connecte avec un code de connexion', async ({ page }) => {
   // Email unique par run pour rester indépendant des autres scénarios, même convention
   // que demande-lien-connexion.steps.ts.
   const email = `e2e-events-${Date.now()}@example.com`
@@ -52,8 +52,9 @@ Given('je me connecte avec un lien magique', async ({ page }) => {
   await page.getByTestId('request-magic-link-submit-button').click()
   await page.getByTestId('check-email-page-title').waitFor()
 
-  const token = await extraireTokenDepuisMailpit(email)
-  await page.goto(`/auth/verify?token=${encodeURIComponent(token)}`)
+  const code = await extraireCodeDepuisMailpit(email)
+  await page.getByTestId('verify-login-code-input').fill(code)
+  await page.getByTestId('verify-login-code-submit-button').click()
   await page.waitForURL('**/events')
 })
 

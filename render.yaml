@@ -19,8 +19,6 @@ services:
         sync: false
       - key: Frontend__BaseUrl
         sync: false
-      - key: MagicLink__VerificationUrlBase
-        sync: false
       - key: Email__FromAddress
         sync: false
       - key: Email__FromName

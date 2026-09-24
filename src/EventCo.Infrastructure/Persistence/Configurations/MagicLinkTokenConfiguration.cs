@@ -18,15 +18,19 @@ public class MagicLinkTokenConfiguration : IEntityTypeConfiguration<MagicLinkTok
 
         builder.HasIndex(t => t.Email);
 
+        // Pas d'index unique : le hash d'un code à 6 chiffres peut légitimement se répéter entre deux
+        // emails (ou deux demandes successives). Le code est toujours recherché par email (index ci-dessus).
         builder.Property(t => t.TokenHash)
             .HasMaxLength(512)
             .IsRequired();
 
-        builder.HasIndex(t => t.TokenHash).IsUnique();
-
         builder.Property(t => t.ExpiresAt).IsRequired();
 
         builder.Property(t => t.ConsumedAt);
+
+        builder.Property(t => t.FailedAttempts)
+            .HasDefaultValue(0)
+            .IsRequired();
 
         builder.Property(t => t.EventInviteLinkToken)
             .HasMaxLength(64);

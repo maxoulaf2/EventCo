@@ -59,4 +59,56 @@ public class MagicLinkTokenTests
 
         Assert.Throws<MagicLinkTokenExpiredException>(() => token.Consume(DateTime.UtcNow.AddMinutes(2)));
     }
+
+    [Fact]
+    public void Consume_TokenLocked_ThrowsMagicLinkTokenLockedException()
+    {
+        var token = CreateLockedToken();
+
+        Assert.Throws<MagicLinkTokenLockedException>(() => token.Consume(DateTime.UtcNow));
+    }
+
+    [Fact]
+    public void RegisterFailedAttempt_BelowMax_IncrementsFailedAttempts()
+    {
+        var token = CreateToken();
+
+        token.RegisterFailedAttempt();
+
+        Assert.Equal(1, token.FailedAttempts);
+        Assert.False(token.IsLocked);
+    }
+
+    [Fact]
+    public void RegisterFailedAttempt_MaxReached_LocksToken()
+    {
+        var token = CreateLockedToken();
+
+        Assert.True(token.IsLocked);
+    }
+
+    [Fact]
+    public void RegisterFailedAttempt_AlreadyLocked_ThrowsMagicLinkTokenLockedException()
+    {
+        var token = CreateLockedToken();
+
+        Assert.Throws<MagicLinkTokenLockedException>(() => token.RegisterFailedAttempt());
+    }
+
+    [Fact]
+    public void RegisterFailedAttempt_AlreadyConsumed_ThrowsMagicLinkTokenAlreadyConsumedException()
+    {
+        var token = CreateToken();
+        token.Consume(DateTime.UtcNow);
+
+        Assert.Throws<MagicLinkTokenAlreadyConsumedException>(() => token.RegisterFailedAttempt());
+    }
+
+    private static MagicLinkToken CreateLockedToken()
+    {
+        var token = CreateToken();
+        for (var i = 0; i < MagicLinkToken.MaxFailedAttempts; i++)
+            token.RegisterFailedAttempt();
+        return token;
+    }
 }

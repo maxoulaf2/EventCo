@@ -1,4 +1,4 @@
-export interface VerifyMagicLinkResult {
+export interface VerifyLoginCodeResult {
   userId: string
   email: string
   displayName: string

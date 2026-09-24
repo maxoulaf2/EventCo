@@ -21,9 +21,9 @@ public sealed class AuthenticatedSessionSteps(SessionContext sessionContext)
         await client.PostAsJsonAsync("/api/auth/request-link", new RequestMagicLinkRequest(email));
 
         var sentEmail = Hooks.Factory.EmailSender.SentEmails.Last(e => e.ToEmail == email.ToLowerInvariant());
-        var rawToken = ExtractRawToken(sentEmail.HtmlBody);
+        var code = ExtractCode(sentEmail.HtmlBody);
 
-        var verifyResponse = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(rawToken));
+        var verifyResponse = await client.PostAsJsonAsync("/api/auth/verify", new VerifyMagicLinkRequest(email, code));
         Assert.True(verifyResponse.Headers.TryGetValues("Set-Cookie", out var cookies));
         sessionContext.Cookie = cookies!.Single(c => c.StartsWith("eventco_session=")).Split(';')[0];
     }
@@ -43,9 +43,6 @@ public sealed class AuthenticatedSessionSteps(SessionContext sessionContext)
             .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.IsAdmin, true));
     }
 
-    private static string ExtractRawToken(string emailHtmlBody)
-    {
-        var match = Regex.Match(emailHtmlBody, @"token=([^""&]+)");
-        return Uri.UnescapeDataString(match.Groups[1].Value);
-    }
+    private static string ExtractCode(string emailHtmlBody) =>
+        Regex.Match(emailHtmlBody, @">(\d{6})<").Groups[1].Value;
 }

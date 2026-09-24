@@ -37,8 +37,8 @@ public sealed class RequestLinkSteps
         Assert.Equal(expectedStatusCode, (int)_response!.StatusCode);
     }
 
-    [Then(@"un token de connexion est persisté en base pour ""(.*)""")]
-    public async Task AlorsUnTokenDeConnexionEstPersisteEnBasePour(string email)
+    [Then(@"un code de connexion est persisté en base pour ""(.*)""")]
+    public async Task AlorsUnCodeDeConnexionEstPersisteEnBasePour(string email)
     {
         using var scope = Hooks.Factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<EventCoDbContext>();

@@ -28,9 +28,22 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
     })
   })
 
-  Scenario('Un utilisateur non connecté voit un aperçu puis demande la connexion', ({ Given, When, Then }) => {
+  Scenario('Un utilisateur non connecté voit un aperçu, se connecte avec le code reçu et rejoint l\'événement', ({ Given, When, Then }) => {
     Given('je ne suis pas connecté', () => {
-      server.use(http.get('*/api/auth/me', () => new HttpResponse(null, { status: 401 })))
+      let isAuthenticated = false
+      server.use(
+        http.get('*/api/auth/me', () =>
+          isAuthenticated
+            ? HttpResponse.json({ userId: 'user-1', email: 'invite@example.com', displayName: 'invite', isAdmin: false })
+            : new HttpResponse(null, { status: 401 }),
+        ),
+        // L'intention de rejoindre l'événement est résolue côté serveur à la validation du code,
+        // qui renvoie alors l'événement rejoint.
+        http.post('*/api/auth/verify', () => {
+          isAuthenticated = true
+          return HttpResponse.json({ userId: 'user-1', email: 'invite@example.com', displayName: 'invite', eventId: 'event-1' })
+        }),
+      )
     })
 
     When('j\'ouvre le lien d\'invitation "invite-token-1"', () => {
@@ -50,6 +63,16 @@ describeFeature(feature, ({ AfterEachScenario, Scenario }) => {
 
     Then('je suis redirigé vers la page de confirmation', async () => {
       await screen.findByTestId('check-email-page')
+    })
+
+    When('je saisis le code reçu et je valide', async () => {
+      const user = userEvent.setup()
+      await user.type(screen.getByTestId('verify-login-code-input'), '123456')
+      await user.click(screen.getByTestId('verify-login-code-submit-button'))
+    })
+
+    Then('je suis redirigé vers la page de l\'événement rejoint', async () => {
+      await screen.findByTestId('event-detail-page')
     })
   })
 

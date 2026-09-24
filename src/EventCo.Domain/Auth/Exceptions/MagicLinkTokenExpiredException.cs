@@ -9,7 +9,7 @@ public sealed class MagicLinkTokenExpiredException : DomainException
     public DateTime AttemptedAt { get; }
 
     public MagicLinkTokenExpiredException(Guid tokenId, DateTime expiresAt, DateTime attemptedAt)
-        : base($"Ce lien de connexion a expiré (TokenId: {tokenId}, ExpiresAt: {expiresAt:O}, AttemptedAt: {attemptedAt:O}).")
+        : base($"Ce code de connexion a expiré (TokenId: {tokenId}, ExpiresAt: {expiresAt:O}, AttemptedAt: {attemptedAt:O}).")
     {
         TokenId = tokenId;
         ExpiresAt = expiresAt;

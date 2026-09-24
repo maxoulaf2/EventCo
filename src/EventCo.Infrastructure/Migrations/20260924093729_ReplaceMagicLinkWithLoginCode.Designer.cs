@@ -3,6 +3,7 @@ using System;
 using EventCo.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventCo.Infrastructure.Migrations
 {
     [DbContext(typeof(EventCoDbContext))]
-    partial class EventCoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260924093729_ReplaceMagicLinkWithLoginCode")]
+    partial class ReplaceMagicLinkWithLoginCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
