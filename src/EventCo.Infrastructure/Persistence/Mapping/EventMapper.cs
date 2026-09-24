@@ -10,12 +10,12 @@ internal static class EventMapper
         var participants = entity.Participants.Select(p =>
             EventParticipant.Reconstitute(p.Id, p.EventId, p.UserId, p.Role, p.InvitedAt, p.ParticipationStatus));
 
-        var tasks = entity.Tasks.Select(t =>
-            EventTask.Reconstitute(t.Id, t.EventId, t.Title, t.Quantity, t.AssignedToUserId, t.CreatedByUserId, t.CreatedAt));
+        var items = entity.Items.Select(t =>
+            EventItem.Reconstitute(t.Id, t.EventId, t.Title, t.Quantity, t.AssignedToUserId, t.CreatedByUserId, t.CreatedAt));
 
         return Event.Reconstitute(
             entity.Id, entity.Title, entity.Description, entity.EventDate, entity.Location, entity.ImageUrl, entity.InviteLinkToken,
-            entity.CreatedByUserId, entity.Status, entity.CreatedAt, participants, tasks);
+            entity.CreatedByUserId, entity.Status, entity.CreatedAt, participants, items);
     }
 
     public static EventEntity ToEntity(Event domain)
@@ -35,7 +35,7 @@ internal static class EventMapper
         };
 
         entity.Participants.AddRange(domain.Participants.Select(ToEntity));
-        entity.Tasks.AddRange(domain.Tasks.Select(ToEntity));
+        entity.Items.AddRange(domain.Items.Select(ToEntity));
 
         return entity;
     }
@@ -53,7 +53,7 @@ internal static class EventMapper
         ParticipationStatus = domain.ParticipationStatus,
     };
 
-    internal static EventTaskEntity ToEntity(EventTask domain) => new()
+    internal static EventItemEntity ToEntity(EventItem domain) => new()
     {
         Id = domain.Id,
         EventId = domain.EventId,

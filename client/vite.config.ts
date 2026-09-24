@@ -20,7 +20,7 @@ export default defineConfig({
       manifest: {
         name: 'EventCo',
         short_name: 'EventCo',
-        description: 'Co-organisez vos événements de groupe : invitations, répartition des tâches, suivi en temps réel.',
+        description: 'Co-organisez vos événements de groupe : invitations, qui apporte quoi, suivi en temps réel.',
         lang: 'fr',
         start_url: '/',
         display: 'standalone',

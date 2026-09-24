@@ -1,21 +1,21 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
-using EventCo.Application.Events.AssignTask;
+using EventCo.Application.Events.AssignItem;
 using EventCo.Application.Events.CreateEvent;
-using EventCo.Application.Events.CreateTask;
+using EventCo.Application.Events.CreateItem;
 using EventCo.Application.Events.DeleteEvent;
-using EventCo.Application.Events.DeleteTask;
+using EventCo.Application.Events.DeleteItem;
 using EventCo.Application.Events.DemoteToParticipant;
 using EventCo.Application.Events.GetEventById;
 using EventCo.Application.Events.GetEventInvitePreviewByToken;
-using EventCo.Application.Events.GetEventTasks;
+using EventCo.Application.Events.GetEventItems;
 using EventCo.Application.Events.GetMyEvents;
 using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.JoinEventViaInviteLink;
 using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.RegenerateEventInviteLink;
 using EventCo.Application.Events.SetParticipationStatus;
-using EventCo.Application.Events.UnassignTask;
+using EventCo.Application.Events.UnassignItem;
 using EventCo.Application.Events.UpdateEvent;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -166,13 +166,13 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
         return Created($"api/events/{id}", response);
     }
 
-    [HttpGet("{id:guid}/tasks")]
-    public async Task<IActionResult> GetTasks(Guid id, CancellationToken cancellationToken)
+    [HttpGet("{id:guid}/items")]
+    public async Task<IActionResult> GetItems(Guid id, CancellationToken cancellationToken)
     {
-        var result = await commandDispatcher.Send(new GetEventTasksQuery(id), cancellationToken);
+        var result = await commandDispatcher.Send(new GetEventItemsQuery(id), cancellationToken);
 
-        var response = result.Tasks.Select(t => new EventTaskResponse(
-            t.TaskId,
+        var response = result.Items.Select(t => new EventItemResponse(
+            t.ItemId,
             t.EventId,
             t.Title,
             t.Quantity,
@@ -182,44 +182,44 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
         return Ok(response);
     }
 
-    [HttpPost("{id:guid}/tasks")]
-    public async Task<IActionResult> CreateTask(Guid id, CreateTaskRequest request, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/items")]
+    public async Task<IActionResult> CreateItem(Guid id, CreateItemRequest request, CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(
-            new CreateTaskCommand(id, request.Title, request.Quantity),
+            new CreateItemCommand(id, request.Title, request.Quantity),
             cancellationToken);
 
-        var response = new EventTaskResponse(
-            result.TaskId,
+        var response = new EventItemResponse(
+            result.ItemId,
             result.EventId,
             result.Title,
             result.Quantity,
             result.AssignedToUserId,
             result.CreatedAt);
 
-        return Created($"api/events/{id}/tasks/{result.TaskId}", response);
+        return Created($"api/events/{id}/items/{result.ItemId}", response);
     }
 
-    [HttpPost("{id:guid}/tasks/{taskId:guid}/assign/{userId:guid}")]
-    public async Task<IActionResult> AssignTask(Guid id, Guid taskId, Guid userId, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/items/{itemId:guid}/assign/{userId:guid}")]
+    public async Task<IActionResult> AssignItem(Guid id, Guid itemId, Guid userId, CancellationToken cancellationToken)
     {
-        await commandDispatcher.Send(new AssignTaskCommand(id, taskId, userId), cancellationToken);
+        await commandDispatcher.Send(new AssignItemCommand(id, itemId, userId), cancellationToken);
 
         return NoContent();
     }
 
-    [HttpPost("{id:guid}/tasks/{taskId:guid}/unassign")]
-    public async Task<IActionResult> UnassignTask(Guid id, Guid taskId, CancellationToken cancellationToken)
+    [HttpPost("{id:guid}/items/{itemId:guid}/unassign")]
+    public async Task<IActionResult> UnassignItem(Guid id, Guid itemId, CancellationToken cancellationToken)
     {
-        await commandDispatcher.Send(new UnassignTaskCommand(id, taskId), cancellationToken);
+        await commandDispatcher.Send(new UnassignItemCommand(id, itemId), cancellationToken);
 
         return NoContent();
     }
 
-    [HttpDelete("{id:guid}/tasks/{taskId:guid}")]
-    public async Task<IActionResult> DeleteTask(Guid id, Guid taskId, CancellationToken cancellationToken)
+    [HttpDelete("{id:guid}/items/{itemId:guid}")]
+    public async Task<IActionResult> DeleteItem(Guid id, Guid itemId, CancellationToken cancellationToken)
     {
-        await commandDispatcher.Send(new DeleteTaskCommand(id, taskId), cancellationToken);
+        await commandDispatcher.Send(new DeleteItemCommand(id, itemId), cancellationToken);
 
         return NoContent();
     }

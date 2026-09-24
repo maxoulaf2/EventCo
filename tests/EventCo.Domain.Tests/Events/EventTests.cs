@@ -295,13 +295,13 @@ public class EventTests
     }
 
     [Fact]
-    public void AddTask_ActingUserIsAdminNotParticipant_ThrowsUserNotEventParticipantException()
+    public void AddItem_ActingUserIsAdminNotParticipant_ThrowsUserNotEventParticipantException()
     {
         // La consultation administrateur est en lecture seule : aucune action d'écriture n'est ouverte.
         var @event = CreateEvent(out _);
 
         Assert.Throws<UserNotEventParticipantException>(() =>
-            @event.AddTask(Guid.NewGuid(), "Bûche", null, DateTime.UtcNow));
+            @event.AddItem(Guid.NewGuid(), "Bûche", null, DateTime.UtcNow));
     }
 
     [Fact]
@@ -338,215 +338,215 @@ public class EventTests
     }
 
     [Fact]
-    public void AddTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    public void AddItem_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out _);
 
         Assert.Throws<UserNotEventParticipantException>(
-            () => @event.AddTask(Guid.NewGuid(), "Bûche au chocolat", "1", DateTime.UtcNow));
+            () => @event.AddItem(Guid.NewGuid(), "Bûche au chocolat", "1", DateTime.UtcNow));
     }
 
     [Fact]
-    public void AddTask_ActingUserIsParticipantNotOrganizer_AddsTask()
+    public void AddItem_ActingUserIsParticipantNotOrganizer_AddsItem()
     {
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
 
-        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
-        Assert.Contains(task, @event.Tasks);
+        Assert.Contains(item, @event.Items);
     }
 
     [Fact]
-    public void AddTask_EmptyTitle_ThrowsEventTaskTitleEmptyException()
+    public void AddItem_EmptyTitle_ThrowsEventItemTitleEmptyException()
     {
         var @event = CreateEvent(out var creatorId);
 
-        Assert.Throws<EventTaskTitleEmptyException>(
-            () => @event.AddTask(creatorId, " ", "1", DateTime.UtcNow));
+        Assert.Throws<EventItemTitleEmptyException>(
+            () => @event.AddItem(creatorId, " ", "1", DateTime.UtcNow));
     }
 
     [Fact]
-    public void AssignTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    public void AssignItem_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
-        Assert.Throws<UserNotEventParticipantException>(() => @event.AssignTask(Guid.NewGuid(), task.Id, creatorId));
+        Assert.Throws<UserNotEventParticipantException>(() => @event.AssignItem(Guid.NewGuid(), item.Id, creatorId));
     }
 
     [Fact]
-    public void AssignTask_TargetUserNotParticipant_ThrowsTaskAssigneeNotParticipantException()
+    public void AssignItem_TargetUserNotParticipant_ThrowsItemAssigneeNotParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
-        Assert.Throws<TaskAssigneeNotParticipantException>(() => @event.AssignTask(creatorId, task.Id, Guid.NewGuid()));
+        Assert.Throws<ItemAssigneeNotParticipantException>(() => @event.AssignItem(creatorId, item.Id, Guid.NewGuid()));
     }
 
     [Fact]
-    public void AssignTask_CreatorAssignsToAnotherParticipant_AssignsTask()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
-
-        @event.AssignTask(creatorId, task.Id, regularParticipantId);
-
-        Assert.Equal(regularParticipantId, task.AssignedToUserId);
-    }
-
-    [Fact]
-    public void AssignTask_SimpleParticipantAssignsToSelf_AssignsTask()
+    public void AssignItem_CreatorAssignsToAnotherParticipant_AssignsItem()
     {
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
-        @event.AssignTask(regularParticipantId, task.Id, regularParticipantId);
+        @event.AssignItem(creatorId, item.Id, regularParticipantId);
 
-        Assert.Equal(regularParticipantId, task.AssignedToUserId);
+        Assert.Equal(regularParticipantId, item.AssignedToUserId);
     }
 
     [Fact]
-    public void AssignTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
-    {
-        var @event = CreateEvent(out var creatorId);
-
-        Assert.Throws<EventTaskNotFoundException>(() => @event.AssignTask(creatorId, Guid.NewGuid(), creatorId));
-    }
-
-    [Fact]
-    public void AssignTask_SimpleParticipantAssignsToAnotherParticipant_ThrowsParticipantCannotAssignTaskToOthersException()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        var otherParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
-
-        Assert.Throws<ParticipantCannotAssignTaskToOthersException>(
-            () => @event.AssignTask(regularParticipantId, task.Id, otherParticipantId));
-    }
-
-    [Fact]
-    public void UnassignTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
-    {
-        var @event = CreateEvent(out var creatorId);
-
-        Assert.Throws<EventTaskNotFoundException>(() => @event.UnassignTask(creatorId, Guid.NewGuid()));
-    }
-
-    [Fact]
-    public void UnassignTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
-        @event.AssignTask(creatorId, task.Id, creatorId);
-
-        Assert.Throws<UserNotEventParticipantException>(() => @event.UnassignTask(Guid.NewGuid(), task.Id));
-    }
-
-    [Fact]
-    public void UnassignTask_ActingUserIsAssignedParticipant_ClearsAssignedToUserId()
+    public void AssignItem_SimpleParticipantAssignsToSelf_AssignsItem()
     {
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
-        @event.AssignTask(creatorId, task.Id, regularParticipantId);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
-        @event.UnassignTask(regularParticipantId, task.Id);
+        @event.AssignItem(regularParticipantId, item.Id, regularParticipantId);
 
-        Assert.Null(task.AssignedToUserId);
+        Assert.Equal(regularParticipantId, item.AssignedToUserId);
     }
 
     [Fact]
-    public void UnassignTask_ActingUserIsCreatorOrOrganizer_ClearsAssignedToUserIdForAnotherParticipant()
+    public void AssignItem_UnknownItemId_ThrowsEventItemNotFoundException()
     {
         var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
-        @event.AssignTask(creatorId, task.Id, regularParticipantId);
 
-        @event.UnassignTask(creatorId, task.Id);
-
-        Assert.Null(task.AssignedToUserId);
+        Assert.Throws<EventItemNotFoundException>(() => @event.AssignItem(creatorId, Guid.NewGuid(), creatorId));
     }
 
     [Fact]
-    public void UnassignTask_ActingUserIsParticipantNotAssigned_ThrowsParticipantCannotUnassignOthersTaskException()
+    public void AssignItem_SimpleParticipantAssignsToAnotherParticipant_ThrowsParticipantCannotAssignItemToOthersException()
     {
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         var otherParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
         @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
-        @event.AssignTask(creatorId, task.Id, otherParticipantId);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
 
-        Assert.Throws<ParticipantCannotUnassignOthersTaskException>(() => @event.UnassignTask(regularParticipantId, task.Id));
+        Assert.Throws<ParticipantCannotAssignItemToOthersException>(
+            () => @event.AssignItem(regularParticipantId, item.Id, otherParticipantId));
     }
 
     [Fact]
-    public void RemoveTask_UnknownTaskId_ThrowsEventTaskNotFoundException()
+    public void UnassignItem_UnknownItemId_ThrowsEventItemNotFoundException()
     {
         var @event = CreateEvent(out var creatorId);
 
-        Assert.Throws<EventTaskNotFoundException>(() => @event.RemoveTask(creatorId, Guid.NewGuid()));
+        Assert.Throws<EventItemNotFoundException>(() => @event.UnassignItem(creatorId, Guid.NewGuid()));
     }
 
     [Fact]
-    public void RemoveTask_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    public void UnassignItem_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
     {
         var @event = CreateEvent(out var creatorId);
-        var task = @event.AddTask(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        @event.AssignItem(creatorId, item.Id, creatorId);
 
-        Assert.Throws<UserNotEventParticipantException>(() => @event.RemoveTask(Guid.NewGuid(), task.Id));
+        Assert.Throws<UserNotEventParticipantException>(() => @event.UnassignItem(Guid.NewGuid(), item.Id));
     }
 
     [Fact]
-    public void RemoveTask_ActingUserIsTaskCreator_RemovesFromCollection()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
-
-        @event.RemoveTask(regularParticipantId, task.Id);
-
-        Assert.DoesNotContain(@event.Tasks, t => t.Id == task.Id);
-    }
-
-    [Fact]
-    public void RemoveTask_ActingUserIsCreatorOrOrganizer_RemovesTaskCreatedByAnotherParticipant()
+    public void UnassignItem_ActingUserIsAssignedParticipant_ClearsAssignedToUserId()
     {
         var @event = CreateEvent(out var creatorId);
         var regularParticipantId = Guid.NewGuid();
         @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        @event.AssignItem(creatorId, item.Id, regularParticipantId);
 
-        @event.RemoveTask(creatorId, task.Id);
+        @event.UnassignItem(regularParticipantId, item.Id);
 
-        Assert.DoesNotContain(@event.Tasks, t => t.Id == task.Id);
+        Assert.Null(item.AssignedToUserId);
     }
 
     [Fact]
-    public void RemoveTask_ActingUserIsParticipantNotTaskCreatorNorOrganizer_ThrowsParticipantCannotDeleteOthersTaskException()
+    public void UnassignItem_ActingUserIsCreatorOrOrganizer_ClearsAssignedToUserIdForAnotherParticipant()
     {
         var @event = CreateEvent(out var creatorId);
-        var taskCreatorId = Guid.NewGuid();
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        @event.AssignItem(creatorId, item.Id, regularParticipantId);
+
+        @event.UnassignItem(creatorId, item.Id);
+
+        Assert.Null(item.AssignedToUserId);
+    }
+
+    [Fact]
+    public void UnassignItem_ActingUserIsParticipantNotAssigned_ThrowsParticipantCannotUnassignOthersItemException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
         var otherParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, taskCreatorId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
         @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var task = @event.AddTask(taskCreatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+        @event.AssignItem(creatorId, item.Id, otherParticipantId);
 
-        Assert.Throws<ParticipantCannotDeleteOthersTaskException>(() => @event.RemoveTask(otherParticipantId, task.Id));
+        Assert.Throws<ParticipantCannotUnassignOthersItemException>(() => @event.UnassignItem(regularParticipantId, item.Id));
+    }
+
+    [Fact]
+    public void RemoveItem_UnknownItemId_ThrowsEventItemNotFoundException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventItemNotFoundException>(() => @event.RemoveItem(creatorId, Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void RemoveItem_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventParticipantException>(() => @event.RemoveItem(Guid.NewGuid(), item.Id));
+    }
+
+    [Fact]
+    public void RemoveItem_ActingUserIsItemCreator_RemovesFromCollection()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
+
+        @event.RemoveItem(regularParticipantId, item.Id);
+
+        Assert.DoesNotContain(@event.Items, t => t.Id == item.Id);
+    }
+
+    [Fact]
+    public void RemoveItem_ActingUserIsCreatorOrOrganizer_RemovesItemCreatedByAnotherParticipant()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(regularParticipantId, "Bûche au chocolat", "1", DateTime.UtcNow);
+
+        @event.RemoveItem(creatorId, item.Id);
+
+        Assert.DoesNotContain(@event.Items, t => t.Id == item.Id);
+    }
+
+    [Fact]
+    public void RemoveItem_ActingUserIsParticipantNotItemCreatorNorOrganizer_ThrowsParticipantCannotDeleteOthersItemException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var itemCreatorId = Guid.NewGuid();
+        var otherParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, itemCreatorId, DateTime.UtcNow);
+        @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(itemCreatorId, "Bûche au chocolat", "1", DateTime.UtcNow);
+
+        Assert.Throws<ParticipantCannotDeleteOthersItemException>(() => @event.RemoveItem(otherParticipantId, item.Id));
     }
 
     [Fact]

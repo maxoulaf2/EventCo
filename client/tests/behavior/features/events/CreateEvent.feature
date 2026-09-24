@@ -1,7 +1,7 @@
 # language: fr
 Fonctionnalité: Création d'un événement
   En tant qu'utilisateur connecté je veux créer un événement afin de pouvoir
-  ensuite y inviter des participants et y organiser des tâches
+  ensuite y inviter des participants et y répartir ce que chacun apporte
 
   Contexte:
     Etant donné que je suis sur la page de création d'événement

@@ -108,7 +108,7 @@ export const handlers = [
     }),
   ),
 
-  http.get('*/api/events/:id/tasks', () => HttpResponse.json([])),
+  http.get('*/api/events/:id/items', () => HttpResponse.json([])),
 
   http.post('*/api/events/:id/invite-link/regenerate', ({ params }) =>
     HttpResponse.json({ eventId: params.id, inviteLinkToken: 'invite-token-2' }),

@@ -126,9 +126,9 @@
 - [ ] Budget partagé (suivi des dépenses, calcul des remboursements)
 - [ ] Templates d'événements pré-remplis
 - [ ] Photos partagées post-événement
-- [ ] Catégories de tâches personnalisables par événement
+- [ ] Catégories d'articles personnalisables par événement
 - [ ] Commentaires / chat par événement
-- [ ] Notification email : tâche assignée
+- [ ] Notification email : article assigné
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)
 
 ## Lot 6 — Mise en production
@@ -158,6 +158,9 @@
 - [x] Renommage technique : suppression de toute référence à « MagicLink » dans le code (Domain/Application/Infrastructure/Api/Frontend/tests), la base (table `MagicLinkTokens` → `LoginCodes`), la configuration et les docs de référence
   > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur, suite au passage du lien magique au code de connexion (tâche précédente), qui avait volontairement conservé les noms techniques existants.
   > Restent volontairement : les migrations EF Core antérieures (`InitialCreate`, `AddMagicLinkTokenCreatedAt`, `ReplaceMagicLinkWithLoginCode`...), déjà appliquées en production et enregistrées sous ces noms dans `__EFMigrationsHistory`, l'`Up`/`Down` de la migration `RenameToLoginCodes` (qui doit nommer l'ancienne table), et les entrées historiques de ce suivi et du journal.
+- [x] Renommage « tâche » → « article » (ce que chacun apporte) : libellés frontend, code (Domain/Application/Infrastructure/Api/Frontend/tests), routes API (`/tasks` → `/items`), messages SignalR, base (table `EventTasks` → `EventItems`) et docs de référence
+  > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur : depuis la suppression du statut « fait » et de la catégorie, une « tâche » n'est plus qu'un intitulé + une quantité + la personne qui s'en charge, c'est-à-dire un article à apporter.
+  > Références visuelles de la page de détail d'un événement (`apparence-detail-evenement.feature`, libellés et noms de scénarios modifiés) à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.
 - [x] Frontend : liste des tâches d'un événement en deux sections empilées (« À prendre » puis « Assignées ») au lieu de deux onglets, pour voir toutes les tâches d'un coup
   > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur.
   > Référence visuelle du scénario renommé « Détail d'un événement avec des tâches à prendre et assignées » (`apparence-detail-evenement.feature`, anciennes captures « onglet des tâches assignées » supprimées) et autres captures du détail d'un événement devenues obsolètes — à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.

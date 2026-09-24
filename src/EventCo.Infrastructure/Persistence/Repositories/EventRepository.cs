@@ -40,17 +40,17 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case ParticipantRemovedDomainEvent e:
                     await DeleteParticipant(e.ParticipantId, cancellationToken);
                     break;
-                case TaskCreatedDomainEvent e:
-                    await InsertTask(e.Task, cancellationToken);
+                case ItemCreatedDomainEvent e:
+                    await InsertItem(e.Item, cancellationToken);
                     break;
-                case TaskAssignedDomainEvent e:
-                    await UpdateTaskAssignment(e.Task, cancellationToken);
+                case ItemAssignedDomainEvent e:
+                    await UpdateItemAssignment(e.Item, cancellationToken);
                     break;
-                case TaskUnassignedDomainEvent e:
-                    await UpdateTaskAssignment(e.Task, cancellationToken);
+                case ItemUnassignedDomainEvent e:
+                    await UpdateItemAssignment(e.Item, cancellationToken);
                     break;
-                case TaskDeletedDomainEvent e:
-                    await DeleteTask(e.TaskId, cancellationToken);
+                case ItemDeletedDomainEvent e:
+                    await DeleteItem(e.ItemId, cancellationToken);
                     break;
                 default:
                     throw new InvalidOperationException(
@@ -114,18 +114,18 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         dbContext.Remove(entity);
     }
 
-    private async Task InsertTask(EventTask task, CancellationToken cancellationToken) =>
-        await dbContext.Set<EventTaskEntity>().AddAsync(EventMapper.ToEntity(task), cancellationToken);
+    private async Task InsertItem(EventItem item, CancellationToken cancellationToken) =>
+        await dbContext.Set<EventItemEntity>().AddAsync(EventMapper.ToEntity(item), cancellationToken);
 
-    private async Task UpdateTaskAssignment(EventTask task, CancellationToken cancellationToken)
+    private async Task UpdateItemAssignment(EventItem item, CancellationToken cancellationToken)
     {
-        var entity = await FindTaskEntityAsync(task.Id, cancellationToken);
-        entity.AssignedToUserId = task.AssignedToUserId;
+        var entity = await FindItemEntityAsync(item.Id, cancellationToken);
+        entity.AssignedToUserId = item.AssignedToUserId;
     }
 
-    private async Task DeleteTask(Guid taskId, CancellationToken cancellationToken)
+    private async Task DeleteItem(Guid itemId, CancellationToken cancellationToken)
     {
-        var entity = await FindTaskEntityAsync(taskId, cancellationToken);
+        var entity = await FindItemEntityAsync(itemId, cancellationToken);
         dbContext.Remove(entity);
     }
 
@@ -139,23 +139,23 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         await dbContext.Set<EventParticipantEntity>().FindAsync([participantId], cancellationToken)
         ?? throw new InvalidOperationException($"EventParticipantEntity {participantId} introuvable.");
 
-    private async Task<EventTaskEntity> FindTaskEntityAsync(Guid taskId, CancellationToken cancellationToken) =>
-        await dbContext.Set<EventTaskEntity>().FindAsync([taskId], cancellationToken)
-        ?? throw new InvalidOperationException($"EventTaskEntity {taskId} introuvable.");
+    private async Task<EventItemEntity> FindItemEntityAsync(Guid itemId, CancellationToken cancellationToken) =>
+        await dbContext.Set<EventItemEntity>().FindAsync([itemId], cancellationToken)
+        ?? throw new InvalidOperationException($"EventItemEntity {itemId} introuvable.");
 
     public async Task DeleteAsync(Event @event, CancellationToken cancellationToken)
     {
-        // Les FK EventParticipants/EventTasks -> Events sont en Restrict (pas de cascade DB) :
+        // Les FK EventParticipants/EventItems -> Events sont en Restrict (pas de cascade DB) :
         // les enfants doivent être supprimés explicitement avant le parent.
         var participants = await dbContext.Set<EventParticipantEntity>()
             .Where(p => p.EventId == @event.Id)
             .ToListAsync(cancellationToken);
         dbContext.RemoveRange(participants);
 
-        var tasks = await dbContext.Set<EventTaskEntity>()
+        var items = await dbContext.Set<EventItemEntity>()
             .Where(t => t.EventId == @event.Id)
             .ToListAsync(cancellationToken);
-        dbContext.RemoveRange(tasks);
+        dbContext.RemoveRange(items);
 
         var entity = await dbContext.Events.FirstAsync(e => e.Id == @event.Id, cancellationToken);
         dbContext.Events.Remove(entity);
@@ -165,7 +165,7 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entity = await dbContext.Events
             .Include(e => e.Participants)
-            .Include(e => e.Tasks)
+            .Include(e => e.Items)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
         return entity is null ? null : EventMapper.ToDomain(entity);
@@ -175,7 +175,7 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entity = await dbContext.Events
             .Include(e => e.Participants)
-            .Include(e => e.Tasks)
+            .Include(e => e.Items)
             .FirstOrDefaultAsync(e => e.InviteLinkToken == token, cancellationToken);
 
         return entity is null ? null : EventMapper.ToDomain(entity);

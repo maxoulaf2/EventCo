@@ -422,10 +422,10 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       expect(await screen.findByTestId('event-detail-admin-viewer-badge')).toHaveTextContent('Consultation administrateur')
     })
 
-    And('je ne vois ni formulaire de participation ni formulaire d\'ajout de tâche', async () => {
-      await screen.findByTestId('task-list-empty-message')
+    And('je ne vois ni formulaire de participation ni formulaire d\'ajout d\'article', async () => {
+      await screen.findByTestId('item-list-empty-message')
       expect(screen.queryByTestId('event-detail-participation-status-select')).not.toBeInTheDocument()
-      expect(screen.queryByTestId('add-task-form')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('add-item-form')).not.toBeInTheDocument()
     })
   })
 

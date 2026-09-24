@@ -1,7 +1,7 @@
 # language: fr
 Fonctionnalité: Connexion au groupe temps réel d'un événement (SignalR)
   En tant que participant à un événement je veux rejoindre son groupe temps réel
-  afin de recevoir les mises à jour de tâches en direct
+  afin de recevoir les mises à jour d'articles en direct
 
   Scénario: Un participant rejoint le groupe temps réel de l'événement
     Etant donné une session ouverte via l'API pour "join-hub-participant-api-test@example.com"

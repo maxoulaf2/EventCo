@@ -102,4 +102,4 @@ Fonctionnalité: Détail d'un événement
     Etant donné que je suis un administrateur qui ne participe pas à cet événement
     Quand j'arrive sur le détail de l'événement
     Alors je vois un badge de consultation administrateur
-    Et je ne vois ni formulaire de participation ni formulaire d'ajout de tâche
+    Et je ne vois ni formulaire de participation ni formulaire d'ajout d'article

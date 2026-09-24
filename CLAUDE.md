@@ -4,7 +4,7 @@ Ce fichier est lu automatiquement par Claude Code au démarrage d'une session da
 
 ## Contexte du projet
 
-EventCo est un SaaS de planification d'événements de groupe (repas, anniversaires, week-ends entre amis...) permettant de co-organiser un événement à plusieurs : invitations, répartition des tâches/courses, suivi en temps réel.
+EventCo est un SaaS de planification d'événements de groupe (repas, anniversaires, week-ends entre amis...) permettant de co-organiser un événement à plusieurs : invitations, répartition de qui apporte quoi, suivi en temps réel.
 
 Projet personnel de montée en compétences, mené selon des standards professionnels (architecture propre, tests, CI/CD).
 
@@ -96,7 +96,7 @@ Le déploiement est piloté par le job `deploy` de `.github/workflows/ci.yml` : 
 
 ### Attribuer le flag administrateur
 
-Un compte administrateur (`Users.IsAdmin`) peut consulter tous les événements (`/admin/events`, détail, tâches, temps réel) en lecture seule, sans apparaître en tant que participant. Aucun endpoint ne permet de l'attribuer (volontairement) : c'est une action manuelle en base, sur un compte déjà créé (première connexion par code effectuée). Le flag est relu en base à chaque requête : l'attribution/le retrait prend effet immédiatement, sans reconnexion.
+Un compte administrateur (`Users.IsAdmin`) peut consulter tous les événements (`/admin/events`, détail, articles, temps réel) en lecture seule, sans apparaître en tant que participant. Aucun endpoint ne permet de l'attribuer (volontairement) : c'est une action manuelle en base, sur un compte déjà créé (première connexion par code effectuée). Le flag est relu en base à chaque requête : l'attribution/le retrait prend effet immédiatement, sans reconnexion.
 
 ```sql
 UPDATE "Users" SET "IsAdmin" = true WHERE "Email" = '<email-en-minuscules>';

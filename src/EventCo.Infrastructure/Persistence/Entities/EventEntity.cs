@@ -16,5 +16,5 @@ public class EventEntity
     public DateTime CreatedAt { get; set; }
 
     public List<EventParticipantEntity> Participants { get; set; } = [];
-    public List<EventTaskEntity> Tasks { get; set; } = [];
+    public List<EventItemEntity> Items { get; set; } = [];
 }

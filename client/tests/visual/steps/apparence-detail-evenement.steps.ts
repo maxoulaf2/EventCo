@@ -22,9 +22,9 @@ const participants = [
   },
 ]
 
-const tasks = [
+const items = [
   {
-    id: 'task-1',
+    id: 'item-1',
     eventId: 'event-1',
     title: 'Bûche au chocolat',
     quantity: '1',
@@ -32,7 +32,7 @@ const tasks = [
     createdAt: '2026-09-01T00:00:00Z',
   },
   {
-    id: 'task-2',
+    id: 'item-2',
     eventId: 'event-1',
     title: 'Réserver la salle',
     quantity: null,
@@ -57,8 +57,8 @@ async function mockEventDetail(page: import('@playwright/test').Page) {
       },
     }),
   )
-  await page.route('**/api/events/event-1/tasks', (route) => route.fulfill({ json: tasks }))
-  // TaskList ouvre une connexion SignalR (`useTaskRealtime`) vers `/hubs/events`, proxifiée par Vite
+  await page.route('**/api/events/event-1/items', (route) => route.fulfill({ json: items }))
+  // ItemList ouvre une connexion SignalR (`useItemRealtime`) vers `/hubs/events`, proxifiée par Vite
   // vers la vraie API (cf. vite.config.ts) : absente en test visuel, d'où un abort de la négociation
   // pour éviter que le navigateur tente de joindre un backend qui n'existe pas ici.
   await page.route('**/hubs/events/negotiate**', (route) => route.fulfill({ status: 404 }))
@@ -84,27 +84,27 @@ Given("je suis sur le détail d'un événement en tant que simple participant", 
   await expect(page.getByTestId('participant-row-user-2')).toBeVisible()
 })
 
-Given("je suis sur le détail d'un événement avec des tâches à prendre et assignées", async ({ page }) => {
+Given("je suis sur le détail d'un événement avec des articles à prendre et assignés", async ({ page }) => {
   await mockEventDetail(page)
-  await page.route('**/api/events/event-1/tasks', (route) =>
+  await page.route('**/api/events/event-1/items', (route) =>
     route.fulfill({
-      json: tasks.map((task) => (task.id === 'task-2' ? { ...task, assignedToUserId: 'user-2' } : task)),
+      json: items.map((item) => (item.id === 'item-2' ? { ...item, assignedToUserId: 'user-2' } : item)),
     }),
   )
   await page.route('**/api/auth/me', (route) =>
     route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
   )
   await page.goto('/events/event-1')
-  await expect(page.getByTestId('task-item-task-2')).toBeVisible()
+  await expect(page.getByTestId('item-row-item-2')).toBeVisible()
 })
 
-Given("je suis sur le détail d'un événement avec le formulaire d'ajout de tâche rempli", async ({ page }) => {
+Given("je suis sur le détail d'un événement avec le formulaire d'ajout d'article rempli", async ({ page }) => {
   await mockEventDetail(page)
   await page.route('**/api/auth/me', (route) =>
     route.fulfill({ json: { userId: 'user-1', email: 'organisateur@example.com', displayName: 'Organisateur' } }),
   )
   await page.goto('/events/event-1')
-  await page.getByTestId('add-task-title-input').fill('Guirlandes')
+  await page.getByTestId('add-item-title-input').fill('Guirlandes')
 })
 
 Given("je suis sur le détail d'un événement avec le statut de participation renseigné", async ({ page }) => {

@@ -50,7 +50,7 @@ public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
             .HasForeignKey(p => p.EventId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(e => e.Tasks)
+        builder.HasMany(e => e.Items)
             .WithOne()
             .HasForeignKey(t => t.EventId)
             .OnDelete(DeleteBehavior.Restrict);

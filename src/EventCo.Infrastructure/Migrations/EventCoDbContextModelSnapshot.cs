@@ -74,41 +74,7 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("Events", (string)null);
                 });
 
-            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventParticipantEntity", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("EventId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("InvitedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ParticipationStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("EventId", "UserId")
-                        .IsUnique();
-
-                    b.ToTable("EventParticipants", (string)null);
-                });
-
-            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventTaskEntity", b =>
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventItemEntity", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -142,7 +108,41 @@ namespace EventCo.Infrastructure.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("EventTasks", (string)null);
+                    b.ToTable("EventItems", (string)null);
+                });
+
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventParticipantEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("InvitedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ParticipationStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EventId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("EventParticipants", (string)null);
                 });
 
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.LoginCodeEntity", b =>
@@ -231,6 +231,26 @@ namespace EventCo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventItemEntity", b =>
+                {
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventEntity", null)
+                        .WithMany("Items")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventParticipantEntity", b =>
                 {
                     b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventEntity", null)
@@ -246,31 +266,11 @@ namespace EventCo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventTaskEntity", b =>
-                {
-                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("AssignedToUserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventEntity", null)
-                        .WithMany("Tasks")
-                        .HasForeignKey("EventId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
-                    b.Navigation("Participants");
+                    b.Navigation("Items");
 
-                    b.Navigation("Tasks");
+                    b.Navigation("Participants");
                 });
 #pragma warning restore 612, 618
         }

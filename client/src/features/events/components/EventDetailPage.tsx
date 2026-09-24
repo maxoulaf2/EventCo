@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
-import { TaskList } from '../../tasks/components/TaskList'
+import { ItemList } from '../../items/components/ItemList'
 import { Avatar } from '../../../shared/components/Avatar'
 import { Modal } from '../../../shared/components/Modal'
 import { Select } from '../../../shared/components/Select'
@@ -273,12 +273,12 @@ export function EventDetailPage() {
             </div>
 
             <div className="flex flex-col lg:overflow-hidden">
-              <TaskList
+              <ItemList
                 eventId={eventId!}
                 currentUserId={currentUser?.userId}
-                canManageAllTasks={isCreatorOrOrganizer}
+                canManageAllItems={isCreatorOrOrganizer}
                 canSelfAssign={isParticipant}
-                canAddTask={isParticipant}
+                canAddItem={isParticipant}
                 participants={event.participants}
               />
             </div>

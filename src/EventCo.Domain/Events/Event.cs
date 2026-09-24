@@ -7,7 +7,7 @@ namespace EventCo.Domain.Events;
 public class Event : Entity
 {
     private readonly List<EventParticipant> _participants = [];
-    private readonly List<EventTask> _tasks = [];
+    private readonly List<EventItem> _items = [];
 
     public string Title { get; private set; } = null!;
     public string? Description { get; private set; }
@@ -20,7 +20,7 @@ public class Event : Entity
     public DateTime CreatedAt { get; private set; }
 
     public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
-    public IReadOnlyCollection<EventTask> Tasks => _tasks.AsReadOnly();
+    public IReadOnlyCollection<EventItem> Items => _items.AsReadOnly();
 
     private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken, Guid createdByUserId, EventStatus status, DateTime createdAt)
         : base(id)
@@ -54,11 +54,11 @@ public class Event : Entity
     internal static Event Reconstitute(
         Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken,
         Guid createdByUserId, EventStatus status, DateTime createdAt,
-        IEnumerable<EventParticipant> participants, IEnumerable<EventTask> tasks)
+        IEnumerable<EventParticipant> participants, IEnumerable<EventItem> items)
     {
         var @event = new Event(id, title, description, eventDate, location, imageUrl, inviteLinkToken, createdByUserId, status, createdAt);
         @event._participants.AddRange(participants);
-        @event._tasks.AddRange(tasks);
+        @event._items.AddRange(items);
         return @event;
     }
 
@@ -177,45 +177,45 @@ public class Event : Entity
         EnsureActingUserIsParticipant(actingUserId);
     }
 
-    public EventTask AddTask(Guid actingUserId, string title, string? quantity, DateTime now)
+    public EventItem AddItem(Guid actingUserId, string title, string? quantity, DateTime now)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        var task = new EventTask(Id, title, quantity, actingUserId, now);
-        _tasks.Add(task);
-        AddDomainEvent(new TaskCreatedDomainEvent(task));
-        return task;
+        var item = new EventItem(Id, title, quantity, actingUserId, now);
+        _items.Add(item);
+        AddDomainEvent(new ItemCreatedDomainEvent(item));
+        return item;
     }
 
-    public void AssignTask(Guid actingUserId, Guid taskId, Guid userId)
+    public void AssignItem(Guid actingUserId, Guid itemId, Guid userId)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
         if (_participants.All(p => p.UserId != userId))
-            throw new TaskAssigneeNotParticipantException(Id, taskId, userId);
+            throw new ItemAssigneeNotParticipantException(Id, itemId, userId);
 
         if (userId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
-            throw new ParticipantCannotAssignTaskToOthersException(Id, taskId, actingUserId, userId);
+            throw new ParticipantCannotAssignItemToOthersException(Id, itemId, actingUserId, userId);
 
-        var task = GetTask(taskId);
-        task.AssignTo(userId);
-        AddDomainEvent(new TaskAssignedDomainEvent(task));
+        var item = GetItem(itemId);
+        item.AssignTo(userId);
+        AddDomainEvent(new ItemAssignedDomainEvent(item));
     }
 
-    public void UnassignTask(Guid actingUserId, Guid taskId)
+    public void UnassignItem(Guid actingUserId, Guid itemId)
     {
-        var task = GetTask(taskId);
-        EnsureActingUserCanUnassignTask(actingUserId, task);
-        task.Unassign();
-        AddDomainEvent(new TaskUnassignedDomainEvent(task));
+        var item = GetItem(itemId);
+        EnsureActingUserCanUnassignItem(actingUserId, item);
+        item.Unassign();
+        AddDomainEvent(new ItemUnassignedDomainEvent(item));
     }
 
-    public void RemoveTask(Guid actingUserId, Guid taskId)
+    public void RemoveItem(Guid actingUserId, Guid itemId)
     {
-        var task = GetTask(taskId);
-        EnsureActingUserCanDeleteTask(actingUserId, task);
-        _tasks.Remove(task);
-        AddDomainEvent(new TaskDeletedDomainEvent(Id, taskId));
+        var item = GetItem(itemId);
+        EnsureActingUserCanDeleteItem(actingUserId, item);
+        _items.Remove(item);
+        AddDomainEvent(new ItemDeletedDomainEvent(Id, itemId));
     }
 
     private void EnsureActingUserIsCreator(Guid actingUserId)
@@ -241,27 +241,27 @@ public class Event : Entity
             throw new UserNotEventParticipantException(Id, actingUserId);
     }
 
-    private void EnsureActingUserCanDeleteTask(Guid actingUserId, EventTask task)
+    private void EnsureActingUserCanDeleteItem(Guid actingUserId, EventItem item)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        if (task.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
-            throw new ParticipantCannotDeleteOthersTaskException(Id, task.Id, actingUserId);
+        if (item.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotDeleteOthersItemException(Id, item.Id, actingUserId);
     }
 
-    private void EnsureActingUserCanUnassignTask(Guid actingUserId, EventTask task)
+    private void EnsureActingUserCanUnassignItem(Guid actingUserId, EventItem item)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        if (task.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
-            throw new ParticipantCannotUnassignOthersTaskException(Id, task.Id, actingUserId);
+        if (item.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotUnassignOthersItemException(Id, item.Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>
         _participants.FirstOrDefault(p => p.UserId == userId)
         ?? throw new ParticipantNotFoundException(Id, userId);
 
-    private EventTask GetTask(Guid taskId) =>
-        _tasks.FirstOrDefault(t => t.Id == taskId)
-        ?? throw new EventTaskNotFoundException(Id, taskId);
+    private EventItem GetItem(Guid itemId) =>
+        _items.FirstOrDefault(t => t.Id == itemId)
+        ?? throw new EventItemNotFoundException(Id, itemId);
 }

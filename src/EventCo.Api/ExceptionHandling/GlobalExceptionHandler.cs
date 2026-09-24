@@ -38,13 +38,13 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             UserNotAdminException forbiddenAdminException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenAdminException.Message }),
-            ParticipantCannotAssignTaskToOthersException forbiddenAssignException => (
+            ParticipantCannotAssignItemToOthersException forbiddenAssignException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenAssignException.Message }),
-            ParticipantCannotUnassignOthersTaskException forbiddenUnassignException => (
+            ParticipantCannotUnassignOthersItemException forbiddenUnassignException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenUnassignException.Message }),
-            ParticipantCannotDeleteOthersTaskException forbiddenDeleteException => (
+            ParticipantCannotDeleteOthersItemException forbiddenDeleteException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenDeleteException.Message }),
             TooManyLoginCodeRequestsException tooManyRequestsException => (

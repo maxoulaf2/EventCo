@@ -8,10 +8,10 @@ Projet personnel de montée en compétences, mené comme s'il s'agissait d'un pr
 L'objectif secondaire (et non des moindres) est de pratiquer le développement assisté par IA (Claude Code) en délégation large, avec review humaine.
 
 ### 1.2 Pitch du produit
-Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires, week-ends entre amis...) en collaboration : créer un événement, inviter des participants, répartir les tâches (courses, logistique), et suivre l'avancement en temps réel.
+Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires, week-ends entre amis...) en collaboration : créer un événement, inviter des participants, répartir ce que chacun apporte (courses, plats, matériel), et suivre l'avancement en temps réel.
 
 ### 1.3 Cas d'usage de référence
-**Le repas de Noël entre amis** : un organisateur crée l'événement avec date et lieu fixés, invite ses amis par email, certains deviennent co-organisateurs. La liste de courses/tâches est partagée et chacun s'assigne ou se voit assigner des éléments ("qui apporte la bûche", "qui s'occupe de la déco"). Les mises à jour sont visibles en temps réel par tous.
+**Le repas de Noël entre amis** : un organisateur crée l'événement avec date et lieu fixés, invite ses amis par email, certains deviennent co-organisateurs. La liste des articles à apporter est partagée et chacun s'assigne ou se voit assigner des articles ("qui apporte la bûche", "qui apporte les guirlandes"). Les mises à jour sont visibles en temps réel par tous.
 
 ### 1.4 Contrainte d'usage majeure
 **La majorité des utilisateurs accèdent au service depuis un navigateur mobile.** Le design doit être pensé mobile-first, avec une ergonomie tactile soignée (zones cliquables larges, actions rapides, formulaires courts).
@@ -86,20 +86,20 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | InvitedAt | DateTime | |
 | ParticipationStatus | enum | `Unknown` (défaut à l'invitation), `Attending`, `NotAttending` — indiqué par le participant lui-même, `Attending` fixe pour le créateur |
 
-**EventTask**
+**EventItem** (article à apporter)
 | Champ | Type | Notes |
 |---|---|---|
 | Id | Guid | |
 | EventId | Guid | FK |
 | Title | string | ex: "Bûche au chocolat" |
 | Quantity | string? | texte libre (ex: "2", "1kg") |
-| AssignedToUserId | Guid? | null = non assignée |
+| AssignedToUserId | Guid? | null = non assigné |
 | CreatedAt | DateTime | |
 
 ### 3.2 Règles de gestion des rôles
 - Le **créateur** (`Event.CreatedByUserId`) a les droits ultimes : suppression de l'événement, gestion des rôles des autres participants, retrait de n'importe qui.
-- Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les tâches, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
-- Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement et s'auto-assigner des tâches.
+- Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les articles, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
+- Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement et s'auto-assigner des articles.
 - Le créateur possède automatiquement une entrée `EventParticipant` avec `Role = Organizer` ; la distinction "droits ultimes" se fait via la comparaison avec `Event.CreatedByUserId`.
 
 ---
@@ -111,14 +111,14 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Création d'événement (titre, description, date, lieu)
 - Invitation de participants par email
 - Distinction créateur / co-organisateur / participant
-- Liste de tâches partagée avec quantités et assignation
-- Mise à jour en temps réel (SignalR) des tâches entre participants
-- Vue événement centralisée (résumé, participants, tâches)
+- Liste partagée des articles à apporter, avec quantités et assignation
+- Mise à jour en temps réel (SignalR) des articles entre participants
+- Vue événement centralisée (résumé, participants, articles)
 - Design responsive mobile-first
 - PWA (installation sur écran d'accueil, tolérance réseau)
 
 ### Should have
-- Notifications par email (invitation, tâche assignée, rappel avant l'événement)
+- Notifications par email (invitation, article assigné, rappel avant l'événement)
 - Commentaires / chat par événement
 
 ### Could have
@@ -126,7 +126,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Budget partagé (suivi des dépenses, calcul de qui doit combien à qui)
 - Templates d'événements pré-remplis (ex: liste de courses type "Noël")
 - Photos partagées post-événement
-- Catégories de tâches personnalisables par événement
+- Catégories d'articles personnalisables par événement
 
 ### Won't have (hors scope MVP)
 - Application mobile native
@@ -138,8 +138,8 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 ## 5. Contraintes transverses
 
 - **Responsive / mobile-first** : conception et CSS pensés d'abord pour petit écran (Tailwind CSS), adaptation ensuite vers desktop.
-- **Ergonomie tactile** : zones cliquables larges, actions rapides (ex: s'assigner une tâche en un geste), formulaires courts adaptés à la saisie mobile.
-- **Temps réel** : toute mise à jour d'une tâche (création, assignation) doit être propagée instantanément à tous les participants connectés via SignalR, groupés par événement (un "groupe SignalR" par `EventId`).
+- **Ergonomie tactile** : zones cliquables larges, actions rapides (ex: s'assigner un article en un geste), formulaires courts adaptés à la saisie mobile.
+- **Temps réel** : toute mise à jour d'un article (création, assignation) doit être propagée instantanément à tous les participants connectés via SignalR, groupés par événement (un "groupe SignalR" par `EventId`).
 - **Sécurité** : codes de connexion hashés en base, cookies de session en httpOnly, validation stricte des droits par rôle sur chaque action API.
 
 ---
@@ -157,8 +157,8 @@ Ce découpage vise à séquencer le travail de façon à obtenir rapidement une 
 - CRUD événement (création, consultation, modification, suppression)
 - Gestion des participants et rôles (invitation par email, acceptation)
 
-**Lot 3 — Tâches et temps réel**
-- CRUD des tâches (quantité, assignation)
+**Lot 3 — Tâches et temps réel** (tâches renommées « articles » depuis le 2026-09-24)
+- CRUD des articles (quantité, assignation)
 - Intégration SignalR pour la synchronisation en temps réel
 
 **Lot 4 — Finitions MVP**

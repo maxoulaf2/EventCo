@@ -30,7 +30,7 @@ public static class DependencyInjection
         services.AddSingleton<ISessionTokenService, SessionTokenService>();
 
         services.AddSignalR();
-        services.AddSingleton<ITaskRealtimeNotifier, TaskRealtimeNotifier>();
+        services.AddSingleton<IItemRealtimeNotifier, ItemRealtimeNotifier>();
 
         services.AddScoped<LoggingEmailSender>();
         services.AddScoped<SmtpEmailSender>();
