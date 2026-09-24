@@ -9,7 +9,7 @@ namespace EventCo.Infrastructure.Storage;
 // Fallback quand aucun bucket S3 n'est configuré (Storage:S3:ServiceUrl vide), comme LoggingEmailSender
 // pour l'email : fichiers écrits sur le disque de l'API et servis par elle sous RequestPath (cf.
 // Program.cs), en same-origin. Utile en dev et pour les tests Api — pas en production sur Render, dont
-// le disque est effacé à chaque déploiement.
+// le disque est effacé à chaque déploiement. Chaque bucket correspond à un sous-dossier de RootDirectory.
 public sealed class LocalFileStorage : IFileStorage
 {
     private readonly LocalStorageOptions _options;
@@ -26,18 +26,18 @@ public sealed class LocalFileStorage : IFileStorage
 
     public string RequestPath => _options.RequestPath;
 
-    public async Task UploadAsync(string key, byte[] content, string contentType, CancellationToken cancellationToken)
+    public async Task UploadAsync(FileStorageBucket bucket, string key, byte[] content, string contentType, CancellationToken cancellationToken)
     {
-        var path = ResolvePath(key);
+        var path = ResolvePath(bucket, key);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         await File.WriteAllBytesAsync(path, content, cancellationToken);
     }
 
-    public Task DeleteAsync(string key, CancellationToken cancellationToken)
+    public Task DeleteAsync(FileStorageBucket bucket, string key, CancellationToken cancellationToken)
     {
         try
         {
-            File.Delete(ResolvePath(key));
+            File.Delete(ResolvePath(bucket, key));
         }
         catch (IOException exception)
         {
@@ -47,14 +47,23 @@ public sealed class LocalFileStorage : IFileStorage
         return Task.CompletedTask;
     }
 
-    public string GetPublicUrl(string key) => $"{_options.RequestPath.TrimEnd('/')}/{key}";
+    public string GetPublicUrl(FileStorageBucket bucket, string key) =>
+        $"{_options.RequestPath.TrimEnd('/')}/{DirectoryName(bucket)}/{key}";
 
-    // Les clés sont générées côté serveur, mais une clé qui sortirait du dossier racine (../) écrirait
-    // n'importe où sur le disque : refusée par principe.
-    private string ResolvePath(string key)
+    private static string DirectoryName(FileStorageBucket bucket) => bucket switch
     {
-        var path = Path.GetFullPath(Path.Combine(RootDirectory, key));
-        if (!path.StartsWith(RootDirectory + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+        FileStorageBucket.Avatars => "avatars",
+        FileStorageBucket.EventImages => "event-images",
+        _ => throw new ArgumentOutOfRangeException(nameof(bucket), bucket, null),
+    };
+
+    // Les clés sont générées côté serveur, mais une clé qui sortirait du dossier du bucket (../) écrirait
+    // n'importe où sur le disque : refusée par principe.
+    private string ResolvePath(FileStorageBucket bucket, string key)
+    {
+        var bucketDirectory = Path.Combine(RootDirectory, DirectoryName(bucket));
+        var path = Path.GetFullPath(Path.Combine(bucketDirectory, key));
+        if (!path.StartsWith(bucketDirectory + Path.DirectorySeparatorChar, StringComparison.Ordinal))
             throw new InvalidOperationException($"Clé de stockage invalide : {key}.");
 
         return path;

@@ -13,7 +13,7 @@ public class Event : Entity
     public string? Description { get; private set; }
     public DateTime EventDate { get; private set; }
     public string? Location { get; private set; }
-    public string? ImageUrl { get; private set; }
+    public string? ImageStorageKey { get; private set; }
     public string InviteLinkToken { get; private set; } = null!;
     public Guid CreatedByUserId { get; private set; }
     public EventStatus Status { get; private set; }
@@ -22,26 +22,26 @@ public class Event : Entity
     public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
     public IReadOnlyCollection<EventItem> Items => _items.AsReadOnly();
 
-    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken, Guid createdByUserId, EventStatus status, DateTime createdAt)
+    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageStorageKey, string inviteLinkToken, Guid createdByUserId, EventStatus status, DateTime createdAt)
         : base(id)
     {
         Title = title;
         Description = description;
         EventDate = eventDate;
         Location = location;
-        ImageUrl = imageUrl;
+        ImageStorageKey = imageStorageKey;
         InviteLinkToken = inviteLinkToken;
         CreatedByUserId = createdByUserId;
         Status = status;
         CreatedAt = createdAt;
     }
 
-    public static Event Create(string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken, Guid createdByUserId, DateTime now)
+    public static Event Create(string title, string? description, DateTime eventDate, string? location, string inviteLinkToken, Guid createdByUserId, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException();
 
-        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, imageUrl, inviteLinkToken, createdByUserId, EventStatus.Planned, now);
+        var @event = new Event(Guid.NewGuid(), title.Trim(), description, eventDate, location, imageStorageKey: null, inviteLinkToken, createdByUserId, EventStatus.Planned, now);
 
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
         @event._participants.Add(creatorParticipant);
@@ -52,11 +52,11 @@ public class Event : Entity
     }
 
     internal static Event Reconstitute(
-        Guid id, string title, string? description, DateTime eventDate, string? location, string? imageUrl, string inviteLinkToken,
+        Guid id, string title, string? description, DateTime eventDate, string? location, string? imageStorageKey, string inviteLinkToken,
         Guid createdByUserId, EventStatus status, DateTime createdAt,
         IEnumerable<EventParticipant> participants, IEnumerable<EventItem> items)
     {
-        var @event = new Event(id, title, description, eventDate, location, imageUrl, inviteLinkToken, createdByUserId, status, createdAt);
+        var @event = new Event(id, title, description, eventDate, location, imageStorageKey, inviteLinkToken, createdByUserId, status, createdAt);
         @event._participants.AddRange(participants);
         @event._items.AddRange(items);
         return @event;
@@ -75,6 +75,19 @@ public class Event : Entity
         Location = location;
 
         AddDomainEvent(new EventDetailsUpdatedDomainEvent(Id));
+    }
+
+    // Clé générée par le use case (jamais saisie par l'utilisateur) : une clé vide est une erreur de
+    // programmation, pas une règle métier violée (cf. User.ChangeAvatar).
+    public void ChangeImage(Guid actingUserId, string imageStorageKey)
+    {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+
+        if (string.IsNullOrWhiteSpace(imageStorageKey))
+            throw new ArgumentException("La clé de stockage de l'image est obligatoire.", nameof(imageStorageKey));
+
+        ImageStorageKey = imageStorageKey;
+        AddDomainEvent(new EventImageChangedDomainEvent(Id));
     }
 
     public void Cancel()

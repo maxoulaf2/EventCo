@@ -134,6 +134,10 @@ export const handlers = [
 
   http.get('*/api/events/:id/items', () => HttpResponse.json([])),
 
+  http.put('*/api/events/:id/image', ({ params }) =>
+    HttpResponse.json({ eventId: params.id, imageUrl: `/uploads/event-images/${String(params.id)}/image-1.jpg` }),
+  ),
+
   http.post('*/api/events/:id/invite-link/regenerate', ({ params }) =>
     HttpResponse.json({ eventId: params.id, inviteLinkToken: 'invite-token-2' }),
   ),

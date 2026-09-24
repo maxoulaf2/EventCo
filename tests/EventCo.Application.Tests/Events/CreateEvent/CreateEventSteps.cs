@@ -53,41 +53,6 @@ public sealed class CreateEventSteps
         }
     }
 
-    [When(@"je crée l'événement ""(.*)"" prévu le ""(.*)"" au lieu ""([^""]*)"" avec l'image ""(.*)""")]
-    public async Task JeCreeLevenementPrevuLeAuLieuAvecLimage(string title, string eventDate, string location, string imageUrl)
-    {
-        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-
-        try
-        {
-            _lastResult = await dispatcher.Send(
-                new CreateEventCommand(title, null, DateTime.Parse(eventDate), location, imageUrl),
-                CancellationToken.None);
-        }
-        catch (Exception exception)
-        {
-            _thrownException = exception;
-        }
-    }
-
-    [When(@"je crée l'événement ""(.*)"" prévu le ""(.*)"" au lieu ""([^""]*)"" avec une URL d'image trop longue")]
-    public async Task JeCreeLevenementPrevuLeAuLieuAvecUneUrlDimageTropLongue(string title, string eventDate, string location)
-    {
-        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-        var tooLongImageUrl = "https://example.com/" + new string('a', 2048);
-
-        try
-        {
-            _lastResult = await dispatcher.Send(
-                new CreateEventCommand(title, null, DateTime.Parse(eventDate), location, tooLongImageUrl),
-                CancellationToken.None);
-        }
-        catch (Exception exception)
-        {
-            _thrownException = exception;
-        }
-    }
-
     [Then(@"la création réussit")]
     public void AlorsLaCreationReussit() => Assert.Null(_thrownException);
 
@@ -97,9 +62,6 @@ public sealed class CreateEventSteps
 
     [Then(@"l'événement créé a pour titre ""(.*)""")]
     public void AlorsLevenementCreeAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);
-
-    [Then(@"l'événement créé a pour image ""(.*)""")]
-    public void AlorsLevenementCreeAPourImage(string imageUrl) => Assert.Equal(imageUrl, _lastResult!.ImageUrl);
 
     [Then(@"l'événement créé n'a pas d'image")]
     public void AlorsLevenementCreeNaPasDimage() => Assert.Null(_lastResult!.ImageUrl);

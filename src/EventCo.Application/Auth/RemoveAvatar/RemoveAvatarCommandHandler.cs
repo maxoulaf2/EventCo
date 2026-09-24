@@ -19,7 +19,7 @@ public sealed class RemoveAvatarCommandHandler(
         await userRepository.ApplyAsync(user, cancellationToken);
 
         if (previousKey is not null)
-            await fileStorage.DeleteAsync(previousKey, cancellationToken);
+            await fileStorage.DeleteAsync(FileStorageBucket.Avatars, previousKey, cancellationToken);
 
         return new RemoveAvatarResult(user.Id, user.Email.Value, user.DisplayName, user.IsAdmin, AvatarUrl: null);
     }

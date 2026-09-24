@@ -50,7 +50,7 @@ public sealed class GetEventByIdQueryHandler(
             @event.Description,
             @event.EventDate,
             @event.Location,
-            @event.ImageUrl,
+            fileStorage.GetEventImageUrl(@event),
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt,

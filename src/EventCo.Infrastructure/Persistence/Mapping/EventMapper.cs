@@ -14,7 +14,7 @@ internal static class EventMapper
             EventItem.Reconstitute(t.Id, t.EventId, t.Title, t.Quantity, t.AssignedToUserId, t.CreatedByUserId, t.CreatedAt));
 
         return Event.Reconstitute(
-            entity.Id, entity.Title, entity.Description, entity.EventDate, entity.Location, entity.ImageUrl, entity.InviteLinkToken,
+            entity.Id, entity.Title, entity.Description, entity.EventDate, entity.Location, entity.ImageStorageKey, entity.InviteLinkToken,
             entity.CreatedByUserId, entity.Status, entity.CreatedAt, participants, items);
     }
 
@@ -27,7 +27,7 @@ internal static class EventMapper
             Description = domain.Description,
             EventDate = domain.EventDate,
             Location = domain.Location,
-            ImageUrl = domain.ImageUrl,
+            ImageStorageKey = domain.ImageStorageKey,
             InviteLinkToken = domain.InviteLinkToken,
             CreatedByUserId = domain.CreatedByUserId,
             Status = domain.Status,

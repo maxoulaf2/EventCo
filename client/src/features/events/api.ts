@@ -52,3 +52,13 @@ export function getEventInvitePreview(token: string): Promise<EventInvitePreview
 export function joinEventViaInviteLink(token: string): Promise<{ eventId: string }> {
   return apiFetch(`/api/events/invite-links/${token}/join`, { method: 'POST' })
 }
+
+export function updateEventImage(eventId: string, image: Blob): Promise<{ eventId: string; imageUrl: string }> {
+  const formData = new FormData()
+  formData.append('file', image, 'image.jpg')
+
+  return apiFetch(`/api/events/${eventId}/image`, {
+    method: 'PUT',
+    body: formData,
+  })
+}

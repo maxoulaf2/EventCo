@@ -1,3 +1,4 @@
+using EventCo.Application.Common.Images;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
 
@@ -15,14 +16,14 @@ public sealed class UpdateAvatarCommandHandler(
         var user = await userRepository.GetByIdAsync(currentUserService.UserId!.Value, cancellationToken);
 
         // Format garanti non nul par UpdateAvatarCommandValidator.
-        var format = AvatarImageFormat.Detect(request.Content)!;
+        var format = ImageFormat.Detect(request.Content)!;
 
         // Nouvelle clé à chaque changement (jamais d'écrasement) : l'URL change, ce qui contourne les
         // caches navigateur/CDN d'un fichier servi publiquement sous une URL stable.
-        var key = $"avatars/{user!.Id:N}/{Guid.NewGuid():N}.{format.Extension}";
+        var key = $"{user!.Id:N}/{Guid.NewGuid():N}.{format.Extension}";
         var previousKey = user.AvatarStorageKey;
 
-        await fileStorage.UploadAsync(key, request.Content, format.ContentType, cancellationToken);
+        await fileStorage.UploadAsync(FileStorageBucket.Avatars, key, request.Content, format.ContentType, cancellationToken);
 
         user.ChangeAvatar(key);
         await userRepository.ApplyAsync(user, cancellationToken);
@@ -31,7 +32,7 @@ public sealed class UpdateAvatarCommandHandler(
         // celle-ci échouait, l'ancien avatar référencé en base serait perdu — cas jugé assez rare pour ne
         // pas justifier un mécanisme de nettoyage différé.
         if (previousKey is not null)
-            await fileStorage.DeleteAsync(previousKey, cancellationToken);
+            await fileStorage.DeleteAsync(FileStorageBucket.Avatars, previousKey, cancellationToken);
 
         return new UpdateAvatarResult(user.Id, user.Email.Value, user.DisplayName, user.IsAdmin, fileStorage.GetAvatarUrl(user));
     }

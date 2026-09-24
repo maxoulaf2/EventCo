@@ -1,3 +1,4 @@
+using EventCo.Application.Common.Images;
 using FluentValidation;
 
 namespace EventCo.Application.Auth.UpdateAvatar;
@@ -19,7 +20,7 @@ public sealed class UpdateAvatarCommandValidator : AbstractValidator<UpdateAvata
             .WithMessage("L'image ne doit pas dépasser 2 Mo.");
 
         RuleFor(x => x.Content)
-            .Must(content => AvatarImageFormat.Detect(content) is not null)
+            .Must(content => ImageFormat.Detect(content) is not null)
             .When(x => x.Content.Length > 0)
             .WithMessage("Format d'image non supporté (JPEG, PNG ou WebP attendu).");
     }

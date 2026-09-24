@@ -3,6 +3,7 @@ using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.DeleteEvent;
 using EventCo.Application.Events.GetEventById;
+using EventCo.Application.Events.UpdateEventImage;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
 using EventCo.Domain.Events.Exceptions;
@@ -17,6 +18,7 @@ public sealed class DeleteEventSteps
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly DateTime _now = new(2026, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+    private readonly InMemoryFileStorage _fileStorage = new();
 
     private Guid? _existingEventId;
     private Exception? _thrownException;
@@ -28,6 +30,7 @@ public sealed class DeleteEventSteps
         builder.Services.AddScoped<IEventRepository, EventRepository>();
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddSingleton<IDateTimeProvider>(new FixedDateTimeProvider(_now));
+        builder.Services.AddSingleton<IFileStorage>(_fileStorage);
         builder.Services.AddScoped<ICurrentUserService>(_ => new CurrentUserContextService(currentUserContext));
 
         _serviceProvider = builder.Build();
@@ -42,6 +45,14 @@ public sealed class DeleteEventSteps
             CancellationToken.None);
 
         _existingEventId = createResult.EventId;
+    }
+
+    [Given(@"cet événement à supprimer a une image de présentation")]
+    public async Task EtantDonneCetEvenementASupprimerAUneImageDePresentation()
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+
+        await dispatcher.Send(new UpdateEventImageCommand(_existingEventId!.Value, TestImages.Png), CancellationToken.None);
     }
 
     [When(@"je supprime cet événement")]
@@ -83,4 +94,7 @@ public sealed class DeleteEventSteps
         await Assert.ThrowsAsync<EventNotFoundException>(
             () => dispatcher.Send(new GetEventByIdQuery(_existingEventId!.Value), CancellationToken.None));
     }
+
+    [Then(@"l'image de présentation de l'événement supprimé a été retirée du stockage")]
+    public void AlorsLimageDePresentationDeLevenementSupprimeAEteRetireeDuStockage() => Assert.Empty(_fileStorage.Files);
 }

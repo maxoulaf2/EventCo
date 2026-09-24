@@ -1,6 +1,6 @@
 namespace EventCo.Api.Tests.Support;
 
-// Contenus minimaux reconnus par AvatarImageFormat (signature en tête de fichier) : le format n'est
+// Contenus minimaux reconnus par ImageFormat (signature en tête de fichier) : le format n'est
 // détecté que sur ces premiers octets, le reste du fichier n'est jamais décodé côté serveur.
 public static class TestImages
 {

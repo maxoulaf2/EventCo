@@ -42,7 +42,7 @@ public sealed class GetAllEventsSteps
     [Given(@"un événement ""(.*)"" organisé par un autre utilisateur")]
     public async Task EtantDonneUnEvenementOrganiseParUnAutreUtilisateur(string title)
     {
-        var @event = Event.Create(title, null, _now.AddDays(1), null, null, Guid.NewGuid().ToString("N"), Guid.NewGuid(), _now);
+        var @event = Event.Create(title, null, _now.AddDays(1), null, Guid.NewGuid().ToString("N"), Guid.NewGuid(), _now);
         _dbContext.Events.Add(EventMapper.ToEntity(@event));
         await _dbContext.SaveChangesAsync();
     }

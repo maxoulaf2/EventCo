@@ -20,7 +20,6 @@ public sealed class CreateEventCommandHandler(
             request.Description,
             request.EventDate,
             request.Location,
-            request.ImageUrl,
             inviteLinkToken,
             currentUserService.UserId!.Value,
             now);
@@ -33,7 +32,7 @@ public sealed class CreateEventCommandHandler(
             @event.Description,
             @event.EventDate,
             @event.Location,
-            @event.ImageUrl,
+            ImageUrl: null, // ajoutée après création, cf. UpdateEventImage
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt);

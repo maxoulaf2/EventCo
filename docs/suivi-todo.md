@@ -126,6 +126,11 @@
   > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur, traitée avant les autres tâches de ce lot. Neon Object Storage : bucket `public_read`, 5 Go sur le plan gratuit.
   > Reste une action manuelle du développeur : création du bucket et des clés dans Neon, variables `Storage__S3__*` dans Render (CLAUDE.md § Déploiement, étape 10), puis vérification en production.
   > Référence visuelle de la modale de compte (`apparence-tableau-de-bord.feature`, scénario « Modale de mon compte ouverte depuis le tableau de bord ») devenue obsolète (bloc photo de profil ajouté) — à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.
+- [x] Image de présentation d'un événement : envoi d'un fichier par l'utilisateur à la création (`PUT /api/events/{id}/image`, multipart), stocké dans un bucket dédié (distinct de celui des avatars), en remplacement du lien saisi (`Event.ImageUrl` → `Event.ImageStorageKey`)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur. Revient sur la décision du 2026-09-18 (« pas d'upload de fichier ») ; la portée reste limitée à la création côté frontend (pas d'édition post-création), même si l'endpoint accepte aussi un remplacement.
+  > Migration `ReplaceEventImageUrlWithImageStorageKey` : **les liens d'image déjà saisis en production sont abandonnés** (les événements concernés n'ont plus d'image).
+  > Reste une action manuelle du développeur : créer le second bucket dans Neon et renommer/ajouter les variables Render (`Storage__S3__BucketName` devient `Storage__S3__Buckets__Avatars__Name`, nouvelle `Storage__S3__Buckets__EventImages__Name`), cf. CLAUDE.md § Déploiement, étape 10.
+  > Référence visuelle du formulaire de création (`apparence-creation-evenement.feature`) devenue obsolète (champ URL remplacé par un bouton de choix d'image) — à régénérer via le workflow GitHub Actions `update-visual-baselines`.
 - [ ] Sondage de date/lieu (vote entre plusieurs options)
 - [ ] Budget partagé (suivi des dépenses, calcul des remboursements)
 - [ ] Templates d'événements pré-remplis

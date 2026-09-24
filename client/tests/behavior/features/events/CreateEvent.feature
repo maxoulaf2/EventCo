@@ -17,8 +17,31 @@ Fonctionnalité: Création d'un événement
     Et je reste sur la page de création d'événement
 
   Scénario: Création avec une image
-    Quand je saisis le titre "Repas de Noël", la date "2026-12-24" et l'image "https://example.com/photo.jpg" puis je valide le formulaire
-    Alors la requête de création envoyée au serveur contient l'image "https://example.com/photo.jpg"
+    Quand je saisis le titre "Repas de Noël" et la date "2026-12-24"
+    Et je choisis une image pour l'événement
+    Alors je vois l'aperçu de l'image choisie
+    Quand je valide le formulaire
+    Alors l'image est envoyée pour l'événement créé
+    Et je suis redirigé vers le tableau de bord
+
+  Scénario: Image retirée avant la création
+    Quand je saisis le titre "Repas de Noël" et la date "2026-12-24"
+    Et je choisis une image pour l'événement
+    Et je retire l'image choisie
+    Et je valide le formulaire
+    Alors aucune image n'est envoyée
+    Et je suis redirigé vers le tableau de bord
+
+  Scénario: Le serveur refuse l'image après la création de l'événement
+    Etant donné que le serveur refusera la prochaine image d'événement
+    Quand je saisis le titre "Repas de Noël" et la date "2026-12-24"
+    Et je choisis une image pour l'événement
+    Et je valide le formulaire
+    Alors je vois que l'événement a été créé mais pas son image
+    Quand je valide le formulaire
+    Alors l'image est envoyée pour l'événement créé
+    Et l'événement n'a été créé qu'une seule fois
+    Et je suis redirigé vers le tableau de bord
 
   # Date et heure saisies en heure locale (Europe/Paris dans les tests), envoyées au serveur en UTC.
   Scénario: Création avec une heure précisée

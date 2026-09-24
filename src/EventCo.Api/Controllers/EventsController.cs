@@ -17,6 +17,7 @@ using EventCo.Application.Events.RegenerateEventInviteLink;
 using EventCo.Application.Events.SetParticipationStatus;
 using EventCo.Application.Events.UnassignItem;
 using EventCo.Application.Events.UpdateEvent;
+using EventCo.Application.Events.UpdateEventImage;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,7 +49,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> Create(CreateEventRequest request, CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(
-            new CreateEventCommand(request.Title, request.Description, request.EventDate, request.Location, request.ImageUrl),
+            new CreateEventCommand(request.Title, request.Description, request.EventDate, request.Location),
             cancellationToken);
 
         var response = new EventResponse(
@@ -138,6 +139,21 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.CreatedAt);
 
         return Ok(response);
+    }
+
+    // multipart/form-data, champ "file" (cf. AuthController.UpdateAvatar). Taille et format validés par
+    // UpdateEventImageCommandValidator ; la limite de requête ci-dessous (marge pour l'enveloppe multipart)
+    // coupe court avant de charger en mémoire un fichier manifestement trop gros.
+    [HttpPut("{id:guid}/image")]
+    [RequestSizeLimit(UpdateEventImageCommandValidator.MaxContentBytes + 64 * 1024)]
+    public async Task<IActionResult> UpdateImage(Guid id, IFormFile file, CancellationToken cancellationToken)
+    {
+        using var content = new MemoryStream();
+        await file.CopyToAsync(content, cancellationToken);
+
+        var result = await commandDispatcher.Send(new UpdateEventImageCommand(id, content.ToArray()), cancellationToken);
+
+        return Ok(new EventImageResponse(result.EventId, result.ImageUrl));
     }
 
     [HttpDelete("{id:guid}")]

@@ -9,7 +9,7 @@ public class EventTests
     private static Event CreateEvent(out Guid creatorId)
     {
         creatorId = Guid.NewGuid();
-        return Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", null, "invite-token", creatorId, DateTime.UtcNow);
+        return Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", "invite-token", creatorId, DateTime.UtcNow);
     }
 
     [Fact]
@@ -27,23 +27,59 @@ public class EventTests
     [Fact]
     public void Create_EmptyTitle_ThrowsEventTitleEmptyException()
     {
-        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, null, "invite-token", Guid.NewGuid(), DateTime.UtcNow));
+        Assert.Throws<EventTitleEmptyException>(() => Event.Create(" ", null, DateTime.UtcNow, null, "invite-token", Guid.NewGuid(), DateTime.UtcNow));
     }
 
     [Fact]
-    public void Create_NoImageUrl_ImageUrlIsNull()
+    public void Create_HasNoImage()
     {
         var @event = CreateEvent(out _);
 
-        Assert.Null(@event.ImageUrl);
+        Assert.Null(@event.ImageStorageKey);
     }
 
     [Fact]
-    public void Create_WithImageUrl_ImageUrlIsSet()
+    public void ChangeImage_ActingUserIsCreator_SetsImageStorageKeyAndRaisesDomainEvent()
     {
-        var @event = Event.Create("Repas de Noël", "Chez Alice", DateTime.UtcNow.AddDays(30), "Paris", "https://example.com/photo.jpg", "invite-token", Guid.NewGuid(), DateTime.UtcNow);
+        var @event = CreateEvent(out var creatorId);
+        @event.ClearDomainEvents();
 
-        Assert.Equal("https://example.com/photo.jpg", @event.ImageUrl);
+        @event.ChangeImage(creatorId, "event/photo.jpg");
+
+        Assert.Equal("event/photo.jpg", @event.ImageStorageKey);
+        Assert.Contains(@event.DomainEvents, e => e is EventImageChangedDomainEvent);
+    }
+
+    [Fact]
+    public void ChangeImage_ActingUserIsOrganizer_SetsImageStorageKey()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var organizerId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, organizerId, DateTime.UtcNow);
+        @event.PromoteToOrganizer(creatorId, organizerId);
+
+        @event.ChangeImage(organizerId, "event/photo.jpg");
+
+        Assert.Equal("event/photo.jpg", @event.ImageStorageKey);
+    }
+
+    [Fact]
+    public void ChangeImage_ActingUserNotCreatorNorOrganizer_ThrowsUserNotEventOrganizerException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var invitedUserId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, invitedUserId, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventOrganizerException>(() => @event.ChangeImage(invitedUserId, "event/photo.jpg"));
+        Assert.Null(@event.ImageStorageKey);
+    }
+
+    [Fact]
+    public void ChangeImage_EmptyKey_ThrowsArgumentException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<ArgumentException>(() => @event.ChangeImage(creatorId, " "));
     }
 
     [Fact]

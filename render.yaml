@@ -31,13 +31,15 @@ services:
         sync: false
       - key: Email__Smtp__Password
         sync: false
-      # Neon Object Storage (bucket public_read) — sans ces variables, fallback disque local, effacé à
-      # chaque déploiement.
+      # Neon Object Storage (un bucket public_read par usage) — sans ces variables, fallback disque local,
+      # effacé à chaque déploiement.
       - key: Storage__S3__ServiceUrl
         sync: false
       - key: Storage__S3__Region
         sync: false
-      - key: Storage__S3__BucketName
+      - key: Storage__S3__Buckets__Avatars__Name
+        sync: false
+      - key: Storage__S3__Buckets__EventImages__Name
         sync: false
       - key: Storage__S3__AccessKeyId
         sync: false

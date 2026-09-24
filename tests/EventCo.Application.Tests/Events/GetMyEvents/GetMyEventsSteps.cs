@@ -47,7 +47,7 @@ public sealed class GetMyEventsSteps
     [Given(@"un événement ""(.*)"" créé par un autre utilisateur auquel je ne participe pas")]
     public async Task EtantDonneUnEvenementCreeParUnAutreUtilisateurAuquelJeNeParticipePas(string title)
     {
-        var @event = Event.Create(title, null, _now.AddDays(1), null, null, Guid.NewGuid().ToString("N"), Guid.NewGuid(), _now);
+        var @event = Event.Create(title, null, _now.AddDays(1), null, Guid.NewGuid().ToString("N"), Guid.NewGuid(), _now);
         _dbContext.Events.Add(EventMapper.ToEntity(@event));
         await _dbContext.SaveChangesAsync();
     }
@@ -56,7 +56,7 @@ public sealed class GetMyEventsSteps
     public async Task EtantDonneUnEvenementCreeParUnAutreUtilisateurQuiMyAInvite(string title)
     {
         var creatorId = Guid.NewGuid();
-        var @event = Event.Create(title, null, _now.AddDays(1), null, null, Guid.NewGuid().ToString("N"), creatorId, _now);
+        var @event = Event.Create(title, null, _now.AddDays(1), null, Guid.NewGuid().ToString("N"), creatorId, _now);
         @event.InviteParticipant(creatorId, _currentUserId, _now);
         _dbContext.Events.Add(EventMapper.ToEntity(@event));
         await _dbContext.SaveChangesAsync();

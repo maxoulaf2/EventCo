@@ -98,8 +98,9 @@ public sealed class UpdateAvatarSteps
     [Then(@"ma photo de profil est accessible à une URL publique")]
     public void AlorsMaPhotoDeProfilEstAccessibleAUneUrlPublique()
     {
-        var key = Assert.Single(_fileStorage.Files.Keys);
-        Assert.Equal(_fileStorage.GetPublicUrl(key), _lastResult!.AvatarUrl);
+        var location = Assert.Single(_fileStorage.Files.Keys);
+        Assert.Equal(FileStorageBucket.Avatars, location.Bucket);
+        Assert.Equal(_fileStorage.GetPublicUrl(location.Bucket, location.Key), _lastResult!.AvatarUrl);
     }
 
     [Then(@"ma photo de profil a changé d'URL")]

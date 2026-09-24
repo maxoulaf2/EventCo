@@ -4,7 +4,10 @@ using EventCo.Domain.Events.Exceptions;
 
 namespace EventCo.Application.Events.UpdateEvent;
 
-public sealed class UpdateEventCommandHandler(ICurrentUserService currentUserService, IEventRepository eventRepository)
+public sealed class UpdateEventCommandHandler(
+    ICurrentUserService currentUserService,
+    IEventRepository eventRepository,
+    IFileStorage fileStorage)
     : ICommandHandler<UpdateEventCommand, UpdateEventResult>
 {
     public async Task<UpdateEventResult> Handle(UpdateEventCommand request, CancellationToken cancellationToken)
@@ -22,7 +25,7 @@ public sealed class UpdateEventCommandHandler(ICurrentUserService currentUserSer
             @event.Description,
             @event.EventDate,
             @event.Location,
-            @event.ImageUrl,
+            fileStorage.GetEventImageUrl(@event),
             @event.CreatedByUserId,
             @event.Status.ToString(),
             @event.CreatedAt);

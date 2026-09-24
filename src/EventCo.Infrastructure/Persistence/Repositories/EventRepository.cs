@@ -25,6 +25,9 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case EventStatusChangedDomainEvent:
                     await UpdateEventStatus(@event, cancellationToken);
                     break;
+                case EventImageChangedDomainEvent:
+                    await UpdateEventImage(@event, cancellationToken);
+                    break;
                 case EventInviteLinkRegeneratedDomainEvent:
                     await UpdateEventInviteLink(@event, cancellationToken);
                     break;
@@ -80,6 +83,12 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entity = await FindEventEntityAsync(@event.Id, cancellationToken);
         entity.Status = @event.Status;
+    }
+
+    private async Task UpdateEventImage(Event @event, CancellationToken cancellationToken)
+    {
+        var entity = await FindEventEntityAsync(@event.Id, cancellationToken);
+        entity.ImageStorageKey = @event.ImageStorageKey;
     }
 
     private async Task UpdateEventInviteLink(Event @event, CancellationToken cancellationToken)
