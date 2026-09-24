@@ -8,7 +8,8 @@ namespace EventCo.Application.Events.GetEventById;
 public sealed class GetEventByIdQueryHandler(
     ICurrentUserService currentUserService,
     IEventRepository eventRepository,
-    IUserRepository userRepository)
+    IUserRepository userRepository,
+    IFileStorage fileStorage)
     : ICommandHandler<GetEventByIdQuery, GetEventByIdResult>
 {
     public async Task<GetEventByIdResult> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
@@ -38,7 +39,8 @@ public sealed class GetEventByIdQueryHandler(
                     user.DisplayName,
                     participant.Role.ToString(),
                     participant.InvitedAt,
-                    participant.ParticipationStatus.ToString());
+                    participant.ParticipationStatus.ToString(),
+                    fileStorage.GetAvatarUrl(user));
             })
             .ToList();
 

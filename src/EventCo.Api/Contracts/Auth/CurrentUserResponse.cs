@@ -1,3 +1,3 @@
 namespace EventCo.Api.Contracts.Auth;
 
-public sealed record CurrentUserResponse(Guid UserId, string Email, string DisplayName, bool IsAdmin);
+public sealed record CurrentUserResponse(Guid UserId, string Email, string DisplayName, bool IsAdmin, string? AvatarUrl);

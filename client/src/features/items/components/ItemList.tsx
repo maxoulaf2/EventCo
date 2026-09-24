@@ -44,8 +44,8 @@ export function ItemList({
     return canManageAllItems || item.assignedToUserId === currentUserId
   }
 
-  function participantName(userId: string | null) {
-    return participants.find((p) => p.userId === userId)?.displayName ?? '?'
+  function participantOf(userId: string | null) {
+    return participants.find((p) => p.userId === userId)
   }
 
   return (
@@ -118,7 +118,11 @@ export function ItemList({
                           )}
                           {!showAssign && item.assignedToUserId && (
                             <div className="flex shrink-0 items-center gap-2">
-                              <Avatar name={participantName(item.assignedToUserId)} size="sm" />
+                              <Avatar
+                                name={participantOf(item.assignedToUserId)?.displayName ?? '?'}
+                                imageUrl={participantOf(item.assignedToUserId)?.avatarUrl}
+                                size="sm"
+                              />
                               {canUnassign(item) && (
                                 <button
                                   type="button"

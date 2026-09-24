@@ -35,11 +35,15 @@ export async function apiFetch<TResponse = undefined>(
   path: string,
   options: RequestInit = {},
 ): Promise<TResponse> {
+  // Pour un FormData (upload de fichier), le navigateur doit poser lui-même le Content-Type
+  // multipart/form-data, qui porte le délimiteur (boundary) des parties.
+  const isFormData = options.body instanceof FormData
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...options.headers,
     },
   })

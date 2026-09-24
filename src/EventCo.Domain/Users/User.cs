@@ -9,7 +9,9 @@ public class User : Entity
 {
     public Email Email { get; private set; } = null!;
     public string DisplayName { get; private set; } = null!;
-    public string? AvatarUrl { get; private set; }
+    // Clé de l'objet dans le stockage de fichiers (cf. IFileStorage côté Application), pas une URL :
+    // l'URL publique dépend de l'infrastructure (bucket, endpoint) et est résolue à la lecture.
+    public string? AvatarStorageKey { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     // Attribué uniquement en base (aucun use case ne le modifie) : donne un accès en lecture seule à tous
@@ -33,16 +35,35 @@ public class User : Entity
         return user;
     }
 
-    internal static User Reconstitute(Guid id, Email email, string displayName, string? avatarUrl, DateTime createdAt, bool isAdmin) =>
-        new(id, email, displayName, createdAt) { AvatarUrl = avatarUrl, IsAdmin = isAdmin };
+    internal static User Reconstitute(Guid id, Email email, string displayName, string? avatarStorageKey, DateTime createdAt, bool isAdmin) =>
+        new(id, email, displayName, createdAt) { AvatarStorageKey = avatarStorageKey, IsAdmin = isAdmin };
 
-    public void UpdateProfile(string displayName, string? avatarUrl)
+    public void UpdateProfile(string displayName)
     {
         if (string.IsNullOrWhiteSpace(displayName))
             throw new UserDisplayNameEmptyException(Id);
 
         DisplayName = displayName.Trim();
-        AvatarUrl = avatarUrl;
+        AddDomainEvent(new UserProfileUpdatedDomainEvent(Id));
+    }
+
+    // Clé générée par le use case (jamais saisie par l'utilisateur) : une clé vide est une erreur de
+    // programmation, pas une règle métier violée.
+    public void ChangeAvatar(string avatarStorageKey)
+    {
+        if (string.IsNullOrWhiteSpace(avatarStorageKey))
+            throw new ArgumentException("La clé de stockage de l'avatar est obligatoire.", nameof(avatarStorageKey));
+
+        AvatarStorageKey = avatarStorageKey;
+        AddDomainEvent(new UserProfileUpdatedDomainEvent(Id));
+    }
+
+    public void RemoveAvatar()
+    {
+        if (AvatarStorageKey is null)
+            return;
+
+        AvatarStorageKey = null;
         AddDomainEvent(new UserProfileUpdatedDomainEvent(Id));
     }
 }

@@ -7,16 +7,17 @@ namespace EventCo.Application.Auth.UpdateProfile;
 // jamais atteint pour une requête non authentifiée.
 public sealed class UpdateProfileCommandHandler(
     ICurrentUserService currentUserService,
-    IUserRepository userRepository) : ICommandHandler<UpdateProfileCommand, UpdateProfileResult>
+    IUserRepository userRepository,
+    IFileStorage fileStorage) : ICommandHandler<UpdateProfileCommand, UpdateProfileResult>
 {
     public async Task<UpdateProfileResult> Handle(UpdateProfileCommand request, CancellationToken cancellationToken)
     {
         var user = await userRepository.GetByIdAsync(currentUserService.UserId!.Value, cancellationToken);
 
-        user!.UpdateProfile(request.DisplayName, user.AvatarUrl);
+        user!.UpdateProfile(request.DisplayName);
 
         await userRepository.ApplyAsync(user, cancellationToken);
 
-        return new UpdateProfileResult(user.Id, user.Email.Value, user.DisplayName, user.IsAdmin);
+        return new UpdateProfileResult(user.Id, user.Email.Value, user.DisplayName, user.IsAdmin, fileStorage.GetAvatarUrl(user));
     }
 }

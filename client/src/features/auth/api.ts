@@ -29,3 +29,17 @@ export function updateProfile(displayName: string): Promise<CurrentUser> {
     body: JSON.stringify({ displayName }),
   })
 }
+
+export function updateAvatar(image: Blob): Promise<CurrentUser> {
+  const formData = new FormData()
+  formData.append('file', image, 'avatar.jpg')
+
+  return apiFetch<CurrentUser>('/api/auth/me/avatar', {
+    method: 'PUT',
+    body: formData,
+  })
+}
+
+export function removeAvatar(): Promise<CurrentUser> {
+  return apiFetch<CurrentUser>('/api/auth/me/avatar', { method: 'DELETE' })
+}

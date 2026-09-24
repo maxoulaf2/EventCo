@@ -7,4 +7,5 @@ public sealed record EventParticipantResponse(
     string DisplayName,
     string Role,
     DateTime InvitedAt,
-    string ParticipationStatus);
+    string ParticipationStatus,
+    string? AvatarUrl);

@@ -25,6 +25,10 @@ public sealed class ApplicationTestHostBuilder
         _services.AddSingleton<IEmailSender>(new RecordingEmailSender());
         _services.AddSingleton(Options.Create(new InvitationOptions()));
         _services.AddSingleton(Options.Create(new FrontendOptions { BaseUrl = "http://localhost:5173" }));
+
+        // Dépendance de toute query/command qui expose la photo de profil d'un utilisateur (utilisateur
+        // courant, participants d'un événement...) : surchargeable par les Steps qui observent le stockage.
+        _services.AddSingleton<IFileStorage>(new InMemoryFileStorage());
     }
 
     public IServiceCollection Services => _services;

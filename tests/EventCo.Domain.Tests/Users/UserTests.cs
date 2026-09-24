@@ -1,4 +1,5 @@
 using EventCo.Domain.Users;
+using EventCo.Domain.Users.DomainEvents;
 using EventCo.Domain.Users.Exceptions;
 using EventCo.Domain.ValueObjects;
 
@@ -15,7 +16,7 @@ public class UserTests
 
         Assert.Equal(email, user.Email);
         Assert.Equal("Alice", user.DisplayName);
-        Assert.Null(user.AvatarUrl);
+        Assert.Null(user.AvatarStorageKey);
         Assert.NotEqual(Guid.Empty, user.Id);
     }
 
@@ -36,14 +37,13 @@ public class UserTests
     }
 
     [Fact]
-    public void UpdateProfile_ValidData_UpdatesDisplayNameAndAvatar()
+    public void UpdateProfile_ValidData_UpdatesDisplayName()
     {
         var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
 
-        user.UpdateProfile("Alice B.", "https://example.com/avatar.png");
+        user.UpdateProfile("Alice B.");
 
         Assert.Equal("Alice B.", user.DisplayName);
-        Assert.Equal("https://example.com/avatar.png", user.AvatarUrl);
     }
 
     [Fact]
@@ -51,6 +51,48 @@ public class UserTests
     {
         var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
 
-        Assert.Throws<UserDisplayNameEmptyException>(() => user.UpdateProfile("  ", null));
+        Assert.Throws<UserDisplayNameEmptyException>(() => user.UpdateProfile("  "));
+    }
+
+    [Fact]
+    public void ChangeAvatar_ValidKey_SetsAvatarStorageKeyAndRaisesProfileUpdated()
+    {
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
+        user.ClearDomainEvents();
+
+        user.ChangeAvatar("avatars/alice/photo.jpg");
+
+        Assert.Equal("avatars/alice/photo.jpg", user.AvatarStorageKey);
+        Assert.IsType<UserProfileUpdatedDomainEvent>(Assert.Single(user.DomainEvents));
+    }
+
+    [Fact]
+    public void ChangeAvatar_EmptyKey_ThrowsArgumentException()
+    {
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
+
+        Assert.Throws<ArgumentException>(() => user.ChangeAvatar(" "));
+    }
+
+    [Fact]
+    public void RemoveAvatar_WithAvatar_ClearsAvatarStorageKey()
+    {
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
+        user.ChangeAvatar("avatars/alice/photo.jpg");
+
+        user.RemoveAvatar();
+
+        Assert.Null(user.AvatarStorageKey);
+    }
+
+    [Fact]
+    public void RemoveAvatar_WithoutAvatar_RaisesNoDomainEvent()
+    {
+        var user = User.Create(Email.From("test@example.com"), "Alice", DateTime.UtcNow);
+        user.ClearDomainEvents();
+
+        user.RemoveAvatar();
+
+        Assert.Empty(user.DomainEvents);
     }
 }

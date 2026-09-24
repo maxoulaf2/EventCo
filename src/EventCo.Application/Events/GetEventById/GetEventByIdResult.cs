@@ -19,4 +19,5 @@ public sealed record EventParticipantSummary(
     string DisplayName,
     string Role,
     DateTime InvitedAt,
-    string ParticipationStatus);
+    string ParticipationStatus,
+    string? AvatarUrl);

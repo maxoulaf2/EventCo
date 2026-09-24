@@ -22,6 +22,7 @@ export const handlers = [
       email: 'test@example.com',
       displayName: 'Test',
       isAdmin: false,
+      avatarUrl: null,
     }),
   ),
 
@@ -32,8 +33,29 @@ export const handlers = [
       email: 'test@example.com',
       displayName: body.displayName,
       isAdmin: false,
+      avatarUrl: null,
     })
   }),
+
+  http.put('*/api/auth/me/avatar', () =>
+    HttpResponse.json({
+      userId: 'user-1',
+      email: 'test@example.com',
+      displayName: 'Test',
+      isAdmin: false,
+      avatarUrl: '/uploads/avatars/user-1/avatar-1.jpg',
+    }),
+  ),
+
+  http.delete('*/api/auth/me/avatar', () =>
+    HttpResponse.json({
+      userId: 'user-1',
+      email: 'test@example.com',
+      displayName: 'Test',
+      isAdmin: false,
+      avatarUrl: null,
+    }),
+  ),
 
   http.post('*/api/auth/logout', () => new HttpResponse(null, { status: 204 })),
 
@@ -94,6 +116,7 @@ export const handlers = [
           role: 'Organizer',
           invitedAt: '2026-09-01T00:00:00Z',
           participationStatus: 'Attending',
+          avatarUrl: null,
         },
         {
           userId: 'user-2',
@@ -102,6 +125,7 @@ export const handlers = [
           role: 'Participant',
           invitedAt: '2026-09-02T00:00:00Z',
           participationStatus: 'Unknown',
+          avatarUrl: null,
         },
       ],
       inviteLinkToken: 'invite-token-1',

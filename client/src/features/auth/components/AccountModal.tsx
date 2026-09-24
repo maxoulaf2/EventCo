@@ -2,6 +2,7 @@ import { Modal } from '../../../shared/components/Modal'
 import { btnSecondary } from '../../../shared/lib/ui'
 import { useCurrentUser } from '../hooks/useCurrentUser'
 import { useLogout } from '../hooks/useLogout'
+import { UpdateAvatarForm } from './UpdateAvatarForm'
 import { UpdateDisplayNameForm } from './UpdateDisplayNameForm'
 
 interface AccountModalProps {
@@ -16,6 +17,7 @@ export function AccountModal({ open, onClose }: AccountModalProps) {
   return (
     <Modal open={open} onClose={onClose} title="Mon compte" testId="account-modal">
       <div className="flex flex-col gap-5">
+        {currentUser && <UpdateAvatarForm currentUser={currentUser} />}
         {currentUser && <UpdateDisplayNameForm currentDisplayName={currentUser.displayName} />}
         <button
           type="button"

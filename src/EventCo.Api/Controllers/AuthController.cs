@@ -1,7 +1,9 @@
 using EventCo.Api.Auth;
 using EventCo.Api.Contracts.Auth;
 using EventCo.Application.Auth.GetCurrentUser;
+using EventCo.Application.Auth.RemoveAvatar;
 using EventCo.Application.Auth.RequestLoginCode;
+using EventCo.Application.Auth.UpdateAvatar;
 using EventCo.Application.Auth.UpdateProfile;
 using EventCo.Application.Auth.VerifyLoginCode;
 using EventCo.Application.Common.Messaging;
@@ -57,7 +59,7 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     {
         var result = await commandDispatcher.Send(new GetCurrentUserQuery(), cancellationToken);
 
-        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin));
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin, result.AvatarUrl));
     }
 
     [Authorize]
@@ -66,7 +68,32 @@ public sealed class AuthController(ICommandDispatcher commandDispatcher, IHostEn
     {
         var result = await commandDispatcher.Send(new UpdateProfileCommand(request.DisplayName), cancellationToken);
 
-        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin));
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin, result.AvatarUrl));
+    }
+
+    // multipart/form-data, champ "file". Taille et format validés par UpdateAvatarCommandValidator ;
+    // la limite de requête ci-dessous (marge pour l'enveloppe multipart) coupe court avant de charger en
+    // mémoire un fichier manifestement trop gros.
+    [Authorize]
+    [HttpPut("me/avatar")]
+    [RequestSizeLimit(UpdateAvatarCommandValidator.MaxContentBytes + 64 * 1024)]
+    public async Task<IActionResult> UpdateAvatar(IFormFile file, CancellationToken cancellationToken)
+    {
+        using var content = new MemoryStream();
+        await file.CopyToAsync(content, cancellationToken);
+
+        var result = await commandDispatcher.Send(new UpdateAvatarCommand(content.ToArray()), cancellationToken);
+
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin, result.AvatarUrl));
+    }
+
+    [Authorize]
+    [HttpDelete("me/avatar")]
+    public async Task<IActionResult> RemoveAvatar(CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new RemoveAvatarCommand(), cancellationToken);
+
+        return Ok(new CurrentUserResponse(result.UserId, result.Email, result.DisplayName, result.IsAdmin, result.AvatarUrl));
     }
 
     // Le token de session est auto-porté (cf. SessionTokenService) : la déconnexion ne fait que

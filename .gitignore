@@ -64,3 +64,6 @@ client/node_modules/
 client/dist/
 client/.vite/
 *.local
+
+# Fichiers uploadés en dev (fallback LocalFileStorage quand aucun bucket S3 n'est configuré)
+src/EventCo.Api/uploads/

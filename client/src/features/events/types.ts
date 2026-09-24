@@ -30,6 +30,7 @@ export interface EventParticipant {
   role: ParticipantRole
   invitedAt: string
   participationStatus: ParticipationStatus
+  avatarUrl: string | null
 }
 
 export interface EventDetail {

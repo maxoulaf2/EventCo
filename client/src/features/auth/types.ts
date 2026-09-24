@@ -10,4 +10,5 @@ export interface CurrentUser {
   email: string
   displayName: string
   isAdmin: boolean
+  avatarUrl: string | null
 }

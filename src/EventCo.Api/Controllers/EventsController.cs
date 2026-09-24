@@ -87,7 +87,8 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
                 p.DisplayName,
                 p.Role,
                 p.InvitedAt,
-                p.ParticipationStatus)).ToList(),
+                p.ParticipationStatus,
+                p.AvatarUrl)).ToList(),
             result.InviteLinkToken);
 
         return Ok(response);
@@ -161,7 +162,8 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.DisplayName,
             result.Role,
             result.InvitedAt,
-            result.ParticipationStatus);
+            result.ParticipationStatus,
+            result.AvatarUrl);
 
         return Created($"api/events/{id}", response);
     }

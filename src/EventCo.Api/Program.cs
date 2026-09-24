@@ -4,7 +4,9 @@ using EventCo.Application;
 using EventCo.Application.Common.Interfaces;
 using EventCo.Infrastructure;
 using EventCo.Infrastructure.Realtime;
+using EventCo.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,6 +75,23 @@ app.UseAuthorization();
 
 // Health check pour Render (et autres PaaS) : doit répondre avant toute dépendance à la base/l'auth.
 app.MapGet("/health", () => Results.Ok());
+
+// Fallback de stockage sur disque (aucun bucket S3 configuré, cf. LocalFileStorage) : les fichiers sont
+// servis par l'API elle-même. Avec un bucket S3, ils sont lus directement dessus (URL publique).
+if (app.Services.GetRequiredService<IFileStorage>() is LocalFileStorage localFileStorage)
+{
+    if (!app.Environment.IsDevelopment())
+        app.Logger.LogWarning(
+            "Aucun bucket S3 configuré (Storage:S3:ServiceUrl) : fichiers stockés sur le disque local ({RootDirectory}), perdus à chaque redéploiement.",
+            localFileStorage.RootDirectory);
+
+    Directory.CreateDirectory(localFileStorage.RootDirectory);
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(localFileStorage.RootDirectory),
+        RequestPath = localFileStorage.RequestPath,
+    });
+}
 
 app.MapControllers();
 app.MapHub<EventHub>("/hubs/events");

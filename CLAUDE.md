@@ -73,7 +73,7 @@ dotnet user-secrets set "Email:Smtp:Password" "<password-mailtrap>" --project sr
 
 ## Déploiement (production)
 
-Architecture : un seul service **Render** (Docker) exécutant l'API, qui sert aussi le frontend buildé en statique (`wwwroot`, cf. `src/EventCo.Api/Dockerfile`) — same-origin, cohérent avec la décision déjà actée pour le dev (cf. `AuthController.cs`, `client/vite.config.ts`). Base de données **Neon** (PostgreSQL gratuit, ne s'auto-supprime pas). Email **Brevo** (SMTP gratuit, 300/jour, pas de domaine à vérifier). `render.yaml` décrit le service (Blueprint Render).
+Architecture : un seul service **Render** (Docker) exécutant l'API, qui sert aussi le frontend buildé en statique (`wwwroot`, cf. `src/EventCo.Api/Dockerfile`) — same-origin, cohérent avec la décision déjà actée pour le dev (cf. `AuthController.cs`, `client/vite.config.ts`). Base de données **Neon** (PostgreSQL gratuit, ne s'auto-supprime pas). Stockage des photos de profil **Neon Object Storage** (S3-compatible, 5 Go sur le plan gratuit, bucket `public_read` lu directement par le navigateur ; sans configuration, fallback sur le disque local de l'API, effacé à chaque déploiement Render). Email **Brevo** (SMTP gratuit, 300/jour, pas de domaine à vérifier). `render.yaml` décrit le service (Blueprint Render).
 
 Le déploiement est piloté par le job `deploy` de `.github/workflows/ci.yml` : après succès de tous les tests sur push `main`, il applique les migrations EF Core sur la base de prod puis déclenche le déploiement Render via son deploy hook (`autoDeploy: false` dans `render.yaml`, pour ne jamais déployer une version dont la migration aurait échoué).
 
@@ -88,11 +88,20 @@ Le déploiement est piloté par le job `deploy` de `.github/workflows/ci.yml` : 
    - `Frontend__BaseUrl` : URL du service Render (ex. `https://eventco.onrender.com`), utilisée dans les liens d'invitation envoyés par email
    - `Email__FromAddress` : adresse vérifiée dans Brevo
    - `Email__Smtp__Host`/`Username`/`Password` : identifiants SMTP Brevo (host `smtp-relay.brevo.com`)
+   - `Storage__S3__ServiceUrl`/`Region`/`BucketName`/`AccessKeyId`/`SecretAccessKey` : Neon Object Storage, cf. étape 10 ci-dessous
 5. Dans le dashboard Render, désactiver le déploiement auto sur push (déjà `autoDeploy: false` via le Blueprint, à vérifier) — le déploiement passe uniquement par le deploy hook, après migration réussie.
 6. Récupérer le **deploy hook** du service (Settings > Deploy Hook).
 7. Dans GitHub (Settings > Environments), créer un environment `production`, y ajouter les secrets `PRODUCTION_DB_CONNECTION_STRING` (même connection string Neon) et `RENDER_DEPLOY_HOOK_URL`.
 8. Dans GitHub (Settings > Secrets and variables > Actions > Variables), ajouter la variable de repo `RENDER_DEPLOY_ENABLED=true` pour activer le job `deploy` (reste inactif tant que cette variable n'existe pas, pour ne pas faire échouer la CI avant que le reste soit configuré).
 9. Pousser sur `main` (ou relancer le workflow) pour déclencher le premier déploiement, puis vérifier le parcours nominal en production (connexion par code, création d'événement, invitation avec envoi d'email réel).
+10. **Neon Object Storage** (photos de profil) : dans le projet Neon, branche de production > onglet *Object Storage* :
+    - créer un bucket (ex. `eventco-avatars`) avec l'accès **`public_read`** (non modifiable ensuite par l'API S3 : `PutBucketAcl`/`PutBucketPolicy` ne sont pas supportés) ;
+    - générer une clé d'accès S3 : `Access Key ID` (`nak_live_...`) et `Secret Access Key` (`nsk_live_...`), **affichées une seule fois** ;
+    - relever l'endpoint de la branche (`https://br-<branche>.storage.c-1.<région>.aws.neon.tech`) et sa région AWS (ex. `eu-central-1`, sans le préfixe `aws-` de Neon) ;
+    - renseigner dans Render `Storage__S3__ServiceUrl` (endpoint), `Storage__S3__Region`, `Storage__S3__BucketName`, `Storage__S3__AccessKeyId`, `Storage__S3__SecretAccessKey`, puis redéployer ;
+    - vérifier : ajout d'une photo depuis la modale « Mon compte », l'URL de l'image doit pointer vers `…aws.neon.tech/<bucket>/avatars/…`. Au démarrage, un avertissement `Aucun bucket S3 configuré` dans les logs Render signale une configuration manquante.
+
+    Le bucket est rattaché à une **branche** Neon : une branche de preview en hérite (copy-on-write) sans toucher aux fichiers de production.
 
 ### Attribuer le flag administrateur
 

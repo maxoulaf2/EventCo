@@ -19,6 +19,10 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
     // on substitue ce port externe par un double observable, comme pour Application.Tests.
     public RecordingEmailSender EmailSender { get; } = new();
 
+    // Aucun bucket S3 en test : c'est le fallback LocalFileStorage (réel, sur disque) qui est exercé, dans
+    // un dossier temporaire propre à ce run.
+    private readonly string _storageRootPath = Path.Combine(Path.GetTempPath(), $"eventco-api-tests-{Guid.NewGuid():N}");
+
     public async Task InitializeAsync()
     {
         await _postgres.StartAsync();
@@ -37,6 +41,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
             {
                 ["ConnectionStrings:Default"] = _postgres.GetConnectionString(),
                 ["Session:Secret"] = "api-tests-secret-simulant-un-secret-de-production",
+                ["Storage:Local:RootPath"] = _storageRootPath,
             });
         });
 
@@ -50,5 +55,8 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
     {
         await _postgres.DisposeAsync();
         await DisposeAsync();
+
+        if (Directory.Exists(_storageRootPath))
+            Directory.Delete(_storageRootPath, recursive: true);
     }
 }

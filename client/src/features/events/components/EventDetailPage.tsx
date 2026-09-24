@@ -106,7 +106,7 @@ export function EventDetailPage() {
         className="flex min-h-14 flex-wrap items-center gap-x-3 gap-y-2 rounded-[1.75rem] bg-surface px-3.5 py-2"
       >
         <div className="flex min-w-0 grow items-center gap-3">
-          <Avatar name={participant.displayName} />
+          <Avatar name={participant.displayName} imageUrl={participant.avatarUrl} />
           <div className="min-w-0">
             <div className="truncate text-[15px] font-semibold text-ink">{participant.displayName}</div>
             <div className="truncate text-[12.5px] text-ink/55">
@@ -251,7 +251,7 @@ export function EventDetailPage() {
                   <span className="flex">
                     {event.participants.slice(0, 4).map((p) => (
                       <span key={p.userId} className="-ml-2 first:ml-0">
-                        <Avatar name={p.displayName} ringed />
+                        <Avatar name={p.displayName} imageUrl={p.avatarUrl} ringed />
                       </span>
                     ))}
                     {event.participants.length > 4 && (

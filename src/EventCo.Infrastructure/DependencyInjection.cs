@@ -6,6 +6,7 @@ using EventCo.Infrastructure.Emailing;
 using EventCo.Infrastructure.Persistence;
 using EventCo.Infrastructure.Persistence.Repositories;
 using EventCo.Infrastructure.Realtime;
+using EventCo.Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,11 +43,22 @@ public static class DependencyInjection
                 : sp.GetRequiredService<SmtpEmailSender>();
         });
 
+        services.AddSingleton<LocalFileStorage>();
+        services.AddSingleton<S3FileStorage>();
+        services.AddSingleton<IFileStorage>(sp =>
+        {
+            var storageOptions = sp.GetRequiredService<IOptions<StorageOptions>>().Value;
+            return storageOptions.S3.IsConfigured
+                ? sp.GetRequiredService<S3FileStorage>()
+                : sp.GetRequiredService<LocalFileStorage>();
+        });
+
         services.Configure<LoginCodeOptions>(configuration.GetSection(LoginCodeOptions.SectionName));
         services.Configure<SessionOptions>(configuration.GetSection(SessionOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
         services.Configure<InvitationOptions>(configuration.GetSection(InvitationOptions.SectionName));
         services.Configure<FrontendOptions>(configuration.GetSection(FrontendOptions.SectionName));
+        services.Configure<StorageOptions>(configuration.GetSection(StorageOptions.SectionName));
 
         return services;
     }

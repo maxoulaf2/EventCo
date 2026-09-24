@@ -14,6 +14,7 @@ public sealed class InviteParticipantCommandHandler(
     IEventRepository eventRepository,
     IUserRepository userRepository,
     IEmailSender emailSender,
+    IFileStorage fileStorage,
     IDateTimeProvider dateTimeProvider,
     IOptions<InvitationOptions> invitationOptions,
     IOptions<FrontendOptions> frontendOptions) : ICommandHandler<InviteParticipantCommand, InviteParticipantResult>
@@ -62,7 +63,8 @@ public sealed class InviteParticipantCommandHandler(
             user.DisplayName,
             participant.Role.ToString(),
             participant.InvitedAt,
-            participant.ParticipationStatus.ToString());
+            participant.ParticipationStatus.ToString(),
+            fileStorage.GetAvatarUrl(user));
     }
 
     private static string DisplayNameFromEmail(string email) => email[..email.IndexOf('@')];

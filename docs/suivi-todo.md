@@ -122,6 +122,10 @@
 
 ## Lot 5 — Enrichissements (post-MVP, non priorisé)
 
+- [x] Photo de profil : upload/suppression par l'utilisateur depuis la modale de compte (`PUT`/`DELETE /api/auth/me/avatar`), stockage objet S3-compatible (Neon Object Storage en production, disque local en dev/tests), affichage dans les avatars (tableau de bord, participants, articles)
+  > Tâche identifiée en cours de route (rule 5, 2026-09-24), à la demande explicite du développeur, traitée avant les autres tâches de ce lot. Neon Object Storage : bucket `public_read`, 5 Go sur le plan gratuit.
+  > Reste une action manuelle du développeur : création du bucket et des clés dans Neon, variables `Storage__S3__*` dans Render (CLAUDE.md § Déploiement, étape 10), puis vérification en production.
+  > Référence visuelle de la modale de compte (`apparence-tableau-de-bord.feature`, scénario « Modale de mon compte ouverte depuis le tableau de bord ») devenue obsolète (bloc photo de profil ajouté) — à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.
 - [ ] Sondage de date/lieu (vote entre plusieurs options)
 - [ ] Budget partagé (suivi des dépenses, calcul des remboursements)
 - [ ] Templates d'événements pré-remplis

@@ -50,6 +50,13 @@ export default defineConfig({
         secure: false,
         ws: true,
       },
+      // Photos de profil servies par l'API en dev (fallback LocalFileStorage, sans bucket S3). En
+      // production elles sont servies directement par Neon Object Storage (URL absolue).
+      '/uploads': {
+        target: apiProxyTarget,
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 })

@@ -49,9 +49,18 @@ export function EventsDashboardPage() {
             onClick={() => setIsAccountModalOpen(true)}
             aria-label="Mon compte"
             data-testid="events-dashboard-account-button"
-            className="inline-grid h-11 w-11 shrink-0 place-items-center rounded-full bg-sage-600 text-[15px] font-semibold text-bg transition-colors hover:bg-sage-700"
+            className="inline-grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-sage-600 text-[15px] font-semibold text-bg transition-colors hover:bg-sage-700"
           >
-            {currentUser.displayName.charAt(0).toUpperCase()}
+            {currentUser.avatarUrl ? (
+              <img
+                src={currentUser.avatarUrl}
+                alt=""
+                data-testid="events-dashboard-account-avatar-image"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              currentUser.displayName.charAt(0).toUpperCase()
+            )}
           </button>
         )}
       </div>

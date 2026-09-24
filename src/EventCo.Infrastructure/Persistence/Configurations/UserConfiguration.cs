@@ -22,8 +22,8 @@ public class UserConfiguration : IEntityTypeConfiguration<UserEntity>
             .HasMaxLength(100)
             .IsRequired();
 
-        builder.Property(u => u.AvatarUrl)
-            .HasMaxLength(2048);
+        builder.Property(u => u.AvatarStorageKey)
+            .HasMaxLength(256);
 
         builder.Property(u => u.CreatedAt)
             .IsRequired();
