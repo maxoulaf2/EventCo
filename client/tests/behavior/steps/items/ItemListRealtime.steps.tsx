@@ -36,6 +36,7 @@ const defaultItems = [
     eventId: 'event-1',
     title: 'Bûche au chocolat',
     quantity: '1',
+    kind: 'ToBring',
     assignedToUserId: null,
     createdAt: '2026-09-01T00:00:00Z',
   },
@@ -44,6 +45,7 @@ const defaultItems = [
     eventId: 'event-1',
     title: 'Réserver la salle',
     quantity: null,
+    kind: 'ToBring',
     assignedToUserId: null,
     createdAt: '2026-09-02T00:00:00Z',
   },
@@ -81,6 +83,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         eventId: 'event-1',
         title: 'Acheter des bougies',
         quantity: null,
+        kind: 'ToBring',
         assignedToUserId: null,
         createdAt: '2026-09-03T00:00:00Z',
       })

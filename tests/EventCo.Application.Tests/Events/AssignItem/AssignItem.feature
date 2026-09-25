@@ -47,3 +47,10 @@ Fonctionnalité: Assignation d'un article à un participant
     Etant donné un événement "Repas de Noël" avec un article "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
     Quand j'assigne un article inexistant à moi-même
     Alors l'assignation échoue avec une erreur d'article introuvable
+
+  Scénario: Réattribution refusée d'un article apporté par un participant
+    Etant donné un événement "Repas de Noël" avec un article "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
+    Et "ami@example.com" rejoint cet événement en tant que participant simple
+    Et ce participant apporte l'article "Chips"
+    Quand j'assigne cet article à moi-même
+    Alors l'assignation échoue avec une erreur d'article apporté

@@ -53,7 +53,7 @@ public sealed class AssignItemSteps
         _existingEventId = createResult.EventId;
 
         var itemResult = await dispatcher.Send(
-            new CreateItemCommand(_existingEventId.Value, itemTitle, "1"),
+            new CreateItemCommand(_existingEventId.Value, itemTitle, "1", "ToBring"),
             CancellationToken.None);
         _existingItemId = itemResult.ItemId;
     }
@@ -71,6 +71,21 @@ public sealed class AssignItemSteps
             _firstParticipantUserId = inviteResult.UserId;
         else
             _secondParticipantUserId = inviteResult.UserId;
+    }
+
+    [Given(@"ce participant apporte l'article ""(.*)""")]
+    public async Task EtantDonneCeParticipantApporteLarticle(string itemTitle)
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        var eventCreatorUserId = _currentUserContext.UserId;
+        _currentUserContext.UserId = _firstParticipantUserId!.Value;
+
+        var itemResult = await dispatcher.Send(
+            new CreateItemCommand(_existingEventId!.Value, itemTitle, null, "Contribution"),
+            CancellationToken.None);
+        _existingItemId = itemResult.ItemId;
+
+        _currentUserContext.UserId = eventCreatorUserId;
     }
 
     [Given(@"ce participant devient l'utilisateur courant")]
@@ -114,6 +129,10 @@ public sealed class AssignItemSteps
             _thrownException = exception;
         }
     }
+
+    [Then(@"l'assignation échoue avec une erreur d'article apporté")]
+    public void AlorsLassignationEchoueAvecUneErreurDarticleApporte() =>
+        Assert.IsType<ContributionAssignmentCannotChangeException>(_thrownException);
 
     [Then(@"l'assignation réussit")]
     public void AlorsLassignationReussit() => Assert.Null(_thrownException);

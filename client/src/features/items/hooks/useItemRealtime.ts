@@ -9,6 +9,7 @@ function toEventItem(payload: ItemRealtimePayload): EventItem {
     eventId: payload.eventId,
     title: payload.title,
     quantity: payload.quantity,
+    kind: payload.kind,
     assignedToUserId: payload.assignedToUserId,
     createdAt: payload.createdAt,
   }

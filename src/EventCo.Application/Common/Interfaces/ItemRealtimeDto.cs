@@ -7,6 +7,7 @@ public sealed record ItemRealtimeDto(
     Guid EventId,
     string Title,
     string? Quantity,
+    string Kind,
     Guid? AssignedToUserId,
     DateTime CreatedAt)
 {
@@ -15,6 +16,7 @@ public sealed record ItemRealtimeDto(
         item.EventId,
         item.Title,
         item.Quantity,
+        item.Kind.ToString(),
         item.AssignedToUserId,
         item.CreatedAt);
 }

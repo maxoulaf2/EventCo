@@ -66,22 +66,30 @@ public sealed class CreateItemSteps
     [Given(@"j'agis désormais en tant que ce participant")]
     public void EtantDonneJagisDesormaisEnTantQueCeParticipant() => _currentUserContext.UserId = _invitedParticipantUserId!.Value;
 
-    [When(@"j'ajoute l'article ""(.*)"" de quantité ""(.*)"" à cet événement")]
-    public async Task QuandJajouteLarticleDeCategorieEtDeQuantiteACetEvenement(string title, string quantity) =>
-        await AjouterArticle(_existingEventId!.Value, title, quantity);
+    [When(@"j'ajoute l'article à prendre ""(.*)"" de quantité ""(.*)"" à cet événement")]
+    public async Task QuandJajouteLarticleAPrendreDeQuantiteACetEvenement(string title, string quantity) =>
+        await AjouterArticle(_existingEventId!.Value, title, quantity, "ToBring");
 
-    [When(@"j'ajoute l'article ""(.*)"" de quantité ""(.*)"" à un événement inexistant")]
-    public async Task QuandJajouteLarticleDeCategorieEtDeQuantiteAUnEvenementInexistant(string title, string quantity) =>
-        await AjouterArticle(Guid.NewGuid(), title, quantity);
+    [When(@"j'ajoute l'article que j'apporte ""(.*)"" de quantité ""(.*)"" à cet événement")]
+    public async Task QuandJajouteLarticleQueJapporteDeQuantiteACetEvenement(string title, string quantity) =>
+        await AjouterArticle(_existingEventId!.Value, title, quantity, "Contribution");
 
-    private async Task AjouterArticle(Guid eventId, string title, string quantity)
+    [When(@"j'ajoute l'article de nature ""(.*)"" ""(.*)"" de quantité ""(.*)"" à cet événement")]
+    public async Task QuandJajouteLarticleDeNatureDeQuantiteACetEvenement(string kind, string title, string quantity) =>
+        await AjouterArticle(_existingEventId!.Value, title, quantity, kind);
+
+    [When(@"j'ajoute l'article que j'apporte ""(.*)"" de quantité ""(.*)"" à un événement inexistant")]
+    public async Task QuandJajouteLarticleQueJapporteDeQuantiteAUnEvenementInexistant(string title, string quantity) =>
+        await AjouterArticle(Guid.NewGuid(), title, quantity, "Contribution");
+
+    private async Task AjouterArticle(Guid eventId, string title, string quantity, string kind)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
         _thrownException = null;
 
         try
         {
-            _lastResult = await dispatcher.Send(new CreateItemCommand(eventId, title, quantity), CancellationToken.None);
+            _lastResult = await dispatcher.Send(new CreateItemCommand(eventId, title, quantity, kind), CancellationToken.None);
         }
         catch (Exception exception)
         {
@@ -104,8 +112,21 @@ public sealed class CreateItemSteps
     public void AlorsLaCreationDeLarticleEchoueAvecUneErreurDautorisation() =>
         Assert.IsType<UserNotEventParticipantException>(_thrownException);
 
+    [Then(@"la création de l'article échoue avec une erreur d'article à prendre réservé aux organisateurs")]
+    public void AlorsLaCreationDeLarticleEchoueAvecUneErreurDarticleAPrendreReserveAuxOrganisateurs() =>
+        Assert.IsType<ParticipantCannotAddItemToBringException>(_thrownException);
+
     [Then(@"l'article créé a pour titre ""(.*)""")]
     public void AlorsLarticleCreeAPourTitre(string title) => Assert.Equal(title, _lastResult!.Title);
+
+    [Then(@"l'article créé est de nature ""(.*)""")]
+    public void AlorsLarticleCreeEstDeNature(string kind) => Assert.Equal(kind, _lastResult!.Kind);
+
+    [Then(@"l'article créé n'est attribué à personne")]
+    public void AlorsLarticleCreeNestAttribueAPersonne() => Assert.Null(_lastResult!.AssignedToUserId);
+
+    [Then(@"l'article créé m'est attribué")]
+    public void AlorsLarticleCreeMestAttribue() => Assert.Equal(_currentUserContext.UserId, _lastResult!.AssignedToUserId);
 
     [Then(@"une notification temps réel de création d'article est diffusée")]
     public void AlorsUneNotificationTempsReelDeCreationDarticleEstDiffusee()

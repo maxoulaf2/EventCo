@@ -19,3 +19,7 @@ export function assignItem(eventId: string, itemId: string, userId: string): Pro
 export function unassignItem(eventId: string, itemId: string): Promise<void> {
   return apiFetch(`/api/events/${eventId}/items/${itemId}/unassign`, { method: 'POST' })
 }
+
+export function deleteItem(eventId: string, itemId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/items/${itemId}`, { method: 'DELETE' })
+}

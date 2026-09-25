@@ -53,7 +53,7 @@ public sealed class GetEventItemsSteps
     public async Task EtantDonneUnArticleEstAjouteACetEvenement(string title)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
-        await dispatcher.Send(new CreateItemCommand(_existingEventId!.Value, title, null), CancellationToken.None);
+        await dispatcher.Send(new CreateItemCommand(_existingEventId!.Value, title, null, "ToBring"), CancellationToken.None);
     }
 
     [When(@"je consulte les articles de cet événement")]

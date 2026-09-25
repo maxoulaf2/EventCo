@@ -8,11 +8,12 @@ public class EventItem : Entity
     public Guid EventId { get; private set; }
     public string Title { get; private set; } = null!;
     public string? Quantity { get; private set; }
+    public EventItemKind Kind { get; private set; }
     public Guid? AssignedToUserId { get; private set; }
     public Guid CreatedByUserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
-    internal EventItem(Guid eventId, string title, string? quantity, Guid createdByUserId, DateTime createdAt)
+    internal EventItem(Guid eventId, string title, string? quantity, EventItemKind kind, Guid createdByUserId, DateTime createdAt)
         : base(Guid.NewGuid())
     {
         if (string.IsNullOrWhiteSpace(title))
@@ -21,23 +22,26 @@ public class EventItem : Entity
         EventId = eventId;
         Title = title.Trim();
         Quantity = quantity;
+        Kind = kind;
+        AssignedToUserId = kind == EventItemKind.Contribution ? createdByUserId : null;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    private EventItem(Guid id, Guid eventId, string title, string? quantity, Guid? assignedToUserId, Guid createdByUserId, DateTime createdAt)
+    private EventItem(Guid id, Guid eventId, string title, string? quantity, EventItemKind kind, Guid? assignedToUserId, Guid createdByUserId, DateTime createdAt)
         : base(id)
     {
         EventId = eventId;
         Title = title;
         Quantity = quantity;
+        Kind = kind;
         AssignedToUserId = assignedToUserId;
         CreatedByUserId = createdByUserId;
         CreatedAt = createdAt;
     }
 
-    internal static EventItem Reconstitute(Guid id, Guid eventId, string title, string? quantity, Guid? assignedToUserId, Guid createdByUserId, DateTime createdAt) =>
-        new(id, eventId, title, quantity, assignedToUserId, createdByUserId, createdAt);
+    internal static EventItem Reconstitute(Guid id, Guid eventId, string title, string? quantity, EventItemKind kind, Guid? assignedToUserId, Guid createdByUserId, DateTime createdAt) =>
+        new(id, eventId, title, quantity, kind, assignedToUserId, createdByUserId, createdAt);
 
     internal void AssignTo(Guid userId) => AssignedToUserId = userId;
 

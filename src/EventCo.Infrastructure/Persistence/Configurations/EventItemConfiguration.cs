@@ -22,6 +22,11 @@ public class EventItemConfiguration : IEntityTypeConfiguration<EventItemEntity>
         builder.Property(t => t.Quantity)
             .HasMaxLength(100);
 
+        builder.Property(t => t.Kind)
+            .HasConversion<string>()
+            .HasMaxLength(20)
+            .IsRequired();
+
         builder.Property(t => t.CreatedByUserId).IsRequired();
 
         builder.Property(t => t.CreatedAt).IsRequired();

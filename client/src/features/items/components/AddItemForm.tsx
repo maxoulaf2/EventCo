@@ -1,20 +1,29 @@
 import { type SubmitEvent, useState } from 'react'
 import { useCreateItem } from '../hooks/useCreateItem'
+import type { EventItemKind } from '../types'
 
 interface AddItemFormProps {
   eventId: string
+  canAddItemToBring: boolean
+}
+
+const PLACEHOLDERS: Record<EventItemKind, string> = {
+  ToBring: 'Ajouter un article à prendre…',
+  Contribution: "Ce que j'apporte…",
 }
 
 // Ajout rapide, une seule zone de saisie (cf. maquette 1f) : l'article part sans quantité
-// — modifiable ensuite depuis le détail de l'article.
-export function AddItemForm({ eventId }: AddItemFormProps) {
+// — modifiable ensuite depuis le détail de l'article. Un (co-)organisateur ajoute toujours un article
+// à prendre (qu'il peut ensuite s'assigner) ; un participant simple, ce qu'il apporte.
+export function AddItemForm({ eventId, canAddItemToBring }: AddItemFormProps) {
   const [title, setTitle] = useState('')
+  const kind: EventItemKind = canAddItemToBring ? 'ToBring' : 'Contribution'
   const { mutate, isPending, error } = useCreateItem(eventId)
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!title.trim()) return
-    mutate({ title }, { onSuccess: () => setTitle('') })
+    mutate({ title, kind }, { onSuccess: () => setTitle('') })
   }
 
   return (
@@ -30,7 +39,7 @@ export function AddItemForm({ eventId }: AddItemFormProps) {
         className="flex min-h-14 items-center gap-2 rounded-full border border-dashed border-ink/25 bg-sand-100 py-1.5 pr-1.5 pl-4.5"
       >
         <label htmlFor="itemTitle" className="sr-only">
-          Ajouter un article
+          {PLACEHOLDERS[kind]}
         </label>
         <input
           id="itemTitle"
@@ -38,7 +47,7 @@ export function AddItemForm({ eventId }: AddItemFormProps) {
           type="text"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Ajouter un article…"
+          placeholder={PLACEHOLDERS[kind]}
           data-testid="add-item-title-input"
           className="flex-1 bg-transparent text-[15px] text-ink placeholder:text-ink/45 focus-visible:outline-none"
         />

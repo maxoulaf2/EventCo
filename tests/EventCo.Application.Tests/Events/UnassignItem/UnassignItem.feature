@@ -37,3 +37,16 @@ Fonctionnalité: Désassignation d'un article
     Etant donné un événement "Repas de Noël" avec un article "Bûche au chocolat" déjà assigné à un participant, prévu le "2026-12-24" au lieu "Chez Alice"
     Quand je désassigne un article inexistant sur cet événement
     Alors la désassignation échoue avec une erreur d'article introuvable
+
+  Scénario: La personne qui apporte un article ne peut pas s'en désassigner
+    Etant donné un événement "Repas de Noël" avec un article "Bûche au chocolat" apporté par un participant, prévu le "2026-12-24" au lieu "Chez Alice"
+    Et je deviens ce participant assigné
+    Quand je désassigne cet article
+    Alors la désassignation échoue avec une erreur d'article apporté
+    Et l'article est toujours assigné à ce participant
+
+  Scénario: Le créateur de l'événement ne peut pas désassigner un article apporté par un participant
+    Etant donné un événement "Repas de Noël" avec un article "Bûche au chocolat" apporté par un participant, prévu le "2026-12-24" au lieu "Chez Alice"
+    Quand je désassigne cet article
+    Alors la désassignation échoue avec une erreur d'article apporté
+    Et l'article est toujours assigné à ce participant

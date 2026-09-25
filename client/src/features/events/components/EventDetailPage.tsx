@@ -279,6 +279,7 @@ export function EventDetailPage() {
                 canManageAllItems={isCreatorOrOrganizer}
                 canSelfAssign={isParticipant}
                 canAddItem={isParticipant}
+                canAddItemToBring={isCreatorOrOrganizer}
                 participants={event.participants}
               />
             </div>

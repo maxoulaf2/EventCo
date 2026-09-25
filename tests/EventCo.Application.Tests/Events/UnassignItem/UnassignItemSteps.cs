@@ -53,7 +53,7 @@ public sealed class UnassignItemSteps
         _existingEventId = createResult.EventId;
 
         var itemResult = await dispatcher.Send(
-            new CreateItemCommand(_existingEventId.Value, itemTitle, "1"),
+            new CreateItemCommand(_existingEventId.Value, itemTitle, "1", "ToBring"),
             CancellationToken.None);
         _existingItemId = itemResult.ItemId;
 
@@ -65,6 +65,31 @@ public sealed class UnassignItemSteps
         await dispatcher.Send(
             new AssignItemCommand(_existingEventId.Value, _existingItemId.Value, _assignedParticipantUserId.Value),
             CancellationToken.None);
+    }
+
+    [Given(@"un événement ""(.*)"" avec un article ""(.*)"" apporté par un participant, prévu le ""(.*)"" au lieu ""(.*)""")]
+    public async Task EtantDonneUnEvenementAvecUnArticleApporteParUnParticipantPrevuLeAuLieu(string title, string itemTitle, string eventDate, string location)
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        var eventCreatorUserId = _currentUserContext.UserId;
+
+        var createResult = await dispatcher.Send(
+            new CreateEventCommand(title, null, DateTime.Parse(eventDate), location),
+            CancellationToken.None);
+        _existingEventId = createResult.EventId;
+
+        var inviteResult = await dispatcher.Send(
+            new InviteParticipantCommand(_existingEventId.Value, "contributeur@example.com"),
+            CancellationToken.None);
+        _assignedParticipantUserId = inviteResult.UserId;
+
+        _currentUserContext.UserId = _assignedParticipantUserId.Value;
+        var itemResult = await dispatcher.Send(
+            new CreateItemCommand(_existingEventId.Value, itemTitle, "1", "Contribution"),
+            CancellationToken.None);
+        _existingItemId = itemResult.ItemId;
+
+        _currentUserContext.UserId = eventCreatorUserId;
     }
 
     [Given(@"je deviens ce participant assigné")]
@@ -115,6 +140,20 @@ public sealed class UnassignItemSteps
     [Then(@"la désassignation échoue avec une erreur de désassignation réservée à l'assigné")]
     public void AlorsLaDesassignationEchoueAvecUneErreurDeDesassignationReserveeALassigne() =>
         Assert.IsType<ParticipantCannotUnassignOthersItemException>(_thrownException);
+
+    [Then(@"la désassignation échoue avec une erreur d'article apporté")]
+    public void AlorsLaDesassignationEchoueAvecUneErreurDarticleApporte() =>
+        Assert.IsType<ContributionAssignmentCannotChangeException>(_thrownException);
+
+    [Then(@"l'article est toujours assigné à ce participant")]
+    public async Task AlorsLarticleEstToujoursAssigneACeParticipant()
+    {
+        var eventRepository = _serviceProvider.GetRequiredService<IEventRepository>();
+        var @event = await eventRepository.GetByIdAsync(_existingEventId!.Value, CancellationToken.None);
+        var item = @event!.Items.Single(t => t.Id == _existingItemId!.Value);
+
+        Assert.Equal(_assignedParticipantUserId!.Value, item.AssignedToUserId);
+    }
 
     [Then(@"la désassignation échoue avec une erreur d'autorisation")]
     public void AlorsLaDesassignationEchoueAvecUneErreurDautorisation() =>

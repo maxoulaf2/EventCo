@@ -47,6 +47,15 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             ParticipantCannotDeleteOthersItemException forbiddenDeleteException => (
                 StatusCodes.Status403Forbidden,
                 new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenDeleteException.Message }),
+            ParticipantCannotAddItemToBringException forbiddenItemToBringException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenItemToBringException.Message }),
+            ContributionAssignmentCannotChangeException forbiddenContributionAssignmentException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenContributionAssignmentException.Message }),
+            OnlyContributorCanCancelContributionException forbiddenContributionCancelException => (
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails { Title = "Action non autorisée", Detail = forbiddenContributionCancelException.Message }),
             TooManyLoginCodeRequestsException tooManyRequestsException => (
                 StatusCodes.Status429TooManyRequests,
                 new ProblemDetails { Title = "Trop de requêtes", Detail = tooManyRequestsException.Message }),

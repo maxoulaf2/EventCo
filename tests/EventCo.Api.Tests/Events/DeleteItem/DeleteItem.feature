@@ -3,33 +3,49 @@ Fonctionnalité: Suppression d'un article via l'API
   En tant qu'utilisateur connecté je veux supprimer un article via l'API
   afin de retirer un article devenu inutile de la liste des préparatifs
 
-  Scénario: Suppression réussie par le participant qui a créé l'article
+  Scénario: Annulation réussie par le participant qui apporte l'article
     Etant donné une session ouverte via l'API pour "delete-item-organizer-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API
     Et "delete-item-creator-api-test@example.com" invité à cet événement via l'API
     Et une session ouverte via l'API pour "delete-item-creator-api-test@example.com"
-    Et un article "Bûche au chocolat" ajouté à cet événement via l'API
+    Et un article apporté "Bûche au chocolat" ajouté à cet événement via l'API
     Quand je supprime cet article via l'API
     Alors la réponse de suppression d'article a le statut 204
 
-  Scénario: Suppression réussie par le créateur de l'événement sur un article créé par un autre participant
+  Scénario: Annulation refusée au créateur de l'événement pour un article apporté par un autre participant
     Etant donné une session ouverte via l'API pour "delete-item-organizer2-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API
     Et "delete-item-creator2-api-test@example.com" invité à cet événement via l'API
     Et une session ouverte via l'API pour "delete-item-creator2-api-test@example.com"
-    Et un article "Bûche au chocolat" ajouté à cet événement via l'API
+    Et un article apporté "Bûche au chocolat" ajouté à cet événement via l'API
     Et une session ouverte via l'API pour "delete-item-organizer2-api-test@example.com"
     Quand je supprime cet article via l'API
-    Alors la réponse de suppression d'article a le statut 204
+    Alors la réponse de suppression d'article a le statut 403
 
-  Scénario: Suppression refusée pour un participant qui n'a pas créé l'article
+  Scénario: Annulation refusée à un autre participant pour un article apporté
     Etant donné une session ouverte via l'API pour "delete-item-organizer3-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API
     Et "delete-item-creator3-api-test@example.com" invité à cet événement via l'API
     Et "delete-item-other3-api-test@example.com" également invité à cet événement via l'API
     Et une session ouverte via l'API pour "delete-item-creator3-api-test@example.com"
-    Et un article "Bûche au chocolat" ajouté à cet événement via l'API
+    Et un article apporté "Bûche au chocolat" ajouté à cet événement via l'API
     Et une session ouverte via l'API pour "delete-item-other3-api-test@example.com"
+    Quand je supprime cet article via l'API
+    Alors la réponse de suppression d'article a le statut 403
+
+  Scénario: Suppression réussie d'un article à prendre par le créateur de l'événement
+    Etant donné une session ouverte via l'API pour "delete-item-organizer6-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
+    Quand je supprime cet article via l'API
+    Alors la réponse de suppression d'article a le statut 204
+
+  Scénario: Suppression refusée pour un participant simple sur un article à prendre
+    Etant donné une session ouverte via l'API pour "delete-item-organizer5-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
+    Et "delete-item-participant5-api-test@example.com" invité à cet événement via l'API
+    Et une session ouverte via l'API pour "delete-item-participant5-api-test@example.com"
     Quand je supprime cet article via l'API
     Alors la réponse de suppression d'article a le statut 403
 
@@ -51,7 +67,7 @@ Fonctionnalité: Suppression d'un article via l'API
   Scénario: Suppression par un utilisateur qui ne participe pas du tout à l'événement
     Etant donné une session ouverte via l'API pour "delete-item-organizer4-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API
-    Et un article "Bûche au chocolat" ajouté à cet événement via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
     Et une session ouverte via l'API pour "delete-item-non-participant4-api-test@example.com"
     Quand je supprime cet article via l'API
     Alors la réponse de suppression d'article a le statut 403

@@ -1,6 +1,11 @@
+// « À prendre » : demande d'un (co-)organisateur, que n'importe quel participant peut prendre.
+// « Contribution » : ce qu'un participant déclare apporter, attribué à lui définitivement (annulable seulement).
+export type EventItemKind = 'ToBring' | 'Contribution'
+
 export interface CreateItemInput {
   title: string
   quantity?: string
+  kind: EventItemKind
 }
 
 export interface EventItem {
@@ -8,6 +13,7 @@ export interface EventItem {
   eventId: string
   title: string
   quantity: string | null
+  kind: EventItemKind
   assignedToUserId: string | null
   createdAt: string
 }
@@ -19,6 +25,7 @@ export interface ItemRealtimePayload {
   eventId: string
   title: string
   quantity: string | null
+  kind: EventItemKind
   assignedToUserId: string | null
   createdAt: string
 }

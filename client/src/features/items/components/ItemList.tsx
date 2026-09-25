@@ -2,6 +2,7 @@ import type { EventParticipant } from '../../events/types'
 import { Avatar } from '../../../shared/components/Avatar'
 import { AddItemForm } from './AddItemForm'
 import { useAssignItem } from '../hooks/useAssignItem'
+import { useDeleteItem } from '../hooks/useDeleteItem'
 import { useEventItems } from '../hooks/useEventItems'
 import { useItemRealtime } from '../hooks/useItemRealtime'
 import { useUnassignItem } from '../hooks/useUnassignItem'
@@ -24,6 +25,7 @@ interface ItemListProps {
   canManageAllItems: boolean
   canSelfAssign: boolean
   canAddItem: boolean
+  canAddItemToBring: boolean
   participants: EventParticipant[]
 }
 
@@ -33,15 +35,22 @@ export function ItemList({
   canManageAllItems,
   canSelfAssign,
   canAddItem,
+  canAddItemToBring,
   participants,
 }: ItemListProps) {
   const { data: items, isPending, isError } = useEventItems(eventId)
   useItemRealtime(eventId)
   const assignItem = useAssignItem(eventId)
   const unassignItem = useUnassignItem(eventId)
+  const deleteItem = useDeleteItem(eventId)
 
+  // Un article apporté reste attribué à la personne qui l'apporte : elle peut seulement l'annuler.
   function canUnassign(item: EventItem) {
-    return canManageAllItems || item.assignedToUserId === currentUserId
+    return item.kind === 'ToBring' && (canManageAllItems || item.assignedToUserId === currentUserId)
+  }
+
+  function canCancel(item: EventItem) {
+    return item.kind === 'Contribution' && item.assignedToUserId === currentUserId
   }
 
   function participantOf(userId: string | null) {
@@ -135,6 +144,18 @@ export function ItemList({
                                   Laisser
                                 </button>
                               )}
+                              {canCancel(item) && (
+                                <button
+                                  type="button"
+                                  onClick={() => deleteItem.mutate(item.id)}
+                                  disabled={deleteItem.isPending}
+                                  aria-label={`Annuler "${item.title}"`}
+                                  data-testid={`item-row-cancel-button-${item.id}`}
+                                  className="inline-flex min-h-9.5 shrink-0 items-center rounded-full border border-ink/15 bg-surface px-3.5 text-[13px] font-heading text-ink/70 transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
+                                >
+                                  Annuler
+                                </button>
+                              )}
                             </div>
                           )}
                         </li>
@@ -148,7 +169,7 @@ export function ItemList({
         </div>
       )}
 
-      {canAddItem && <AddItemForm eventId={eventId} />}
+      {canAddItem && <AddItemForm eventId={eventId} canAddItemToBring={canAddItemToBring} />}
     </div>
   )
 }

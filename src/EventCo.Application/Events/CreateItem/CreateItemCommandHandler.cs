@@ -17,7 +17,9 @@ public sealed class CreateItemCommandHandler(
 
         var now = dateTimeProvider.UtcNow;
 
-        var item = @event.AddItem(currentUserService.UserId!.Value, request.Title, request.Quantity, now);
+        var kind = Enum.Parse<EventItemKind>(request.Kind);
+
+        var item = @event.AddItem(currentUserService.UserId!.Value, request.Title, request.Quantity, kind, now);
 
         await eventRepository.ApplyAsync(@event, cancellationToken);
 
@@ -26,6 +28,7 @@ public sealed class CreateItemCommandHandler(
             @event.Id,
             item.Title,
             item.Quantity,
+            item.Kind.ToString(),
             item.AssignedToUserId,
             item.CreatedAt);
     }

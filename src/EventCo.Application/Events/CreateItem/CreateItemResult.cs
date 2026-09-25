@@ -5,5 +5,6 @@ public sealed record CreateItemResult(
     Guid EventId,
     string Title,
     string? Quantity,
+    string Kind,
     Guid? AssignedToUserId,
     DateTime CreatedAt);

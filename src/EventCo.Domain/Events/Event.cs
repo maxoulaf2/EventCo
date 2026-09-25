@@ -190,11 +190,14 @@ public class Event : Entity
         EnsureActingUserIsParticipant(actingUserId);
     }
 
-    public EventItem AddItem(Guid actingUserId, string title, string? quantity, DateTime now)
+    public EventItem AddItem(Guid actingUserId, string title, string? quantity, EventItemKind kind, DateTime now)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        var item = new EventItem(Id, title, quantity, actingUserId, now);
+        if (kind == EventItemKind.ToBring && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotAddItemToBringException(Id, actingUserId);
+
+        var item = new EventItem(Id, title, quantity, kind, actingUserId, now);
         _items.Add(item);
         AddDomainEvent(new ItemCreatedDomainEvent(item));
         return item;
@@ -211,6 +214,7 @@ public class Event : Entity
             throw new ParticipantCannotAssignItemToOthersException(Id, itemId, actingUserId, userId);
 
         var item = GetItem(itemId);
+        EnsureItemIsNotContribution(actingUserId, item);
         item.AssignTo(userId);
         AddDomainEvent(new ItemAssignedDomainEvent(item));
     }
@@ -219,6 +223,7 @@ public class Event : Entity
     {
         var item = GetItem(itemId);
         EnsureActingUserCanUnassignItem(actingUserId, item);
+        EnsureItemIsNotContribution(actingUserId, item);
         item.Unassign();
         AddDomainEvent(new ItemUnassignedDomainEvent(item));
     }
@@ -258,8 +263,20 @@ public class Event : Entity
     {
         EnsureActingUserIsParticipant(actingUserId);
 
-        if (item.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+        if (item.CreatedByUserId == actingUserId)
+            return;
+
+        if (item.Kind == EventItemKind.Contribution)
+            throw new OnlyContributorCanCancelContributionException(Id, item.Id, actingUserId);
+
+        if (!IsCreatorOrOrganizer(actingUserId))
             throw new ParticipantCannotDeleteOthersItemException(Id, item.Id, actingUserId);
+    }
+
+    private void EnsureItemIsNotContribution(Guid actingUserId, EventItem item)
+    {
+        if (item.Kind == EventItemKind.Contribution)
+            throw new ContributionAssignmentCannotChangeException(Id, item.Id, actingUserId);
     }
 
     private void EnsureActingUserCanUnassignItem(Guid actingUserId, EventItem item)

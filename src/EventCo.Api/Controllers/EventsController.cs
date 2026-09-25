@@ -194,6 +194,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             t.EventId,
             t.Title,
             t.Quantity,
+            t.Kind,
             t.AssignedToUserId,
             t.CreatedAt));
 
@@ -204,7 +205,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> CreateItem(Guid id, CreateItemRequest request, CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(
-            new CreateItemCommand(id, request.Title, request.Quantity),
+            new CreateItemCommand(id, request.Title, request.Quantity, request.Kind),
             cancellationToken);
 
         var response = new EventItemResponse(
@@ -212,6 +213,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.EventId,
             result.Title,
             result.Quantity,
+            result.Kind,
             result.AssignedToUserId,
             result.CreatedAt);
 

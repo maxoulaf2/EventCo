@@ -4,6 +4,7 @@ using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateItem;
 using EventCo.Application.Events.DeleteItem;
 using EventCo.Application.Events.InviteParticipant;
+using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Tests.Support;
 using EventCo.Application.Tests.TestDoubles;
 using EventCo.Domain.Events.Exceptions;
@@ -43,8 +44,15 @@ public sealed class DeleteItemSteps
         _serviceProvider = builder.Build();
     }
 
-    [Given(@"un événement ""(.*)"" avec un article créé par un participant invité ""(.*)"", prévu le ""(.*)"" au lieu ""(.*)""")]
-    public async Task EtantDonneUnEvenementAvecUnArticleCreeParUnParticipantInvitePrevuLeAuLieu(string title, string itemTitle, string eventDate, string location)
+    [Given(@"un événement ""(.*)"" avec un article apporté par un participant invité ""(.*)"", prévu le ""(.*)"" au lieu ""(.*)""")]
+    public async Task EtantDonneUnEvenementAvecUnArticleApporteParUnParticipantInvitePrevuLeAuLieu(string title, string itemTitle, string eventDate, string location) =>
+        await CreerEvenementAvecArticle(title, itemTitle, eventDate, location, promoteItemCreator: false, "Contribution");
+
+    [Given(@"un événement ""(.*)"" avec un article à prendre ""(.*)"" créé par un co-organisateur, prévu le ""(.*)"" au lieu ""(.*)""")]
+    public async Task EtantDonneUnEvenementAvecUnArticleAPrendreCreeParUnCoOrganisateurPrevuLeAuLieu(string title, string itemTitle, string eventDate, string location) =>
+        await CreerEvenementAvecArticle(title, itemTitle, eventDate, location, promoteItemCreator: true, "ToBring");
+
+    private async Task CreerEvenementAvecArticle(string title, string itemTitle, string eventDate, string location, bool promoteItemCreator, string itemKind)
     {
         var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
 
@@ -60,6 +68,13 @@ public sealed class DeleteItemSteps
             CancellationToken.None);
         _itemCreatorUserId = itemCreatorInviteResult.UserId;
 
+        if (promoteItemCreator)
+        {
+            await dispatcher.Send(
+                new PromoteToOrganizerCommand(_existingEventId.Value, _itemCreatorUserId.Value),
+                CancellationToken.None);
+        }
+
         var otherInviteResult = await dispatcher.Send(
             new InviteParticipantCommand(_existingEventId.Value, "autre-participant@example.com"),
             CancellationToken.None);
@@ -68,7 +83,7 @@ public sealed class DeleteItemSteps
         _currentUserContext.UserId = _itemCreatorUserId.Value;
 
         var itemResult = await dispatcher.Send(
-            new CreateItemCommand(_existingEventId.Value, itemTitle, "1"),
+            new CreateItemCommand(_existingEventId.Value, itemTitle, "1", itemKind),
             CancellationToken.None);
         _existingItemId = itemResult.ItemId;
     }
@@ -114,6 +129,10 @@ public sealed class DeleteItemSteps
     [Then(@"la suppression de l'article échoue avec une erreur de suppression réservée au créateur de l'article")]
     public void AlorsLaSuppressionDeLarticleEchoueAvecUneErreurDeSuppressionReserveeAuCreateurDeLarticle() =>
         Assert.IsType<ParticipantCannotDeleteOthersItemException>(_thrownException);
+
+    [Then(@"la suppression de l'article échoue avec une erreur d'annulation réservée à la personne qui l'apporte")]
+    public void AlorsLaSuppressionDeLarticleEchoueAvecUneErreurDannulationReserveeALaPersonneQuiLapporte() =>
+        Assert.IsType<OnlyContributorCanCancelContributionException>(_thrownException);
 
     [Then(@"la suppression de l'article échoue avec une erreur d'autorisation")]
     public void AlorsLaSuppressionDeLarticleEchoueAvecUneErreurDautorisation() =>

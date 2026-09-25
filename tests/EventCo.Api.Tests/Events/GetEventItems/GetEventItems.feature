@@ -6,7 +6,7 @@ Fonctionnalité: Consultation des articles d'un événement via l'API
   Scénario: Consultation des articles d'un événement avec une session valide
     Etant donné une session ouverte via l'API pour "get-event-items-organizer-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API
-    Et un article "Bûche au chocolat" ajouté à cet événement via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
     Quand je consulte les articles de cet événement via l'API
     Alors la réponse de consultation des articles a le statut 200
     Et les articles consultés retournés contiennent 1 article

@@ -28,6 +28,7 @@ const items = [
     eventId: 'event-1',
     title: 'Bûche au chocolat',
     quantity: '1',
+    kind: 'ToBring',
     assignedToUserId: null,
     createdAt: '2026-09-01T00:00:00Z',
   },
@@ -36,6 +37,7 @@ const items = [
     eventId: 'event-1',
     title: 'Réserver la salle',
     quantity: null,
+    kind: 'ToBring',
     assignedToUserId: null,
     createdAt: '2026-09-02T00:00:00Z',
   },
@@ -105,6 +107,31 @@ Given("je suis sur le détail d'un événement avec le formulaire d'ajout d'arti
   )
   await page.goto('/events/event-1')
   await page.getByTestId('add-item-title-input').fill('Guirlandes')
+})
+
+Given("je suis sur le détail d'un événement en tant que simple participant qui apporte un article", async ({ page }) => {
+  await mockEventDetail(page)
+  await page.route('**/api/events/event-1/items', (route) =>
+    route.fulfill({
+      json: [
+        ...items,
+        {
+          id: 'item-3',
+          eventId: 'event-1',
+          title: 'Chips',
+          quantity: null,
+          kind: 'Contribution',
+          assignedToUserId: 'user-2',
+          createdAt: '2026-09-03T00:00:00Z',
+        },
+      ],
+    }),
+  )
+  await page.route('**/api/auth/me', (route) =>
+    route.fulfill({ json: { userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' } }),
+  )
+  await page.goto('/events/event-1')
+  await expect(page.getByTestId('item-row-cancel-button-item-3')).toBeVisible()
 })
 
 Given("je suis sur le détail d'un événement avec le statut de participation renseigné", async ({ page }) => {

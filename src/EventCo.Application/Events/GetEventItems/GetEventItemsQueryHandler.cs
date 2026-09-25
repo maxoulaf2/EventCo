@@ -25,6 +25,7 @@ public sealed class GetEventItemsQueryHandler(
                 t.EventId,
                 t.Title,
                 t.Quantity,
+                t.Kind.ToString(),
                 t.AssignedToUserId,
                 t.CreatedAt))
             .ToList();

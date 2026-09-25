@@ -93,13 +93,15 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | EventId | Guid | FK |
 | Title | string | ex: "Bûche au chocolat" |
 | Quantity | string? | texte libre (ex: "2", "1kg") |
-| AssignedToUserId | Guid? | null = non assigné |
+| Kind | enum | `ToBring` (« à prendre » : demande d'un créateur/co-organisateur, créée sans attribution), `Contribution` (« apporté » : ce qu'un participant déclare apporter, attribué à son créateur dès la création, définitivement) |
+| AssignedToUserId | Guid? | null = non assigné (jamais null pour une `Contribution`) |
 | CreatedAt | DateTime | |
 
 ### 3.2 Règles de gestion des rôles
 - Le **créateur** (`Event.CreatedByUserId`) a les droits ultimes : suppression de l'événement, gestion des rôles des autres participants, retrait de n'importe qui.
 - Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les articles, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
-- Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement et s'auto-assigner des articles.
+- Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement, s'auto-assigner des articles à prendre et ajouter ce qu'il apporte — mais pas d'article à prendre.
+- Un **article apporté** (`Kind = Contribution`) ne peut être ni désassigné ni réattribué, par personne : seule la personne qui l'apporte peut l'annuler (le supprimer), y compris vis-à-vis du créateur/des co-organisateurs.
 - Le créateur possède automatiquement une entrée `EventParticipant` avec `Role = Organizer` ; la distinction "droits ultimes" se fait via la comparaison avec `Event.CreatedByUserId`.
 
 ---
