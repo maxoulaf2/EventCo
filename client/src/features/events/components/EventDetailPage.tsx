@@ -134,18 +134,20 @@ export function EventDetailPage() {
   }
 
   return (
-    <main data-testid="event-detail-page" className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col bg-bg lg:max-w-5xl">
-      <Link
-        to={routes.events}
-        aria-label="Retour"
-        data-testid="event-detail-back-link"
-        className="absolute top-3.5 left-3.5 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full bg-bg text-ink shadow-elev-sm transition-colors hover:bg-sand-100"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m12 19-7-7 7-7" />
-          <path d="M19 12H5" />
-        </svg>
-      </Link>
+    <main data-testid="event-detail-page" className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-bg lg:max-w-5xl">
+      <div className="px-5.5 pt-5.5 lg:px-8.5">
+        <Link
+          to={routes.events}
+          aria-label="Retour"
+          data-testid="event-detail-back-link"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-bg text-ink shadow-elev-sm transition-colors hover:bg-sand-100"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m12 19-7-7 7-7" />
+            <path d="M19 12H5" />
+          </svg>
+        </Link>
+      </div>
 
       {isPending && (
         <p data-testid="event-detail-loading" className="p-6 text-sm text-ink/60">
@@ -161,7 +163,7 @@ export function EventDetailPage() {
 
       {event && (
         <>
-          <div className="flex flex-col gap-6 px-5.5 pt-5.5 lg:grid lg:grid-cols-2 lg:gap-10 lg:px-8.5 lg:pb-9">
+          <div className="flex flex-col gap-6 px-5.5 pt-4 lg:grid lg:grid-cols-2 lg:gap-10 lg:px-8.5 lg:pb-9">
             <div className="flex flex-col">
               {event.imageUrl && (
                 <div className="h-52 flex-none overflow-hidden rounded-3xl lg:h-64">
