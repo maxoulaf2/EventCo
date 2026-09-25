@@ -1,3 +1,5 @@
+import { APP_VERSION_HEADER, checkServerVersion } from './appVersion'
+
 // Vide par défaut = appels relatifs à l'origine courante, proxifiés vers l'API par Vite en dev
 // (cf. vite.config.ts) pour rester same-origin et éviter que le cookie de session soit traité comme
 // cookie tiers (bloqué par défaut en navigation privée). VITE_API_URL reste utile en prod si le build
@@ -47,6 +49,8 @@ export async function apiFetch<TResponse = undefined>(
       ...options.headers,
     },
   })
+
+  checkServerVersion(response.headers.get(APP_VERSION_HEADER))
 
   if (!response.ok) {
     throw new ApiError(await extractErrorMessage(response), response.status)

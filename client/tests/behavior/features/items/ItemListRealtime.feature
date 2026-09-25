@@ -17,3 +17,8 @@ Fonctionnalité: Mise à jour temps réel de la liste des articles
     Quand j'arrive sur le détail de l'événement
     Et un autre participant supprime l'article "Réserver la salle"
     Alors je ne vois plus l'article "Réserver la salle"
+
+  Scénario: La version de l'API est vérifiée à la reconnexion temps réel
+    Quand j'arrive sur le détail de l'événement
+    Et la connexion temps réel est rétablie après une coupure
+    Alors la version de l'API est vérifiée

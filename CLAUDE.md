@@ -77,6 +77,8 @@ Architecture : un seul service **Render** (Docker) exécutant l'API, qui sert au
 
 Le déploiement est piloté par le job `deploy` de `.github/workflows/ci.yml` : après succès de tous les tests sur push `main`, il applique les migrations EF Core sur la base de prod puis déclenche le déploiement Render via son deploy hook (`autoDeploy: false` dans `render.yaml`, pour ne jamais déployer une version dont la migration aurait échoué).
 
+Version du build : le Dockerfile injecte le SHA du commit (`RENDER_GIT_COMMIT`, transmis par Render comme build arg) dans le frontend et l'API. Un frontend resté ouvert pendant un déploiement le détecte (en-tête `X-App-Version`) et se recharge seul. À vérifier dans les logs Render au démarrage : `Version de l'application : <sha>`. Si c'est `dev`, Render n'a pas transmis `RENDER_GIT_COMMIT` au build : la détection reste inactive, mais sans risque puisque les deux côtés valent `dev`. Il faudra alors trouver une autre source de version (par exemple un build de l'image en CI avec `--build-arg APP_VERSION=$GITHUB_SHA`).
+
 ### Checklist de configuration initiale (à faire une seule fois, actions manuelles développeur — Claude Code ne peut pas créer de comptes tiers à sa place)
 
 1. **Neon** (https://neon.tech) : créer un compte + un projet, récupérer la connection string (ajouter `SSL Mode=Require;Trust Server Certificate=true` si le connection string fourni ne l'inclut pas déjà — Neon exige TLS).

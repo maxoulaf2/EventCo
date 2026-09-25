@@ -19,6 +19,9 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
     // on substitue ce port externe par un double observable, comme pour Application.Tests.
     public RecordingEmailSender EmailSender { get; } = new();
 
+    // Version simulant un build déployé (SHA git injecté par le Dockerfile), cf. AppVersion.
+    public const string AppVersion = "api-tests-version";
+
     // Aucun bucket S3 en test : c'est le fallback LocalFileStorage (réel, sur disque) qui est exercé, dans
     // un dossier temporaire propre à ce run.
     private readonly string _storageRootPath = Path.Combine(Path.GetTempPath(), $"eventco-api-tests-{Guid.NewGuid():N}");
@@ -42,6 +45,7 @@ public sealed class ApiWebApplicationFactory : WebApplicationFactory<Program>
                 ["ConnectionStrings:Default"] = _postgres.GetConnectionString(),
                 ["Session:Secret"] = "api-tests-secret-simulant-un-secret-de-production",
                 ["Storage:Local:RootPath"] = _storageRootPath,
+                ["App:Version"] = ApiWebApplicationFactory.AppVersion,
             });
         });
 

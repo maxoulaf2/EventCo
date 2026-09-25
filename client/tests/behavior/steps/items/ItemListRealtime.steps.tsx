@@ -10,6 +10,7 @@ import { renderApp } from '../../../../src/test/render'
 // déclencher les messages du Hub `EventHub` (cf. `useItemRealtime`) sans back réel.
 const registeredHandlers = new Map<string, (payload: unknown) => void>()
 const invokeMock = vi.fn().mockResolvedValue(undefined)
+let reconnectedCallback: (() => void) | null = null
 
 vi.mock('@microsoft/signalr', () => ({
   HubConnectionBuilder: vi.fn().mockImplementation(function HubConnectionBuilder(this: unknown) {
@@ -19,6 +20,9 @@ vi.mock('@microsoft/signalr', () => ({
       configureLogging: vi.fn().mockReturnThis(),
       build: vi.fn().mockReturnValue({
         on: (event: string, callback: (payload: unknown) => void) => registeredHandlers.set(event, callback),
+        onreconnected: (callback: () => void) => {
+          reconnectedCallback = callback
+        },
         start: vi.fn().mockResolvedValue(undefined),
         stop: vi.fn().mockResolvedValue(undefined),
         invoke: invokeMock,
@@ -62,6 +66,7 @@ function emit(event: string, payload: unknown) {
 describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) => {
   BeforeEachScenario(() => {
     registeredHandlers.clear()
+    reconnectedCallback = null
     invokeMock.mockClear()
     server.use(http.get('*/api/events/:id/items', () => HttpResponse.json(defaultItems)))
   })
@@ -124,6 +129,30 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     Then('je ne vois plus l\'article "Réserver la salle"', async () => {
       await waitFor(() => expect(screen.queryByTestId('item-row-item-2')).not.toBeInTheDocument())
+    })
+  })
+
+  Scenario('La version de l\'API est vérifiée à la reconnexion temps réel', ({ When, And, Then }) => {
+    let versionRequested = false
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      server.use(
+        http.get('*/api/version', () => {
+          versionRequested = true
+          return HttpResponse.json({ version: 'dev' })
+        }),
+      )
+      renderApp('/events/event-1')
+    })
+
+    And('la connexion temps réel est rétablie après une coupure', async () => {
+      await screen.findByTestId('item-row-item-1')
+      expect(reconnectedCallback).not.toBeNull()
+      reconnectedCallback!()
+    })
+
+    Then('la version de l\'API est vérifiée', async () => {
+      await waitFor(() => expect(versionRequested).toBe(true))
     })
   })
 })

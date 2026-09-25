@@ -5,6 +5,9 @@ import { HttpResponse, http } from 'msw'
  * Les scénarios d'erreur surchargent un handler ponctuellement via `server.use(...)`.
  */
 export const handlers = [
+  // Sans en-tête X-App-Version (comme l'API hors build Docker) : aucun rechargement déclenché.
+  http.get('*/api/version', () => HttpResponse.json({ version: 'dev' })),
+
   http.post('*/api/auth/request-code', () => new HttpResponse(null, { status: 202 })),
 
   http.post('*/api/auth/verify', () =>
