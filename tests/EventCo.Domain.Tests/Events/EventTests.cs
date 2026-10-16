@@ -530,6 +530,76 @@ public class EventTests
     }
 
     [Fact]
+    public void AddItem_TitleMatchesNoKeyword_CategoryIsDeducedAsOther()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        var item = @event.AddItem(creatorId, "Réserver la salle", null, EventItemKind.ToBring, DateTime.UtcNow);
+
+        Assert.Null(item.CorrectedCategory);
+        Assert.Equal(EventItemCategory.Other, item.Category);
+    }
+
+    [Fact]
+    public void CorrectItemCategory_ActingUserIsItemCreator_OverridesDeducedCategory()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(regularParticipantId, "Gâteau du chef", "1", EventItemKind.Contribution, DateTime.UtcNow);
+
+        @event.CorrectItemCategory(regularParticipantId, item.Id, EventItemCategory.Aperitif);
+
+        Assert.Equal(EventItemCategory.Aperitif, item.CorrectedCategory);
+        Assert.Equal(EventItemCategory.Aperitif, item.Category);
+        Assert.Contains(@event.DomainEvents, e => e is ItemCategoryCorrectedDomainEvent);
+    }
+
+    [Fact]
+    public void CorrectItemCategory_ActingUserIsCreatorOrOrganizer_CorrectsContributionOfAnotherParticipant()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(regularParticipantId, "Le truc de mamie", "1", EventItemKind.Contribution, DateTime.UtcNow);
+
+        @event.CorrectItemCategory(creatorId, item.Id, EventItemCategory.Desserts);
+
+        Assert.Equal(EventItemCategory.Desserts, item.Category);
+    }
+
+    [Fact]
+    public void CorrectItemCategory_ActingUserIsParticipantNotItemCreatorNorOrganizer_ThrowsParticipantCannotCorrectOthersItemCategoryException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
+
+        Assert.Throws<ParticipantCannotCorrectOthersItemCategoryException>(
+            () => @event.CorrectItemCategory(regularParticipantId, item.Id, EventItemCategory.Drinks));
+    }
+
+    [Fact]
+    public void CorrectItemCategory_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
+
+        Assert.Throws<UserNotEventParticipantException>(
+            () => @event.CorrectItemCategory(Guid.NewGuid(), item.Id, EventItemCategory.Drinks));
+    }
+
+    [Fact]
+    public void CorrectItemCategory_UnknownItemId_ThrowsEventItemNotFoundException()
+    {
+        var @event = CreateEvent(out var creatorId);
+
+        Assert.Throws<EventItemNotFoundException>(
+            () => @event.CorrectItemCategory(creatorId, Guid.NewGuid(), EventItemCategory.Drinks));
+    }
+
+    [Fact]
     public void RemoveItem_UnknownItemId_ThrowsEventItemNotFoundException()
     {
         var @event = CreateEvent(out var creatorId);

@@ -10,6 +10,7 @@ public class EventItemEntity
     public string? Quantity { get; set; }
     public EventItemKind Kind { get; set; }
     public Guid? AssignedToUserId { get; set; }
+    public EventItemCategory? CorrectedCategory { get; set; }
     public Guid CreatedByUserId { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -82,6 +82,10 @@ namespace EventCo.Infrastructure.Migrations
                     b.Property<Guid?>("AssignedToUserId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CorrectedCategory")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 

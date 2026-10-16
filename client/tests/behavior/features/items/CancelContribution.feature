@@ -20,4 +20,4 @@ Fonctionnalité: Annulation d'un article apporté
     Et l'annulation de l'article "Chips" échoue
     Quand j'arrive sur le détail de l'événement
     Et j'annule l'article "Chips"
-    Alors je vois toujours l'article "Chips" dans la section "Assignés"
+    Alors je vois toujours l'article "Chips" assigné

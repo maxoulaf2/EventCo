@@ -11,7 +11,12 @@ Fonctionnalité: Mise à jour temps réel de la liste des articles
   Scénario: L'assignation d'un article se met à jour automatiquement
     Quand j'arrive sur le détail de l'événement
     Et un autre participant assigne l'article "Bûche au chocolat"
-    Alors je vois l'article "Bûche au chocolat" dans la section "Assignés"
+    Alors je vois l'article "Bûche au chocolat" assigné
+
+  Scénario: La correction de la catégorie d'un article se met à jour automatiquement
+    Quand j'arrive sur le détail de l'événement
+    Et un autre participant range l'article "Réserver la salle" dans la catégorie "Matériel et déco"
+    Alors je vois l'article "Réserver la salle" dans la catégorie "Matériel et déco"
 
   Scénario: Un article supprimé par un autre participant disparaît automatiquement
     Quand j'arrive sur le détail de l'événement

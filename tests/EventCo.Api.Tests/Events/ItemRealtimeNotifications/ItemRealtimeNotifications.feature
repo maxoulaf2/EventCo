@@ -21,6 +21,15 @@ Fonctionnalité: Diffusion temps réel des événements d'articles
     Quand j'assigne cet article à ce participant via l'API
     Alors une notification temps réel d'assignation d'article est reçue pour cet article
 
+  Scénario: La correction de la catégorie d'un article est diffusée au groupe temps réel
+    Etant donné une session ouverte via l'API pour "realtime-correct-category-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
+    Et je me connecte au hub temps réel et que je rejoins cet événement
+    Et j'écoute les notifications temps réel d'articles
+    Quand je corrige la catégorie de cet article en "Aperitif" via l'API
+    Alors une notification temps réel de correction de catégorie d'article est reçue pour cet article avec la catégorie "Aperitif"
+
   Scénario: La suppression d'un article est diffusée au groupe temps réel
     Etant donné une session ouverte via l'API pour "realtime-delete-item-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API

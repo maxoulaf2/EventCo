@@ -1,5 +1,5 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen, within } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
@@ -7,31 +7,32 @@ import { renderApp } from '../../../../src/test/render'
 
 const feature = await loadFeature('tests/behavior/features/items/ItemList.feature', { language: 'fr' })
 
-const SECTION_KEY: Record<string, string> = {
-  'À prendre': 'todo',
-  Assignés: 'assigned',
+const CATEGORY_KEY: Record<string, string> = {
+  Apéro: 'Aperitif',
+  Desserts: 'Desserts',
+  Boissons: 'Drinks',
+  Autre: 'Other',
+}
+
+function buildItem(id: string, title: string, category: string, assignedToUserId: string | null = null) {
+  return {
+    id,
+    eventId: 'event-1',
+    title,
+    quantity: null,
+    kind: 'ToBring',
+    category,
+    assignedToUserId,
+    createdAt: '2026-09-01T00:00:00Z',
+  }
 }
 
 function buildItems() {
   return [
-    {
-      id: 'item-1',
-      eventId: 'event-1',
-      title: 'Bûche au chocolat',
-      quantity: '1',
-      kind: 'ToBring',
-      assignedToUserId: null as string | null,
-      createdAt: '2026-09-01T00:00:00Z',
-    },
-    {
-      id: 'item-2',
-      eventId: 'event-1',
-      title: 'Réserver la salle',
-      quantity: null,
-      kind: 'ToBring',
-      assignedToUserId: null as string | null,
-      createdAt: '2026-09-02T00:00:00Z',
-    },
+    // Dans l'ordre où le backend les renvoie (catégorie, à prendre d'abord, ordre alphabétique).
+    buildItem('item-1', 'Bûche au chocolat', 'Desserts'),
+    buildItem('item-3', 'Vin rouge', 'Drinks'),
+    buildItem('item-2', 'Réserver la salle', 'Other'),
   ]
 }
 
@@ -48,26 +49,55 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     cleanup()
   })
 
-  function section(label: string) {
-    return within(screen.getByTestId(`item-list-section-${SECTION_KEY[label]}`))
+  function category(label: string) {
+    return within(screen.getByTestId(`item-list-category-${CATEGORY_KEY[label]}`))
   }
 
-  Scenario('Affichage des articles à prendre', ({ When, Then, And }) => {
+  Scenario('Articles regroupés par catégorie, dans l\'ordre fourni par l\'API', ({ When, Then, And }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
 
-    Then('je vois l\'article "Bûche au chocolat" dans la section "À prendre"', async () => {
+    Then('je vois l\'article "Bûche au chocolat" dans la catégorie "Desserts"', async () => {
       await screen.findByTestId('item-row-item-1')
-      expect(section('À prendre').getByTestId('item-row-item-1')).toBeInTheDocument()
+      expect(category('Desserts').getByTestId('item-row-item-1')).toBeInTheDocument()
     })
 
-    And('je vois l\'article "Réserver la salle" dans la section "À prendre"', () => {
-      expect(section('À prendre').getByTestId('item-row-item-2')).toBeInTheDocument()
+    And('je vois l\'article "Vin rouge" dans la catégorie "Boissons"', () => {
+      expect(category('Boissons').getByTestId('item-row-item-3')).toBeInTheDocument()
+    })
+
+    And('je vois l\'article "Réserver la salle" dans la catégorie "Autre"', () => {
+      expect(category('Autre').getByTestId('item-row-item-2')).toBeInTheDocument()
+    })
+
+    And('les catégories sont affichées dans l\'ordre "Desserts", "Boissons", "Autre"', () => {
+      const displayed = screen.getAllByTestId(/^item-list-category-heading-/).map((heading) => heading.dataset.testid)
+      expect(displayed).toEqual([
+        'item-list-category-heading-Desserts',
+        'item-list-category-heading-Drinks',
+        'item-list-category-heading-Other',
+      ])
+    })
+
+    And('la catégorie "Boissons" est affichée avec son libellé', async () => {
+      await waitFor(() => expect(screen.getByTestId('item-list-category-heading-Drinks')).toHaveTextContent('Boissons · 1'))
     })
   })
 
-  Scenario('Articles à prendre et assignés affichés ensemble', ({ Given, When, And, Then }) => {
+  Scenario('Les catégories sans article ne sont pas affichées', ({ When, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas la catégorie "Apéro"', async () => {
+      await screen.findByTestId('item-row-item-1')
+      expect(screen.queryByTestId('item-list-category-Aperitif')).not.toBeInTheDocument()
+    })
+  })
+
+
+  Scenario('Nombre d\'articles restant à prendre', ({ Given, When, Then }) => {
     Given('l\'article "Bûche au chocolat" est assigné à un participant', () => {
       items[0].assignedToUserId = 'user-2'
     })
@@ -76,27 +106,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    Then('je vois l\'article "Bûche au chocolat" dans la section "Assignés"', async () => {
-      await screen.findByTestId('item-row-item-1')
-      expect(section('Assignés').getByTestId('item-row-item-1')).toBeInTheDocument()
-    })
-
-    And('je vois l\'article "Réserver la salle" dans la section "À prendre"', () => {
-      expect(section('À prendre').getByTestId('item-row-item-2')).toBeInTheDocument()
-    })
-  })
-
-  Scenario('Aucun article dans une section', ({ Given, When, Then }) => {
-    Given('cet événement n\'a aucun article assigné', () => {
-      // Les deux articles par défaut (buildItems) sont déjà non assignés.
-    })
-
-    When('j\'arrive sur le détail de l\'événement', () => {
-      renderApp('/events/event-1')
-    })
-
-    Then('je vois un message indiquant qu\'il n\'y a aucun article dans la section "Assignés"', async () => {
-      await screen.findByTestId('item-list-section-empty-message-assigned')
+    Then('je vois qu\'il reste 2 articles à prendre', async () => {
+      expect(await screen.findByTestId('item-list-to-take-count')).toHaveTextContent('2 à prendre')
     })
   })
 

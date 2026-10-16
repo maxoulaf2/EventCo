@@ -1,17 +1,13 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
+import { expectItemAssigned, expectItemToTake } from '../../../../src/test/items'
 import { server } from '../../../../src/test/mocks/server'
 import { renderApp } from '../../../../src/test/render'
 
 const feature = await loadFeature('tests/behavior/features/items/UnassignItem.feature', { language: 'fr' })
-
-const SECTION_KEY: Record<string, string> = {
-  'À prendre': 'todo',
-  Assignés: 'assigned',
-}
 
 function buildItems() {
   return [
@@ -21,6 +17,7 @@ function buildItems() {
       title: 'Bûche au chocolat',
       quantity: '1',
       kind: 'ToBring',
+      category: 'Desserts',
       assignedToUserId: null as string | null,
       createdAt: '2026-09-01T00:00:00Z',
     },
@@ -30,6 +27,7 @@ function buildItems() {
       title: 'Réserver la salle',
       quantity: null,
       kind: 'ToBring',
+      category: 'Other',
       assignedToUserId: null as string | null,
       createdAt: '2026-09-02T00:00:00Z',
     },
@@ -52,10 +50,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     cleanup()
   })
 
-  function section(label: string) {
-    return within(screen.getByTestId(`item-list-section-${SECTION_KEY[label]}`))
-  }
-
   async function unassign(itemId: string) {
     await screen.findByTestId(`item-row-unassign-button-${itemId}`)
     const user = userEvent.setup()
@@ -75,8 +69,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await unassign('item-1')
     })
 
-    Then('je vois l\'article "Bûche au chocolat" dans la section "À prendre"', async () => {
-      await waitFor(() => expect(section('À prendre').getByTestId('item-row-item-1')).toBeInTheDocument())
+    Then('je vois l\'article "Bûche au chocolat" à prendre', async () => {
+      await expectItemToTake('item-1')
     })
   })
 
@@ -98,8 +92,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await unassign('item-1')
     })
 
-    Then('je vois l\'article "Bûche au chocolat" dans la section "À prendre"', async () => {
-      await waitFor(() => expect(section('À prendre').getByTestId('item-row-item-1')).toBeInTheDocument())
+    Then('je vois l\'article "Bûche au chocolat" à prendre', async () => {
+      await expectItemToTake('item-1')
     })
   })
 
@@ -144,8 +138,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await unassign('item-1')
     })
 
-    Then('je vois l\'article "Bûche au chocolat" dans la section "Assignés"', async () => {
-      await waitFor(() => expect(section('Assignés').getByTestId('item-row-item-1')).toBeInTheDocument())
+    Then('je vois l\'article "Bûche au chocolat" assigné', async () => {
+      await expectItemAssigned('item-1')
     })
   })
 })

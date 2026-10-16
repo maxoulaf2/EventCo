@@ -6,5 +6,6 @@ public sealed record EventItemResponse(
     string Title,
     string? Quantity,
     string Kind,
+    string Category,
     Guid? AssignedToUserId,
     DateTime CreatedAt);

@@ -2,6 +2,7 @@ using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
 using EventCo.Application.Events.AssignItem;
 using EventCo.Application.Events.CreateEvent;
+using EventCo.Application.Events.CorrectItemCategory;
 using EventCo.Application.Events.CreateItem;
 using EventCo.Application.Events.DeleteEvent;
 using EventCo.Application.Events.DeleteItem;
@@ -195,6 +196,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             t.Title,
             t.Quantity,
             t.Kind,
+            t.Category,
             t.AssignedToUserId,
             t.CreatedAt));
 
@@ -214,6 +216,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
             result.Title,
             result.Quantity,
             result.Kind,
+            result.Category,
             result.AssignedToUserId,
             result.CreatedAt);
 
@@ -232,6 +235,14 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> UnassignItem(Guid id, Guid itemId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new UnassignItemCommand(id, itemId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/items/{itemId:guid}/category")]
+    public async Task<IActionResult> CorrectItemCategory(Guid id, Guid itemId, CorrectItemCategoryRequest request, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new CorrectItemCategoryCommand(id, itemId, request.Category), cancellationToken);
 
         return NoContent();
     }

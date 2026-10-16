@@ -3,6 +3,7 @@ import { act, cleanup, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect, vi } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
+import { expectItemAssigned } from '../../../../src/test/items'
 import { renderApp } from '../../../../src/test/render'
 
 // Le Hub SignalR (websocket) n'est pas interceptable par MSW comme le sont les appels `fetch` des
@@ -41,6 +42,7 @@ const defaultItems = [
     title: 'Bûche au chocolat',
     quantity: '1',
     kind: 'ToBring',
+    category: 'Desserts',
     assignedToUserId: null,
     createdAt: '2026-09-01T00:00:00Z',
   },
@@ -50,6 +52,7 @@ const defaultItems = [
     title: 'Réserver la salle',
     quantity: null,
     kind: 'ToBring',
+    category: 'Other',
     assignedToUserId: null,
     createdAt: '2026-09-02T00:00:00Z',
   },
@@ -64,11 +67,16 @@ function emit(event: string, payload: unknown) {
 }
 
 describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) => {
+  // Un message du Hub fait recharger la liste : chaque scénario modifie d'abord ce que renvoie le « serveur »,
+  // comme l'aurait fait l'autre participant, puis émet le message.
+  let serverItems: object[] = defaultItems
+
   BeforeEachScenario(() => {
     registeredHandlers.clear()
     reconnectedCallback = null
     invokeMock.mockClear()
-    server.use(http.get('*/api/events/:id/items', () => HttpResponse.json(defaultItems)))
+    serverItems = defaultItems
+    server.use(http.get('*/api/events/:id/items', () => HttpResponse.json(serverItems)))
   })
 
   AfterEachScenario(() => {
@@ -83,15 +91,18 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     And('un autre participant crée l\'article "Acheter des bougies"', async () => {
       await screen.findByTestId('item-row-item-1')
-      emit('ItemCreated', {
-        itemId: 'item-3',
+      const created = {
+        id: 'item-3',
         eventId: 'event-1',
         title: 'Acheter des bougies',
         quantity: null,
         kind: 'ToBring',
+        category: 'Equipment',
         assignedToUserId: null,
         createdAt: '2026-09-03T00:00:00Z',
-      })
+      }
+      serverItems = [defaultItems[0], created, defaultItems[1]]
+      emit('ItemCreated', { ...created, itemId: created.id })
     })
 
     Then('je vois l\'article "Acheter des bougies"', async () => {
@@ -107,12 +118,29 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     And('un autre participant assigne l\'article "Bûche au chocolat"', async () => {
       await screen.findByTestId('item-row-item-1')
-      emit('ItemAssigned', { ...defaultItems[0], itemId: defaultItems[0].id, assignedToUserId: 'user-2' })
+      serverItems = [{ ...defaultItems[0], assignedToUserId: 'user-2' }, defaultItems[1]]
+      emit('ItemAssigned', { ...serverItems[0], itemId: defaultItems[0].id })
     })
 
-    Then('je vois l\'article "Bûche au chocolat" dans la section "Assignés"', async () => {
+    Then('je vois l\'article "Bûche au chocolat" assigné', async () => {
+      await expectItemAssigned('item-1')
+    })
+  })
+
+  Scenario('La correction de la catégorie d\'un article se met à jour automatiquement', ({ When, And, Then }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    And('un autre participant range l\'article "Réserver la salle" dans la catégorie "Matériel et déco"', async () => {
+      await screen.findByTestId('item-row-item-2')
+      serverItems = [defaultItems[0], { ...defaultItems[1], category: 'Equipment' }]
+      emit('ItemCategoryCorrected', { ...serverItems[1], itemId: defaultItems[1].id })
+    })
+
+    Then('je vois l\'article "Réserver la salle" dans la catégorie "Matériel et déco"', async () => {
       await waitFor(() =>
-        expect(within(screen.getByTestId('item-list-section-assigned')).getByTestId('item-row-item-1')).toBeInTheDocument(),
+        expect(within(screen.getByTestId('item-list-category-Equipment')).getByTestId('item-row-item-2')).toBeInTheDocument(),
       )
     })
   })
@@ -124,6 +152,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     And('un autre participant supprime l\'article "Réserver la salle"', async () => {
       await screen.findByTestId('item-row-item-2')
+      serverItems = [defaultItems[0]]
       emit('ItemDeleted', { eventId: 'event-1', itemId: 'item-2' })
     })
 

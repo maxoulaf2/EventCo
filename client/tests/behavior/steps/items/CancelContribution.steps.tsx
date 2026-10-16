@@ -1,8 +1,9 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
+import { expectItemAssigned } from '../../../../src/test/items'
 import { server } from '../../../../src/test/mocks/server'
 import { renderApp } from '../../../../src/test/render'
 
@@ -14,6 +15,7 @@ const CONTRIBUTION = {
   title: 'Chips',
   quantity: null,
   kind: 'Contribution',
+  category: 'Aperitif',
   assignedToUserId: 'user-2',
   createdAt: '2026-09-01T00:00:00Z',
 }
@@ -102,10 +104,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await cancel()
     })
 
-    Then('je vois toujours l\'article "Chips" dans la section "Assignés"', async () => {
-      await waitFor(() =>
-        expect(within(screen.getByTestId('item-list-section-assigned')).getByTestId('item-row-item-1')).toBeInTheDocument(),
-      )
+    Then('je vois toujours l\'article "Chips" assigné', async () => {
+      await expectItemAssigned('item-1')
     })
   })
 })

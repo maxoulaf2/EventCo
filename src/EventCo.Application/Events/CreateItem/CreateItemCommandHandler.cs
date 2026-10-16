@@ -29,6 +29,7 @@ public sealed class CreateItemCommandHandler(
             item.Title,
             item.Quantity,
             item.Kind.ToString(),
+            item.Category.ToString(),
             item.AssignedToUserId,
             item.CreatedAt);
     }

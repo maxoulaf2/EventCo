@@ -95,6 +95,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Quantity | string? | texte libre (ex: "2", "1kg") |
 | Kind | enum | `ToBring` (« à prendre » : demande d'un créateur/co-organisateur, créée sans attribution), `Contribution` (« apporté » : ce qu'un participant déclare apporter, attribué à son créateur dès la création, définitivement) |
 | AssignedToUserId | Guid? | null = non assigné (jamais null pour une `Contribution`) |
+| CorrectedCategory | enum? | `Aperitif`, `MainCourses`, `CheeseAndBread`, `Desserts`, `Drinks`, `Equipment`, `Other`. null = catégorie déduite de l'intitulé à la lecture (dictionnaire de mots-clés dans le Domain), cf. `docs/adr/0001-categorie-deduite-a-la-lecture.md` |
 | CreatedAt | DateTime | |
 
 ### 3.2 Règles de gestion des rôles
@@ -102,6 +103,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les articles, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
 - Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement, s'auto-assigner des articles à prendre et ajouter ce qu'il apporte — mais pas d'article à prendre.
 - Un **article apporté** (`Kind = Contribution`) ne peut être ni désassigné ni réattribué, par personne : seule la personne qui l'apporte peut l'annuler (le supprimer), y compris vis-à-vis du créateur/des co-organisateurs.
+- La **catégorie** d'un article n'est jamais demandée à la création. Elle peut être corrigée après coup par le créateur de l'article, le créateur de l'événement ou un co-organisateur, quelle que soit la nature de l'article.
 - Le créateur possède automatiquement une entrée `EventParticipant` avec `Role = Organizer` ; la distinction "droits ultimes" se fait via la comparaison avec `Event.CreatedByUserId`.
 
 ---
@@ -128,7 +130,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Budget partagé (suivi des dépenses, calcul de qui doit combien à qui)
 - Templates d'événements pré-remplis (ex: liste de courses type "Noël")
 - Photos partagées post-événement
-- Catégories d'articles personnalisables par événement
+- Catégorisation automatique des articles (liste fixe, corrigeable après coup)
 
 ### Won't have (hors scope MVP)
 - Application mobile native

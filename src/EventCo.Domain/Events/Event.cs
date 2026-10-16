@@ -228,6 +228,20 @@ public class Event : Entity
         AddDomainEvent(new ItemUnassignedDomainEvent(item));
     }
 
+    // Contrairement à l'attribution d'un article apporté, la catégorie n'engage pas la personne qui apporte :
+    // elle ne sert qu'à ranger la liste, d'où la correction ouverte aussi au créateur et aux co-organisateurs.
+    public void CorrectItemCategory(Guid actingUserId, Guid itemId, EventItemCategory category)
+    {
+        EnsureActingUserIsParticipant(actingUserId);
+        var item = GetItem(itemId);
+
+        if (item.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+            throw new ParticipantCannotCorrectOthersItemCategoryException(Id, itemId, actingUserId);
+
+        item.CorrectCategory(category);
+        AddDomainEvent(new ItemCategoryCorrectedDomainEvent(item));
+    }
+
     public void RemoveItem(Guid actingUserId, Guid itemId)
     {
         var item = GetItem(itemId);

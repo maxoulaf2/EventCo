@@ -52,6 +52,9 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case ItemUnassignedDomainEvent e:
                     await UpdateItemAssignment(e.Item, cancellationToken);
                     break;
+                case ItemCategoryCorrectedDomainEvent e:
+                    await UpdateItemCategory(e.Item, cancellationToken);
+                    break;
                 case ItemDeletedDomainEvent e:
                     await DeleteItem(e.ItemId, cancellationToken);
                     break;
@@ -130,6 +133,12 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entity = await FindItemEntityAsync(item.Id, cancellationToken);
         entity.AssignedToUserId = item.AssignedToUserId;
+    }
+
+    private async Task UpdateItemCategory(EventItem item, CancellationToken cancellationToken)
+    {
+        var entity = await FindItemEntityAsync(item.Id, cancellationToken);
+        entity.CorrectedCategory = item.CorrectedCategory;
     }
 
     private async Task DeleteItem(Guid itemId, CancellationToken cancellationToken)

@@ -137,6 +137,18 @@ export const handlers = [
 
   http.get('*/api/events/:id/items', () => HttpResponse.json([])),
 
+  http.get('*/api/item-categories', () =>
+    HttpResponse.json([
+      { key: 'Aperitif', label: 'Apéro' },
+      { key: 'MainCourses', label: 'Entrées et plats' },
+      { key: 'CheeseAndBread', label: 'Fromage et pain' },
+      { key: 'Desserts', label: 'Desserts' },
+      { key: 'Drinks', label: 'Boissons' },
+      { key: 'Equipment', label: 'Matériel et déco' },
+      { key: 'Other', label: 'Autre' },
+    ]),
+  ),
+
   http.put('*/api/events/:id/image', ({ params }) =>
     HttpResponse.json({ eventId: params.id, imageUrl: `/uploads/event-images/${String(params.id)}/image-1.jpg` }),
   ),

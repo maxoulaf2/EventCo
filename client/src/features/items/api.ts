@@ -1,5 +1,5 @@
 import { apiFetch } from '../../shared/lib/api'
-import type { CreateItemInput, EventItem } from './types'
+import type { CreateItemInput, EventItem, ItemCategory } from './types'
 
 export function getEventItems(eventId: string): Promise<EventItem[]> {
   return apiFetch<EventItem[]>(`/api/events/${eventId}/items`)
@@ -18,6 +18,17 @@ export function assignItem(eventId: string, itemId: string, userId: string): Pro
 
 export function unassignItem(eventId: string, itemId: string): Promise<void> {
   return apiFetch(`/api/events/${eventId}/items/${itemId}/unassign`, { method: 'POST' })
+}
+
+export function getItemCategories(): Promise<ItemCategory[]> {
+  return apiFetch<ItemCategory[]>('/api/item-categories')
+}
+
+export function correctItemCategory(eventId: string, itemId: string, category: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/items/${itemId}/category`, {
+    method: 'PUT',
+    body: JSON.stringify({ category }),
+  })
 }
 
 export function deleteItem(eventId: string, itemId: string): Promise<void> {

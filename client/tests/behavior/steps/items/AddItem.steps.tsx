@@ -1,18 +1,14 @@
 import { describeFeature, loadFeature } from '@amiceli/vitest-cucumber'
-import { cleanup, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
+import { expectItemAssigned, expectItemToTake } from '../../../../src/test/items'
 import { server } from '../../../../src/test/mocks/server'
 import { renderApp } from '../../../../src/test/render'
 import type { EventItemKind } from '../../../../src/features/items/types'
 
 const feature = await loadFeature('tests/behavior/features/items/AddItem.feature', { language: 'fr' })
-
-const SECTION_KEY: Record<string, string> = {
-  'À prendre': 'todo',
-  Assignés: 'assigned',
-}
 
 const KIND_LABEL: Record<string, EventItemKind> = {
   'à prendre': 'ToBring',
@@ -43,6 +39,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
             title: body.title,
             quantity: body.quantity,
             kind: body.kind,
+            category: 'Equipment',
             assignedToUserId: body.kind === 'Contribution' ? currentUserId : null,
             createdAt: '2026-09-17T00:00:00Z',
           },
@@ -59,14 +56,6 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     await user.click(screen.getByTestId('add-item-submit-button'))
   }
 
-  async function expectItemInSection(sectionLabel: string) {
-    await waitFor(() =>
-      expect(
-        within(screen.getByTestId(`item-list-section-${SECTION_KEY[sectionLabel]}`)).getByTestId('item-row-title-item-new'),
-      ).toHaveTextContent('Guirlandes'),
-    )
-  }
-
   Scenario('Un organisateur ajoute un article à prendre', ({ When, And, Then }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
@@ -80,8 +69,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await waitFor(() => expect(sentKind).toBe(KIND_LABEL['à prendre']))
     })
 
-    And('je vois l\'article "Guirlandes" dans la section "À prendre"', async () => {
-      await expectItemInSection('À prendre')
+    And('je vois l\'article "Guirlandes" à prendre', async () => {
+      await expectItemToTake('item-new')
     })
 
     And('le formulaire d\'ajout d\'article est réinitialisé', () => {
@@ -111,8 +100,8 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await waitFor(() => expect(sentKind).toBe(KIND_LABEL['apporté']))
     })
 
-    And('je vois l\'article "Guirlandes" dans la section "Assignés"', async () => {
-      await expectItemInSection('Assignés')
+    And('je vois l\'article "Guirlandes" assigné', async () => {
+      await expectItemAssigned('item-new')
     })
   })
 

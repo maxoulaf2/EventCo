@@ -7,7 +7,7 @@ Fonctionnalité: Ajout rapide d'un article à un événement
     Quand j'arrive sur le détail de l'événement
     Et j'ajoute l'article "Guirlandes"
     Alors l'article est envoyé comme "à prendre"
-    Et je vois l'article "Guirlandes" dans la section "À prendre"
+    Et je vois l'article "Guirlandes" à prendre
     Et le formulaire d'ajout d'article est réinitialisé
 
   Scénario: Un participant simple ajoute ce qu'il apporte
@@ -15,7 +15,7 @@ Fonctionnalité: Ajout rapide d'un article à un événement
     Quand j'arrive sur le détail de l'événement
     Et j'ajoute l'article "Guirlandes"
     Alors l'article est envoyé comme "apporté"
-    Et je vois l'article "Guirlandes" dans la section "Assignés"
+    Et je vois l'article "Guirlandes" assigné
 
   Scénario: Erreur lors de l'ajout d'un article
     Etant donné que l'ajout d'un article échoue

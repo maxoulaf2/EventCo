@@ -138,7 +138,10 @@
 - [ ] Budget partagé (suivi des dépenses, calcul des remboursements)
 - [ ] Templates d'événements pré-remplis
 - [ ] Photos partagées post-événement
-- [ ] Catégories d'articles personnalisables par événement
+- [x] Catégorisation automatique des articles : 7 catégories fixes (Apéro, Entrées et plats, Fromage et pain, Desserts, Boissons, Matériel et déco, Autre), déduites de l'intitulé par un dictionnaire de mots-clés dans le Domain (fonction pure), jamais demandées à la création ; correction après coup par le créateur de l'article, le créateur de l'événement ou un co-organisateur (seule la catégorie corrigée est stockée, cf. `docs/adr/0001-categorie-deduite-a-la-lecture.md`), propagée en temps réel ; liste d'articles regroupée par catégorie (catégories vides masquées, compteur « N à prendre » dans le titre, articles à prendre puis assignés, ordre alphabétique), correction via un `<select>` natif
+  > Remplace « Catégories d'articles personnalisables par événement » (2026-10-15, à la demande explicite du développeur, traitée en priorité dans ce lot) : le besoin est le même (rendre la liste lisible), mais sans aucune saisie supplémentaire à la création ni catégorie propre à chaque événement. Vocabulaire dans `CONTEXT.md`.
+  > Règle du dictionnaire : intitulé normalisé (minuscules, sans accents, pluriels simples en -s/-x) ; une expression de plusieurs mots l'emporte sur un mot seul ; à égalité, le premier mot reconnu dans l'intitulé l'emporte ; si rien ne correspond, « Autre ».
+  > Les sections « À prendre » / « Assignés » disparaissent : références visuelles du détail d'un événement (`apparence-detail-evenement.feature`) obsolètes, à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.
 - [ ] Commentaires / chat par événement
 - [ ] Notification email : article assigné
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)

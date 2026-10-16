@@ -11,6 +11,7 @@ Fonctionnalité: Consultation des articles d'un événement via l'API
     Alors la réponse de consultation des articles a le statut 200
     Et les articles consultés retournés contiennent 1 article
     Et les articles consultés retournés contiennent un article "Bûche au chocolat"
+    Et l'article consulté retourné "Bûche au chocolat" est dans la catégorie "Desserts"
 
   Scénario: Consultation des articles d'un événement inexistant
     Etant donné une session ouverte via l'API pour "get-event-items-missing-event-api-test@example.com"

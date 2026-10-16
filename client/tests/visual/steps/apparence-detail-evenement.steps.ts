@@ -29,6 +29,7 @@ const items = [
     title: 'Bûche au chocolat',
     quantity: '1',
     kind: 'ToBring',
+    category: 'Desserts',
     assignedToUserId: null,
     createdAt: '2026-09-01T00:00:00Z',
   },
@@ -38,6 +39,7 @@ const items = [
     title: 'Réserver la salle',
     quantity: null,
     kind: 'ToBring',
+    category: 'Other',
     assignedToUserId: null,
     createdAt: '2026-09-02T00:00:00Z',
   },
@@ -60,6 +62,19 @@ async function mockEventDetail(page: import('@playwright/test').Page) {
     }),
   )
   await page.route('**/api/events/event-1/items', (route) => route.fulfill({ json: items }))
+  await page.route('**/api/item-categories', (route) =>
+    route.fulfill({
+      json: [
+        { key: 'Aperitif', label: 'Apéro' },
+        { key: 'MainCourses', label: 'Entrées et plats' },
+        { key: 'CheeseAndBread', label: 'Fromage et pain' },
+        { key: 'Desserts', label: 'Desserts' },
+        { key: 'Drinks', label: 'Boissons' },
+        { key: 'Equipment', label: 'Matériel et déco' },
+        { key: 'Other', label: 'Autre' },
+      ],
+    }),
+  )
   // ItemList ouvre une connexion SignalR (`useItemRealtime`) vers `/hubs/events`, proxifiée par Vite
   // vers la vraie API (cf. vite.config.ts) : absente en test visuel, d'où un abort de la négociation
   // pour éviter que le navigateur tente de joindre un backend qui n'existe pas ici.
@@ -113,17 +128,19 @@ Given("je suis sur le détail d'un événement en tant que simple participant qu
   await mockEventDetail(page)
   await page.route('**/api/events/event-1/items', (route) =>
     route.fulfill({
+      // Chips (Apéro) en tête : ordre dans lequel le backend renvoie les articles.
       json: [
-        ...items,
         {
           id: 'item-3',
           eventId: 'event-1',
           title: 'Chips',
           quantity: null,
           kind: 'Contribution',
+          category: 'Aperitif',
           assignedToUserId: 'user-2',
           createdAt: '2026-09-03T00:00:00Z',
         },
+        ...items,
       ],
     }),
   )

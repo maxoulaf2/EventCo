@@ -27,6 +27,10 @@ public class EventItemConfiguration : IEntityTypeConfiguration<EventItemEntity>
             .HasMaxLength(20)
             .IsRequired();
 
+        builder.Property(t => t.CorrectedCategory)
+            .HasConversion<string>()
+            .HasMaxLength(20);
+
         builder.Property(t => t.CreatedByUserId).IsRequired();
 
         builder.Property(t => t.CreatedAt).IsRequired();

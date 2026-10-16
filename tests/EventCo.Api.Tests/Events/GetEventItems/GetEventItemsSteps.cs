@@ -53,4 +53,8 @@ public sealed class GetEventItemsSteps(SessionContext sessionContext, EventConte
     [Then(@"les articles consultés retournés contiennent un article ""(.*)""")]
     public void AlorsLesArticlesConsultesRetournesContiennentUnArticle(string title) =>
         Assert.Single(_consultedItems!, t => t.Title == title);
+
+    [Then(@"l'article consulté retourné ""(.*)"" est dans la catégorie ""(.*)""")]
+    public void AlorsLarticleConsulteRetourneEstDansLaCategorie(string title, string category) =>
+        Assert.Equal(category, _consultedItems!.Single(t => t.Title == title).Category);
 }

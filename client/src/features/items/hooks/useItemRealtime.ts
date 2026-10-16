@@ -1,52 +1,26 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { createEventHubConnection } from '../../../shared/lib/signalr'
-import type { EventItem, ItemDeletedRealtimePayload, ItemRealtimePayload } from '../types'
 
-function toEventItem(payload: ItemRealtimePayload): EventItem {
-  return {
-    id: payload.itemId,
-    eventId: payload.eventId,
-    title: payload.title,
-    quantity: payload.quantity,
-    kind: payload.kind,
-    assignedToUserId: payload.assignedToUserId,
-    createdAt: payload.createdAt,
-  }
-}
-
-// Connecte l'événement courant au Hub SignalR `EventHub` (`/hubs/events`) et tient à jour le cache
-// React Query des articles (clé partagée avec `useEventItems`) au fil des messages reçus, pour que
-// `ItemList` reflète en direct les changements faits par les autres participants.
+// Connecte l'événement courant au Hub SignalR `EventHub` (`/hubs/events`) et recharge la liste des articles
+// (clé partagée avec `useEventItems`) à chaque message reçu, pour que `ItemList` reflète en direct les
+// changements faits par les autres participants. Recharger plutôt qu'appliquer le message au cache : l'ordre
+// de la liste est décidé par le backend, et un article assigné ou recatégorisé doit changer de place.
 export function useItemRealtime(eventId: string) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
-    const queryKey = ['events', eventId, 'items']
     const connection = createEventHubConnection()
 
-    function upsertItem(payload: ItemRealtimePayload) {
-      const item = toEventItem(payload)
-      queryClient.setQueryData<EventItem[]>(queryKey, (items) => {
-        if (!items) {
-          return items
-        }
-        const index = items.findIndex((existing) => existing.id === item.id)
-        if (index === -1) {
-          return [...items, item]
-        }
-        return items.map((existing, i) => (i === index ? item : existing))
-      })
+    function reloadItems() {
+      void queryClient.invalidateQueries({ queryKey: ['events', eventId, 'items'] })
     }
 
-    function removeItem({ itemId }: ItemDeletedRealtimePayload) {
-      queryClient.setQueryData<EventItem[]>(queryKey, (items) => items?.filter((item) => item.id !== itemId))
-    }
-
-    connection.on('ItemCreated', upsertItem)
-    connection.on('ItemAssigned', upsertItem)
-    connection.on('ItemUnassigned', upsertItem)
-    connection.on('ItemDeleted', removeItem)
+    connection.on('ItemCreated', reloadItems)
+    connection.on('ItemAssigned', reloadItems)
+    connection.on('ItemUnassigned', reloadItems)
+    connection.on('ItemCategoryCorrected', reloadItems)
+    connection.on('ItemDeleted', reloadItems)
 
     connection
       .start()

@@ -8,5 +8,6 @@ public sealed record EventItemSummary(
     string Title,
     string? Quantity,
     string Kind,
+    string Category,
     Guid? AssignedToUserId,
     DateTime CreatedAt);

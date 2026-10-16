@@ -1,5 +1,6 @@
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
+using EventCo.Application.Events.AssignItem;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateItem;
 using EventCo.Application.Events.GetEventItems;
@@ -56,6 +57,14 @@ public sealed class GetEventItemsSteps
         await dispatcher.Send(new CreateItemCommand(_existingEventId!.Value, title, null, "ToBring"), CancellationToken.None);
     }
 
+    [Given(@"un article ""(.*)"" est ajouté à cet événement et je le prends")]
+    public async Task EtantDonneUnArticleEstAjouteACetEvenementEtJeLePrends(string title)
+    {
+        var dispatcher = _serviceProvider.GetRequiredService<ICommandDispatcher>();
+        var item = await dispatcher.Send(new CreateItemCommand(_existingEventId!.Value, title, null, "ToBring"), CancellationToken.None);
+        await dispatcher.Send(new AssignItemCommand(_existingEventId.Value, item.ItemId, _currentUserContext.UserId), CancellationToken.None);
+    }
+
     [When(@"je consulte les articles de cet événement")]
     public async Task QuandJeConsulteLesArticlesDeCetEvenement() => await ConsulterLesArticles(_existingEventId!.Value);
 
@@ -98,4 +107,12 @@ public sealed class GetEventItemsSteps
     [Then(@"l'événement consulté a un article ""(.*)""")]
     public void AlorsLevenementConsulteAUnArticle(string title) =>
         Assert.Single(_lastResult!.Items, t => t.Title == title);
+
+    [Then(@"les articles consultés sont dans l'ordre ""(.*)""")]
+    public void AlorsLesArticlesConsultesSontDansLordre(string titles) =>
+        Assert.Equal(titles.Split("\", \""), _lastResult!.Items.Select(t => t.Title));
+
+    [Then(@"l'article consulté ""(.*)"" est dans la catégorie ""(.*)""")]
+    public void AlorsLarticleConsulteEstDansLaCategorie(string title, string category) =>
+        Assert.Equal(category, _lastResult!.Items.Single(t => t.Title == title).Category);
 }

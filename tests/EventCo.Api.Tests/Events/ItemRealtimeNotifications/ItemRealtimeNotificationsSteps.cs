@@ -12,6 +12,7 @@ public sealed class ItemRealtimeNotificationsSteps(RealtimeHubConnectionContext 
 
     private readonly TaskCompletionSource<ItemRealtimeDto> _itemCreated = new();
     private readonly TaskCompletionSource<ItemRealtimeDto> _itemAssigned = new();
+    private readonly TaskCompletionSource<ItemRealtimeDto> _itemCategoryCorrected = new();
     private readonly TaskCompletionSource<ItemDeletedRealtimeDto> _itemDeleted = new();
 
     [Given(@"j'écoute les notifications temps réel d'articles")]
@@ -21,6 +22,7 @@ public sealed class ItemRealtimeNotificationsSteps(RealtimeHubConnectionContext 
 
         connection.On<ItemRealtimeDto>("ItemCreated", item => _itemCreated.TrySetResult(item));
         connection.On<ItemRealtimeDto>("ItemAssigned", item => _itemAssigned.TrySetResult(item));
+        connection.On<ItemRealtimeDto>("ItemCategoryCorrected", item => _itemCategoryCorrected.TrySetResult(item));
         connection.On<ItemDeletedRealtimeDto>("ItemDeleted", item => _itemDeleted.TrySetResult(item));
     }
 
@@ -33,6 +35,13 @@ public sealed class ItemRealtimeNotificationsSteps(RealtimeHubConnectionContext 
     {
         var item = await AttendreReception(_itemAssigned.Task);
         Assert.NotNull(item.AssignedToUserId);
+    }
+
+    [Then(@"une notification temps réel de correction de catégorie d'article est reçue pour cet article avec la catégorie ""(.*)""")]
+    public async Task AlorsUneNotificationTempsReelDeCorrectionDeCategorieDarticleEstRecuePourCetArticle(string category)
+    {
+        var item = await AttendreReception(_itemCategoryCorrected.Task);
+        Assert.Equal(category, item.Category);
     }
 
     [Then(@"une notification temps réel de suppression d'article est reçue pour cet article")]
