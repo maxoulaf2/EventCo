@@ -44,6 +44,9 @@ Projet personnel de montée en compétences, mené selon des standards professio
 # Tout démarrer en une commande (Docker si besoin + migrations + API + frontend, chacun dans sa fenêtre)
 pwsh -File scripts/start-dev.ps1
 
+# Remplacer la base locale par une copie de la prod Neon (URI postgresql://... demandée au lancement, ou via $env:NEON_DATABASE_URL)
+pwsh -File scripts/clone-prod-db.ps1
+
 # Backend
 dotnet build
 dotnet run --project src/EventCo.Api --launch-profile https
