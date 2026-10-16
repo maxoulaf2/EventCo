@@ -21,11 +21,12 @@ public sealed class GetEventItemsQueryHandler(
         var currentUser = await userRepository.GetByIdAsync(currentUserId, cancellationToken);
         @event.EnsureCanBeViewedBy(currentUserId, currentUser?.IsAdmin == true);
 
-        // Ordre d'affichage décidé ici, le frontend regroupe sans retrier : catégories dans l'ordre de l'enum
-        // (celui d'un repas), ce qui reste à prendre d'abord, puis l'ordre alphabétique.
+        // Ordre d'affichage décidé ici, le frontend regroupe sans retrier : tout ce qui reste à prendre en tête
+        // (mis en valeur à part), puis les catégories dans l'ordre de l'enum (celui d'un repas), puis l'ordre
+        // alphabétique.
         var items = @event.Items
-            .OrderBy(t => t.Category)
-            .ThenBy(t => t.AssignedToUserId is not null)
+            .OrderBy(t => t.AssignedToUserId is not null)
+            .ThenBy(t => t.Category)
             .ThenBy(t => t.Title, FrenchTitleComparer)
             .Select(t => new EventItemSummary(
                 t.Id,

@@ -128,8 +128,9 @@ Given("je suis sur le détail d'un événement en tant que simple participant qu
   await mockEventDetail(page)
   await page.route('**/api/events/event-1/items', (route) =>
     route.fulfill({
-      // Chips (Apéro) en tête : ordre dans lequel le backend renvoie les articles.
+      // Ordre dans lequel le backend renvoie les articles : à prendre d'abord, puis les articles pris.
       json: [
+        ...items,
         {
           id: 'item-3',
           eventId: 'event-1',
@@ -140,7 +141,6 @@ Given("je suis sur le détail d'un événement en tant que simple participant qu
           assignedToUserId: 'user-2',
           createdAt: '2026-09-03T00:00:00Z',
         },
-        ...items,
       ],
     }),
   )

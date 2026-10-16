@@ -20,15 +20,16 @@ Fonctionnalité: Consultation des articles d'un événement
     Et l'article consulté "Bûche au chocolat" est dans la catégorie "Desserts"
     Et l'article consulté "Réserver la salle" est dans la catégorie "Other"
 
-  Scénario: Articles triés par catégorie, puis à prendre d'abord, puis par ordre alphabétique
+  Scénario: Articles à prendre d'abord, puis triés par catégorie, puis par ordre alphabétique
     Etant donné un événement "Repas de Noël" prévu le "2026-12-24" au lieu "Chez Alice" dont je veux consulter les articles
     Et un article "Réserver la salle" est ajouté à cet événement
     Et un article "Tiramisu" est ajouté à cet événement
     Et un article "Bûche au chocolat" est ajouté à cet événement et je le prends
+    Et un article "Vin rouge" est ajouté à cet événement et je le prends
     Et un article "Éclairs" est ajouté à cet événement
-    Et un article "Chips" est ajouté à cet événement
+    Et un article "Chips" est ajouté à cet événement et je le prends
     Quand je consulte les articles de cet événement
-    Alors les articles consultés sont dans l'ordre "Chips", "Éclairs", "Tiramisu", "Bûche au chocolat", "Réserver la salle"
+    Alors les articles consultés sont dans l'ordre "Éclairs", "Tiramisu", "Réserver la salle", "Chips", "Bûche au chocolat", "Vin rouge"
 
   Scénario: Consultation des articles d'un événement inexistant
     Quand je consulte les articles d'un événement inexistant

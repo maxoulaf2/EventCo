@@ -3,6 +3,7 @@ import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import { HttpResponse, http } from 'msw'
 import { expect } from 'vitest'
 import { server } from '../../../../src/test/mocks/server'
+import { expectItemToTake } from '../../../../src/test/items'
 import { renderApp } from '../../../../src/test/render'
 
 const feature = await loadFeature('tests/behavior/features/items/ItemList.feature', { language: 'fr' })
@@ -28,11 +29,11 @@ function buildItem(id: string, title: string, category: string, assignedToUserId
 }
 
 function buildItems() {
+  // Dans l'ordre où le backend les renvoie (à prendre d'abord, puis catégorie, puis ordre alphabétique).
   return [
-    // Dans l'ordre où le backend les renvoie (catégorie, à prendre d'abord, ordre alphabétique).
-    buildItem('item-1', 'Bûche au chocolat', 'Desserts'),
-    buildItem('item-3', 'Vin rouge', 'Drinks'),
     buildItem('item-2', 'Réserver la salle', 'Other'),
+    buildItem('item-1', 'Bûche au chocolat', 'Desserts', 'user-2'),
+    buildItem('item-3', 'Vin rouge', 'Drinks', 'user-1'),
   ]
 }
 
@@ -53,7 +54,23 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     return within(screen.getByTestId(`item-list-category-${CATEGORY_KEY[label]}`))
   }
 
-  Scenario('Articles regroupés par catégorie, dans l\'ordre fourni par l\'API', ({ When, Then, And }) => {
+  Scenario('Les articles à prendre sont mis en valeur en tête de liste', ({ When, Then, And }) => {
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je vois la section "À prendre" en premier, avec 1 article', async () => {
+      const heading = await screen.findByTestId('item-list-to-take-heading')
+      expect(heading).toHaveTextContent('À prendre · 1')
+      expect(screen.getByTestId('item-list').querySelector('section')).toBe(screen.getByTestId('item-list-to-take'))
+    })
+
+    And('je vois l\'article "Réserver la salle" à prendre', async () => {
+      await expectItemToTake('item-2')
+    })
+  })
+
+  Scenario('Les articles pris sont regroupés par catégorie, dans l\'ordre fourni par l\'API', ({ When, Then, And }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
@@ -67,17 +84,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       expect(category('Boissons').getByTestId('item-row-item-3')).toBeInTheDocument()
     })
 
-    And('je vois l\'article "Réserver la salle" dans la catégorie "Autre"', () => {
-      expect(category('Autre').getByTestId('item-row-item-2')).toBeInTheDocument()
-    })
-
-    And('les catégories sont affichées dans l\'ordre "Desserts", "Boissons", "Autre"', () => {
+    And('les catégories sont affichées dans l\'ordre "Desserts", "Boissons"', () => {
       const displayed = screen.getAllByTestId(/^item-list-category-heading-/).map((heading) => heading.dataset.testid)
-      expect(displayed).toEqual([
-        'item-list-category-heading-Desserts',
-        'item-list-category-heading-Drinks',
-        'item-list-category-heading-Other',
-      ])
+      expect(displayed).toEqual(['item-list-category-heading-Desserts', 'item-list-category-heading-Drinks'])
     })
 
     And('la catégorie "Boissons" est affichée avec son libellé', async () => {
@@ -85,7 +94,7 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
     })
   })
 
-  Scenario('Les catégories sans article ne sont pas affichées', ({ When, Then }) => {
+  Scenario('Les catégories sans article pris ne sont pas affichées', ({ When, Then, And }) => {
     When('j\'arrive sur le détail de l\'événement', () => {
       renderApp('/events/event-1')
     })
@@ -94,11 +103,14 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       await screen.findByTestId('item-row-item-1')
       expect(screen.queryByTestId('item-list-category-Aperitif')).not.toBeInTheDocument()
     })
+
+    And('je ne vois pas la catégorie "Autre"', () => {
+      expect(screen.queryByTestId('item-list-category-Other')).not.toBeInTheDocument()
+    })
   })
 
-
-  Scenario('Nombre d\'articles restant à prendre', ({ Given, When, Then }) => {
-    Given('l\'article "Bûche au chocolat" est assigné à un participant', () => {
+  Scenario('Sans article à prendre, la section "À prendre" n\'est pas affichée', ({ Given, When, Then }) => {
+    Given('l\'article "Réserver la salle" est assigné à un participant', () => {
       items[0].assignedToUserId = 'user-2'
     })
 
@@ -106,8 +118,9 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
       renderApp('/events/event-1')
     })
 
-    Then('je vois qu\'il reste 2 articles à prendre', async () => {
-      expect(await screen.findByTestId('item-list-to-take-count')).toHaveTextContent('2 à prendre')
+    Then('je ne vois pas la section "À prendre"', async () => {
+      await screen.findByTestId('item-row-item-2')
+      expect(screen.queryByTestId('item-list-to-take')).not.toBeInTheDocument()
     })
   })
 

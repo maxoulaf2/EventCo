@@ -17,7 +17,8 @@ function buildItems() {
       quantity: null,
       kind: 'ToBring',
       category: 'Other',
-      assignedToUserId: null as string | null,
+      // Déjà pris : un article pris est rangé dans sa catégorie (un article à prendre reste dans « À prendre »).
+      assignedToUserId: 'user-3' as string | null,
       createdAt: '2026-09-01T00:00:00Z',
     },
     {

@@ -128,13 +128,17 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
   })
 
   Scenario('La correction de la catégorie d\'un article se met à jour automatiquement', ({ When, And, Then }) => {
+    // Article déjà pris : seul un article pris est rangé dans sa catégorie.
+    const takenItem = { ...defaultItems[1], assignedToUserId: 'user-2' }
+
     When('j\'arrive sur le détail de l\'événement', () => {
+      serverItems = [defaultItems[0], takenItem]
       renderApp('/events/event-1')
     })
 
     And('un autre participant range l\'article "Réserver la salle" dans la catégorie "Matériel et déco"', async () => {
       await screen.findByTestId('item-row-item-2')
-      serverItems = [defaultItems[0], { ...defaultItems[1], category: 'Equipment' }]
+      serverItems = [defaultItems[0], { ...takenItem, category: 'Equipment' }]
       emit('ItemCategoryCorrected', { ...serverItems[1], itemId: defaultItems[1].id })
     })
 

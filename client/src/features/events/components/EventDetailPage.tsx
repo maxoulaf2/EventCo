@@ -163,7 +163,8 @@ export function EventDetailPage() {
 
       {event && (
         <>
-          <div className="flex flex-col gap-6 px-5.5 pt-4 lg:grid lg:grid-cols-2 lg:gap-10 lg:px-8.5 lg:pb-9">
+          {/* pb-24 : le champ d'ajout d'article est en bas de page ; sans marge, Firefox Android (barre d'adresse en bas) le laisse sous le clavier. */}
+          <div className="flex flex-col gap-6 px-5.5 pt-4 pb-24 lg:grid lg:grid-cols-2 lg:gap-10 lg:px-8.5 lg:pb-9">
             <div className="flex flex-col">
               {event.imageUrl && (
                 <div className="h-52 flex-none overflow-hidden rounded-3xl lg:h-64">

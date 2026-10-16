@@ -10,12 +10,16 @@ import { useItemRealtime } from '../hooks/useItemRealtime'
 import { useUnassignItem } from '../hooks/useUnassignItem'
 import type { EventItem } from '../types'
 
-// Les articles arrivent déjà triés par le backend (catégorie, à prendre d'abord, ordre alphabétique) :
-// on les regroupe par catégorie sans les retrier, les groupes suivant l'ordre de leur premier article.
-function groupByCategory(items: EventItem[]) {
+const TO_TAKE = 'to-take'
+
+// Les articles arrivent déjà triés par le backend (à prendre d'abord, puis catégorie, puis ordre alphabétique) :
+// on les regroupe sans les retrier, les groupes suivant l'ordre de leur premier article. Tout ce qui reste
+// à prendre est mis en valeur dans un groupe à part, en tête ; un article pris rejoint sa catégorie.
+function groupItems(items: EventItem[]) {
   const groups = new Map<string, EventItem[]>()
   for (const item of items) {
-    groups.set(item.category, [...(groups.get(item.category) ?? []), item])
+    const key = item.assignedToUserId ? item.category : TO_TAKE
+    groups.set(key, [...(groups.get(key) ?? []), item])
   }
   return [...groups]
 }
@@ -66,19 +70,12 @@ export function ItemList({
     return participants.find((p) => p.userId === userId)
   }
 
-  const toTakeCount = items?.filter((item) => !item.assignedToUserId).length ?? 0
-
   return (
     <div data-testid="item-list" id="items" className="flex flex-1 flex-col overflow-hidden">
       <div className="mb-4 flex items-baseline gap-2.5">
         <h2 data-testid="item-list-heading" className="m-0 text-xl sm:text-[26px]">
           Qui apporte quoi
         </h2>
-        {items && items.length > 0 && (
-          <span data-testid="item-list-to-take-count" className="font-heading text-[13.5px] text-ink/65">
-            {toTakeCount} à prendre
-          </span>
-        )}
       </div>
 
       {isPending && (
@@ -100,13 +97,14 @@ export function ItemList({
 
       {items && items.length > 0 && (
         <div className="flex flex-1 flex-col gap-6 overflow-auto">
-          {groupByCategory(items).map(([key, categoryItems]) => {
-            const label = categories?.find((category) => category.key === key)?.label ?? key
+          {groupItems(items).map(([key, categoryItems]) => {
+            const isToTake = key === TO_TAKE
+            const label = isToTake ? 'À prendre' : (categories?.find((category) => category.key === key)?.label ?? key)
             return (
-              <section key={key} data-testid={`item-list-category-${key}`}>
+              <section key={key} data-testid={isToTake ? 'item-list-to-take' : `item-list-category-${key}`}>
                 <h3
-                  data-testid={`item-list-category-heading-${key}`}
-                  className="m-0 mb-2.5 pl-3.5 font-heading text-[13.5px] text-ink/65"
+                  data-testid={isToTake ? 'item-list-to-take-heading' : `item-list-category-heading-${key}`}
+                  className={`m-0 mb-2.5 pl-3.5 font-heading text-[13.5px] ${isToTake ? 'text-accent-800' : 'text-ink/65'}`}
                 >
                   {label} · {categoryItems.length}
                 </h3>
