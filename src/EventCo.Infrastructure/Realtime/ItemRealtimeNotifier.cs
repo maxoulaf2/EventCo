@@ -11,9 +11,6 @@ internal sealed class ItemRealtimeNotifier(IHubContext<EventHub> hubContext) : I
     public Task NotifyItemAssigned(ItemRealtimeDto item, CancellationToken cancellationToken) =>
         Send(item.EventId, "ItemAssigned", item, cancellationToken);
 
-    public Task NotifyItemUnassigned(ItemRealtimeDto item, CancellationToken cancellationToken) =>
-        Send(item.EventId, "ItemUnassigned", item, cancellationToken);
-
     public Task NotifyItemCategoryCorrected(ItemRealtimeDto item, CancellationToken cancellationToken) =>
         Send(item.EventId, "ItemCategoryCorrected", item, cancellationToken);
 

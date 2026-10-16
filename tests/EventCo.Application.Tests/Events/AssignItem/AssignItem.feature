@@ -54,3 +54,10 @@ Fonctionnalité: Assignation d'un article à un participant
     Et ce participant apporte l'article "Chips"
     Quand j'assigne cet article à moi-même
     Alors l'assignation échoue avec une erreur d'article apporté
+
+  Scénario: Un article à prendre déjà pris ne peut plus changer de main, même par le créateur
+    Etant donné un événement "Repas de Noël" avec un article "Bûche au chocolat", prévu le "2026-12-24" au lieu "Chez Alice"
+    Et "ami@example.com" rejoint cet événement en tant que participant simple
+    Et cet article est déjà pris par ce participant
+    Quand j'assigne cet article à moi-même
+    Alors l'assignation échoue avec une erreur d'article apporté

@@ -9,7 +9,7 @@ public sealed class ContributionAssignmentCannotChangeException : DomainExceptio
     public Guid ActingUserId { get; }
 
     public ContributionAssignmentCannotChangeException(Guid eventId, Guid itemId, Guid actingUserId)
-        : base($"Un article apporté reste attribué à la personne qui l'apporte : il peut seulement être annulé par elle (EventId: {eventId}, ItemId: {itemId}, ActingUserId: {actingUserId}).")
+        : base($"Un article apporté ou pris reste attribué à la personne qui l'apporte : il peut seulement être annulé par elle (EventId: {eventId}, ItemId: {itemId}, ActingUserId: {actingUserId}).")
     {
         EventId = eventId;
         ItemId = itemId;

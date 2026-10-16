@@ -16,7 +16,6 @@ using EventCo.Application.Events.JoinEventViaInviteLink;
 using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.RegenerateEventInviteLink;
 using EventCo.Application.Events.SetParticipationStatus;
-using EventCo.Application.Events.UnassignItem;
 using EventCo.Application.Events.UpdateEvent;
 using EventCo.Application.Events.UpdateEventImage;
 using Microsoft.AspNetCore.Authorization;
@@ -227,14 +226,6 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> AssignItem(Guid id, Guid itemId, Guid userId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new AssignItemCommand(id, itemId, userId), cancellationToken);
-
-        return NoContent();
-    }
-
-    [HttpPost("{id:guid}/items/{itemId:guid}/unassign")]
-    public async Task<IActionResult> UnassignItem(Guid id, Guid itemId, CancellationToken cancellationToken)
-    {
-        await commandDispatcher.Send(new UnassignItemCommand(id, itemId), cancellationToken);
 
         return NoContent();
     }

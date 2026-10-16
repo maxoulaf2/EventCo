@@ -102,8 +102,8 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Le **créateur** (`Event.CreatedByUserId`) a les droits ultimes : suppression de l'événement, gestion des rôles des autres participants, retrait de n'importe qui.
 - Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les articles, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
 - Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement, s'auto-assigner des articles à prendre et ajouter ce qu'il apporte — mais pas d'article à prendre.
-- Un **article apporté** (`Kind = Contribution`) ne peut être ni désassigné ni réattribué, par personne : seule la personne qui l'apporte peut l'annuler (le supprimer), y compris vis-à-vis du créateur/des co-organisateurs.
-- La **catégorie** d'un article n'est jamais demandée à la création. Elle peut être corrigée après coup par le créateur de l'article, le créateur de l'événement ou un co-organisateur, quelle que soit la nature de l'article.
+- Un **article pris** — apporté (`Kind = Contribution`), ou à prendre une fois pris par quelqu'un, organisateur compris — se comporte comme si la personne qui l'apporte l'avait ajouté elle-même : il ne peut être ni remis « à prendre » ni réattribué, par personne, et seule cette personne peut l'annuler (le supprimer), y compris vis-à-vis du créateur/des co-organisateurs.
+- La **catégorie** d'un article n'est jamais demandée à la création. Elle peut être corrigée après coup par le créateur de l'article, la personne qui l'apporte, le créateur de l'événement ou un co-organisateur, quelle que soit la nature de l'article.
 - Le créateur possède automatiquement une entrée `EventParticipant` avec `Role = Organizer` ; la distinction "droits ultimes" se fait via la comparaison avec `Event.CreatedByUserId`.
 
 ---

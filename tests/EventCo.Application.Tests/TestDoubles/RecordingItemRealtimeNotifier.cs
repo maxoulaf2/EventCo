@@ -6,7 +6,6 @@ public sealed class RecordingItemRealtimeNotifier : IItemRealtimeNotifier
 {
     public List<ItemRealtimeDto> ItemCreatedNotifications { get; } = [];
     public List<ItemRealtimeDto> ItemAssignedNotifications { get; } = [];
-    public List<ItemRealtimeDto> ItemUnassignedNotifications { get; } = [];
     public List<ItemRealtimeDto> ItemCategoryCorrectedNotifications { get; } = [];
     public List<ItemDeletedRealtimeDto> ItemDeletedNotifications { get; } = [];
 
@@ -19,12 +18,6 @@ public sealed class RecordingItemRealtimeNotifier : IItemRealtimeNotifier
     public Task NotifyItemAssigned(ItemRealtimeDto item, CancellationToken cancellationToken)
     {
         ItemAssignedNotifications.Add(item);
-        return Task.CompletedTask;
-    }
-
-    public Task NotifyItemUnassigned(ItemRealtimeDto item, CancellationToken cancellationToken)
-    {
-        ItemUnassignedNotifications.Add(item);
         return Task.CompletedTask;
     }
 

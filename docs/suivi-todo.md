@@ -142,6 +142,10 @@
   > Remplace « Catégories d'articles personnalisables par événement » (2026-10-15, à la demande explicite du développeur, traitée en priorité dans ce lot) : le besoin est le même (rendre la liste lisible), mais sans aucune saisie supplémentaire à la création ni catégorie propre à chaque événement. Vocabulaire dans `CONTEXT.md`.
   > Règle du dictionnaire : intitulé normalisé (minuscules, sans accents, pluriels simples en -s/-x) ; une expression de plusieurs mots l'emporte sur un mot seul ; à égalité, le premier mot reconnu dans l'intitulé l'emporte ; si rien ne correspond, « Autre ».
   > Les sections « À prendre » / « Assignés » disparaissent : références visuelles du détail d'un événement (`apparence-detail-evenement.feature`) obsolètes, à régénérer via le workflow GitHub Actions `update-visual-baselines` puis à valider/committer par le développeur.
+- [x] Liste des articles : fond distinct (`sage-200`) sur les articles que l'utilisateur courant apporte, pour retrouver d'un coup d'œil ce qu'il s'est engagé à amener
+  > Tâche identifiée en cours de route (rule 5, 2026-10-16), à la demande explicite du développeur. Références visuelles du détail d'un événement (`apparence-detail-evenement.feature`) à régénérer via le workflow GitHub Actions `update-visual-baselines`.
+- [x] Un article à prendre, une fois pris, ne peut plus être remis « à prendre » (plus de désassignation, y compris par un organisateur) : il se comporte comme un article apporté par la personne qui l'a pris, qui seule peut l'annuler (le supprimer)
+  > Tâche identifiée en cours de route (rule 5, 2026-10-16), à la demande explicite du développeur. Supprime le cas d'usage de désassignation (`POST /api/events/{id}/items/{itemId}/unassign`, bouton « Laisser ») ajouté au Lot 3.
 - [ ] Commentaires / chat par événement
 - [ ] Notification email : article assigné
 - [ ] Notification email : rappel avant l'événement (nécessite un job planifié, ex: Hangfire ou tâche planifiée simple)

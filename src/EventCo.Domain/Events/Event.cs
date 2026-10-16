@@ -214,18 +214,9 @@ public class Event : Entity
             throw new ParticipantCannotAssignItemToOthersException(Id, itemId, actingUserId, userId);
 
         var item = GetItem(itemId);
-        EnsureItemIsNotContribution(actingUserId, item);
+        EnsureItemIsNotTaken(actingUserId, item);
         item.AssignTo(userId);
         AddDomainEvent(new ItemAssignedDomainEvent(item));
-    }
-
-    public void UnassignItem(Guid actingUserId, Guid itemId)
-    {
-        var item = GetItem(itemId);
-        EnsureActingUserCanUnassignItem(actingUserId, item);
-        EnsureItemIsNotContribution(actingUserId, item);
-        item.Unassign();
-        AddDomainEvent(new ItemUnassignedDomainEvent(item));
     }
 
     // Contrairement à l'attribution d'un article apporté, la catégorie n'engage pas la personne qui apporte :
@@ -235,7 +226,7 @@ public class Event : Entity
         EnsureActingUserIsParticipant(actingUserId);
         var item = GetItem(itemId);
 
-        if (item.CreatedByUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
+        if (item.CreatedByUserId != actingUserId && item.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
             throw new ParticipantCannotCorrectOthersItemCategoryException(Id, itemId, actingUserId);
 
         item.CorrectCategory(category);
@@ -273,32 +264,32 @@ public class Event : Entity
             throw new UserNotEventParticipantException(Id, actingUserId);
     }
 
+    // Un article pris (apporté, ou à prendre une fois pris) appartient à la personne qui l'apporte, comme si elle
+    // l'avait ajouté elle-même : elle seule peut l'annuler, y compris vis-à-vis du créateur de l'article.
     private void EnsureActingUserCanDeleteItem(Guid actingUserId, EventItem item)
     {
         EnsureActingUserIsParticipant(actingUserId);
 
+        if (item.AssignedToUserId is not null)
+        {
+            if (item.AssignedToUserId != actingUserId)
+                throw new OnlyContributorCanCancelContributionException(Id, item.Id, actingUserId);
+            return;
+        }
+
         if (item.CreatedByUserId == actingUserId)
             return;
-
-        if (item.Kind == EventItemKind.Contribution)
-            throw new OnlyContributorCanCancelContributionException(Id, item.Id, actingUserId);
 
         if (!IsCreatorOrOrganizer(actingUserId))
             throw new ParticipantCannotDeleteOthersItemException(Id, item.Id, actingUserId);
     }
 
-    private void EnsureItemIsNotContribution(Guid actingUserId, EventItem item)
+    // Un article pris ne revient jamais « à prendre » ni ne change de main : la personne qui l'apporte peut
+    // seulement l'annuler (cf. EnsureActingUserCanDeleteItem).
+    private void EnsureItemIsNotTaken(Guid actingUserId, EventItem item)
     {
-        if (item.Kind == EventItemKind.Contribution)
+        if (item.AssignedToUserId is not null)
             throw new ContributionAssignmentCannotChangeException(Id, item.Id, actingUserId);
-    }
-
-    private void EnsureActingUserCanUnassignItem(Guid actingUserId, EventItem item)
-    {
-        EnsureActingUserIsParticipant(actingUserId);
-
-        if (item.AssignedToUserId != actingUserId && !IsCreatorOrOrganizer(actingUserId))
-            throw new ParticipantCannotUnassignOthersItemException(Id, item.Id, actingUserId);
     }
 
     private EventParticipant GetParticipant(Guid userId) =>

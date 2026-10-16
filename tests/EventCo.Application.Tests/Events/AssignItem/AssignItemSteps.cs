@@ -88,6 +88,12 @@ public sealed class AssignItemSteps
         _currentUserContext.UserId = eventCreatorUserId;
     }
 
+    [Given(@"cet article est déjà pris par ce participant")]
+    public async Task EtantDonneCetArticleEstDejaPrisParCeParticipant() =>
+        await _serviceProvider.GetRequiredService<ICommandDispatcher>().Send(
+            new AssignItemCommand(_existingEventId!.Value, _existingItemId!.Value, _firstParticipantUserId!.Value),
+            CancellationToken.None);
+
     [Given(@"ce participant devient l'utilisateur courant")]
     public void EtantDonneCeParticipantDevientLutilisateurCourant() => _currentUserContext.UserId = _firstParticipantUserId!.Value;
 

@@ -20,6 +20,9 @@ const CONTRIBUTION = {
   createdAt: '2026-09-01T00:00:00Z',
 }
 
+// Un article à prendre, une fois pris, se comporte comme un article apporté par la personne qui l'a pris.
+const TAKEN_ITEM_TO_BRING = { ...CONTRIBUTION, kind: 'ToBring' }
+
 describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) => {
   BeforeEachScenario(() => {
     server.use(
@@ -39,6 +42,10 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
         HttpResponse.json({ userId: 'user-2', email: 'ami@example.com', displayName: 'Ami' }),
       ),
     )
+  }
+
+  function serveTakenItemToBring() {
+    server.use(http.get('*/api/events/:id/items', () => HttpResponse.json([TAKEN_ITEM_TO_BRING])))
   }
 
   async function cancel() {
@@ -106,6 +113,46 @@ describeFeature(feature, ({ AfterEachScenario, BeforeEachScenario, Scenario }) =
 
     Then('je vois toujours l\'article "Chips" assigné', async () => {
       await expectItemAssigned('item-1')
+    })
+  })
+
+  Scenario('Un participant annule l\'article à prendre qu\'il a pris', ({ Given, When, Then }) => {
+    Given('je suis un simple participant qui a pris l\'article à prendre "Chips"', () => {
+      actAsContributor()
+      serveTakenItemToBring()
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois pas de bouton de désassignation pour l\'article "Chips"', async () => {
+      await screen.findByTestId('item-row-cancel-button-item-1')
+      expect(screen.queryByTestId('item-row-unassign-button-item-1')).not.toBeInTheDocument()
+    })
+
+    When('j\'annule l\'article "Chips"', async () => {
+      await cancel()
+    })
+
+    Then('je ne vois plus l\'article "Chips"', async () => {
+      await waitFor(() => expect(screen.queryByTestId('item-row-item-1')).not.toBeInTheDocument())
+    })
+  })
+
+  Scenario('Un organisateur ne peut ni remettre à prendre ni annuler un article à prendre pris par un participant', ({ Given, When, Then }) => {
+    Given('l\'article à prendre "Chips" est pris par un participant', () => {
+      serveTakenItemToBring()
+    })
+
+    When('j\'arrive sur le détail de l\'événement', () => {
+      renderApp('/events/event-1')
+    })
+
+    Then('je ne vois ni bouton de désassignation ni bouton d\'annulation pour l\'article "Chips"', async () => {
+      await screen.findByTestId('item-row-item-1')
+      expect(screen.queryByTestId('item-row-unassign-button-item-1')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('item-row-cancel-button-item-1')).not.toBeInTheDocument()
     })
   })
 })

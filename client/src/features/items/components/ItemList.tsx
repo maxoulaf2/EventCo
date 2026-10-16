@@ -7,7 +7,6 @@ import { useDeleteItem } from '../hooks/useDeleteItem'
 import { useEventItems } from '../hooks/useEventItems'
 import { useItemCategories } from '../hooks/useItemCategories'
 import { useItemRealtime } from '../hooks/useItemRealtime'
-import { useUnassignItem } from '../hooks/useUnassignItem'
 import type { EventItem } from '../types'
 
 const TO_TAKE = 'to-take'
@@ -46,24 +45,20 @@ export function ItemList({
   const { data: items, isPending, isError } = useEventItems(eventId)
   useItemRealtime(eventId)
   const assignItem = useAssignItem(eventId)
-  const unassignItem = useUnassignItem(eventId)
   const deleteItem = useDeleteItem(eventId)
   const correctItemCategory = useCorrectItemCategory(eventId)
   const { data: categories } = useItemCategories()
 
-  // Un article apporté reste attribué à la personne qui l'apporte : elle peut seulement l'annuler.
-  function canUnassign(item: EventItem) {
-    return item.kind === 'ToBring' && (canManageAllItems || item.assignedToUserId === currentUserId)
-  }
-
+  // Un article pris (apporté, ou à prendre une fois pris) reste attribué à la personne qui l'apporte, comme si
+  // elle l'avait ajouté elle-même : elle seule peut l'annuler, il ne revient jamais « à prendre ».
   function canCancel(item: EventItem) {
-    return item.kind === 'Contribution' && item.assignedToUserId === currentUserId
+    return !!currentUserId && item.assignedToUserId === currentUserId
   }
 
-  // Le créateur de l'article ou un (co-)organisateur. Un article apporté reste attribué à son créateur pour
-  // toujours, et seul un (co-)organisateur crée un article à prendre : pas besoin d'exposer le créateur.
+  // La personne qui apporte l'article ou un (co-)organisateur. Seul un (co-)organisateur crée un article à
+  // prendre : pas besoin d'exposer le créateur.
   function canCorrectCategory(item: EventItem) {
-    return canManageAllItems || (item.kind === 'Contribution' && item.assignedToUserId === currentUserId)
+    return canManageAllItems || canCancel(item)
   }
 
   function participantOf(userId: string | null) {
@@ -115,9 +110,10 @@ export function ItemList({
                       <li
                         key={item.id}
                         data-testid={`item-row-${item.id}`}
-                        className={`flex min-h-14 items-center gap-3 rounded-[1.75rem] bg-surface px-3.5 ${
-                          !item.assignedToUserId ? 'shadow-[inset_0_0_0_1.5px_var(--color-accent-600)]' : ''
-                        }`}
+                        className={`flex min-h-14 items-center gap-3 rounded-[1.75rem] px-3.5 ${
+                          // Ce que l'utilisateur courant apporte ressort, pour qu'il le retrouve d'un coup d'œil.
+                          currentUserId && item.assignedToUserId === currentUserId ? 'bg-sage-200' : 'bg-surface'
+                        } ${!item.assignedToUserId ? 'shadow-[inset_0_0_0_1.5px_var(--color-accent-600)]' : ''}`}
                       >
                         <span data-testid={`item-row-title-${item.id}`} className="flex-1 pl-3.5 text-[15px] text-ink">
                           {item.title}
@@ -165,18 +161,6 @@ export function ItemList({
                               imageUrl={participantOf(item.assignedToUserId)?.avatarUrl}
                               size="sm"
                             />
-                            {canUnassign(item) && (
-                              <button
-                                type="button"
-                                onClick={() => unassignItem.mutate(item.id)}
-                                disabled={unassignItem.isPending}
-                                aria-label={`Se désassigner de "${item.title}"`}
-                                data-testid={`item-row-unassign-button-${item.id}`}
-                                className="inline-flex min-h-9.5 shrink-0 items-center rounded-full border border-ink/15 bg-surface px-3.5 text-[13px] font-heading text-ink/70 transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
-                              >
-                                Laisser
-                              </button>
-                            )}
                             {canCancel(item) && (
                               <button
                                 type="button"

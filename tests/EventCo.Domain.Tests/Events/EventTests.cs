@@ -470,66 +470,6 @@ public class EventTests
     }
 
     [Fact]
-    public void UnassignItem_UnknownItemId_ThrowsEventItemNotFoundException()
-    {
-        var @event = CreateEvent(out var creatorId);
-
-        Assert.Throws<EventItemNotFoundException>(() => @event.UnassignItem(creatorId, Guid.NewGuid()));
-    }
-
-    [Fact]
-    public void UnassignItem_ActingUserNotParticipant_ThrowsUserNotEventParticipantException()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
-        @event.AssignItem(creatorId, item.Id, creatorId);
-
-        Assert.Throws<UserNotEventParticipantException>(() => @event.UnassignItem(Guid.NewGuid(), item.Id));
-    }
-
-    [Fact]
-    public void UnassignItem_ActingUserIsAssignedParticipant_ClearsAssignedToUserId()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
-        @event.AssignItem(creatorId, item.Id, regularParticipantId);
-
-        @event.UnassignItem(regularParticipantId, item.Id);
-
-        Assert.Null(item.AssignedToUserId);
-    }
-
-    [Fact]
-    public void UnassignItem_ActingUserIsCreatorOrOrganizer_ClearsAssignedToUserIdForAnotherParticipant()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
-        @event.AssignItem(creatorId, item.Id, regularParticipantId);
-
-        @event.UnassignItem(creatorId, item.Id);
-
-        Assert.Null(item.AssignedToUserId);
-    }
-
-    [Fact]
-    public void UnassignItem_ActingUserIsParticipantNotAssigned_ThrowsParticipantCannotUnassignOthersItemException()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        var otherParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        @event.InviteParticipant(creatorId, otherParticipantId, DateTime.UtcNow);
-        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
-        @event.AssignItem(creatorId, item.Id, otherParticipantId);
-
-        Assert.Throws<ParticipantCannotUnassignOthersItemException>(() => @event.UnassignItem(regularParticipantId, item.Id));
-    }
-
-    [Fact]
     public void AddItem_TitleMatchesNoKeyword_CategoryIsDeducedAsOther()
     {
         var @event = CreateEvent(out var creatorId);
@@ -715,29 +655,6 @@ public class EventTests
     }
 
     [Fact]
-    public void UnassignItem_ContributorOnOwnContribution_ThrowsContributionAssignmentCannotChangeException()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var item = @event.AddItem(regularParticipantId, "Bûche au chocolat", "1", EventItemKind.Contribution, DateTime.UtcNow);
-
-        Assert.Throws<ContributionAssignmentCannotChangeException>(() => @event.UnassignItem(regularParticipantId, item.Id));
-        Assert.Equal(regularParticipantId, item.AssignedToUserId);
-    }
-
-    [Fact]
-    public void UnassignItem_OrganizerOnContribution_ThrowsContributionAssignmentCannotChangeException()
-    {
-        var @event = CreateEvent(out var creatorId);
-        var regularParticipantId = Guid.NewGuid();
-        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
-        var item = @event.AddItem(regularParticipantId, "Bûche au chocolat", "1", EventItemKind.Contribution, DateTime.UtcNow);
-
-        Assert.Throws<ContributionAssignmentCannotChangeException>(() => @event.UnassignItem(creatorId, item.Id));
-    }
-
-    [Fact]
     public void AssignItem_OrganizerReassignsContribution_ThrowsContributionAssignmentCannotChangeException()
     {
         var @event = CreateEvent(out var creatorId);
@@ -747,6 +664,59 @@ public class EventTests
 
         Assert.Throws<ContributionAssignmentCannotChangeException>(() => @event.AssignItem(creatorId, item.Id, creatorId));
         Assert.Equal(regularParticipantId, item.AssignedToUserId);
+    }
+
+    [Fact]
+    public void AssignItem_OrganizerReassignsTakenItem_ThrowsContributionAssignmentCannotChangeException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
+        @event.AssignItem(regularParticipantId, item.Id, regularParticipantId);
+
+        Assert.Throws<ContributionAssignmentCannotChangeException>(() => @event.AssignItem(creatorId, item.Id, creatorId));
+        Assert.Equal(regularParticipantId, item.AssignedToUserId);
+    }
+
+    [Fact]
+    public void RemoveItem_ParticipantWhoTookItem_RemovesFromCollection()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
+        @event.AssignItem(regularParticipantId, item.Id, regularParticipantId);
+
+        @event.RemoveItem(regularParticipantId, item.Id);
+
+        Assert.DoesNotContain(@event.Items, t => t.Id == item.Id);
+    }
+
+    [Fact]
+    public void RemoveItem_ItemCreatorOnItemTakenByAnotherParticipant_ThrowsOnlyContributorCanCancelContributionException()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
+        @event.AssignItem(regularParticipantId, item.Id, regularParticipantId);
+
+        Assert.Throws<OnlyContributorCanCancelContributionException>(() => @event.RemoveItem(creatorId, item.Id));
+    }
+
+    [Fact]
+    public void CorrectItemCategory_ParticipantWhoTookItem_CorrectsCategory()
+    {
+        var @event = CreateEvent(out var creatorId);
+        var regularParticipantId = Guid.NewGuid();
+        @event.InviteParticipant(creatorId, regularParticipantId, DateTime.UtcNow);
+        var item = @event.AddItem(creatorId, "Bûche au chocolat", "1", EventItemKind.ToBring, DateTime.UtcNow);
+        @event.AssignItem(regularParticipantId, item.Id, regularParticipantId);
+
+        @event.CorrectItemCategory(regularParticipantId, item.Id, EventItemCategory.Desserts);
+
+        Assert.Equal(EventItemCategory.Desserts, item.Category);
     }
 
     [Fact]

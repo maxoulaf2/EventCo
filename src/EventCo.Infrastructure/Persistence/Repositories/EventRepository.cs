@@ -49,9 +49,6 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case ItemAssignedDomainEvent e:
                     await UpdateItemAssignment(e.Item, cancellationToken);
                     break;
-                case ItemUnassignedDomainEvent e:
-                    await UpdateItemAssignment(e.Item, cancellationToken);
-                    break;
                 case ItemCategoryCorrectedDomainEvent e:
                     await UpdateItemCategory(e.Item, cancellationToken);
                     break;

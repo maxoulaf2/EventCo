@@ -63,3 +63,12 @@ Fonctionnalité: Assignation d'un article à un participant via l'API
     Et une session ouverte via l'API pour "assign-item-contribution-organizer-api-test@example.com"
     Quand j'assigne cet article à ce participant via l'API
     Alors la réponse d'assignation a le statut 403
+
+  Scénario: Réattribution refusée au créateur pour un article à prendre déjà pris
+    Etant donné une session ouverte via l'API pour "assign-item-taken-organizer-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
+    Et "assign-item-taken-guest-api-test@example.com" invité à cet événement via l'API
+    Et cet article assigné à ce participant via l'API
+    Quand j'assigne cet article à ce participant via l'API
+    Alors la réponse d'assignation a le statut 403

@@ -1,5 +1,6 @@
 using EventCo.Application.Common.Interfaces;
 using EventCo.Application.Common.Messaging;
+using EventCo.Application.Events.AssignItem;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CreateItem;
 using EventCo.Application.Events.DeleteItem;
@@ -95,6 +96,15 @@ public sealed class DeleteItemSteps
     [Given(@"un autre participant invité devient l'utilisateur courant")]
     public void EtantDonneUnAutreParticipantInviteDevientLutilisateurCourant() =>
         _currentUserContext.UserId = _otherInvitedUserId!.Value;
+
+    [Given(@"un autre participant invité prend cet article et devient l'utilisateur courant")]
+    public async Task EtantDonneUnAutreParticipantInvitePrendCetArticleEtDevientLutilisateurCourant()
+    {
+        _currentUserContext.UserId = _otherInvitedUserId!.Value;
+        await _serviceProvider.GetRequiredService<ICommandDispatcher>().Send(
+            new AssignItemCommand(_existingEventId!.Value, _existingItemId!.Value, _otherInvitedUserId.Value),
+            CancellationToken.None);
+    }
 
     [When(@"je supprime cet article")]
     public async Task QuandJeSupprimeCetArticle() =>

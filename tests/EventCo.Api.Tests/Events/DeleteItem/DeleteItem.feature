@@ -40,6 +40,25 @@ Fonctionnalité: Suppression d'un article via l'API
     Quand je supprime cet article via l'API
     Alors la réponse de suppression d'article a le statut 204
 
+  Scénario: Annulation réussie par le participant qui a pris un article à prendre
+    Etant donné une session ouverte via l'API pour "delete-item-organizer7-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
+    Et "delete-item-taker7-api-test@example.com" invité à cet événement via l'API
+    Et cet article assigné à ce participant via l'API
+    Et une session ouverte via l'API pour "delete-item-taker7-api-test@example.com"
+    Quand je supprime cet article via l'API
+    Alors la réponse de suppression d'article a le statut 204
+
+  Scénario: Suppression refusée au créateur de l'événement pour un article à prendre pris par un participant
+    Etant donné une session ouverte via l'API pour "delete-item-organizer8-api-test@example.com"
+    Et un événement "Repas de Noël" créé via l'API
+    Et un article à prendre "Bûche au chocolat" ajouté à cet événement via l'API
+    Et "delete-item-taker8-api-test@example.com" invité à cet événement via l'API
+    Et cet article assigné à ce participant via l'API
+    Quand je supprime cet article via l'API
+    Alors la réponse de suppression d'article a le statut 403
+
   Scénario: Suppression refusée pour un participant simple sur un article à prendre
     Etant donné une session ouverte via l'API pour "delete-item-organizer5-api-test@example.com"
     Et un événement "Repas de Noël" créé via l'API

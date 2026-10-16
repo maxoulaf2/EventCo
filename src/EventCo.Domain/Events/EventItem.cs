@@ -51,7 +51,5 @@ public class EventItem : Entity
 
     internal void AssignTo(Guid userId) => AssignedToUserId = userId;
 
-    internal void Unassign() => AssignedToUserId = null;
-
     internal void CorrectCategory(EventItemCategory category) => CorrectedCategory = category;
 }

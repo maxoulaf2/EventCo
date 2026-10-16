@@ -6,8 +6,6 @@ public interface IItemRealtimeNotifier
 
     Task NotifyItemAssigned(ItemRealtimeDto item, CancellationToken cancellationToken);
 
-    Task NotifyItemUnassigned(ItemRealtimeDto item, CancellationToken cancellationToken);
-
     Task NotifyItemCategoryCorrected(ItemRealtimeDto item, CancellationToken cancellationToken);
 
     Task NotifyItemDeleted(ItemDeletedRealtimeDto item, CancellationToken cancellationToken);

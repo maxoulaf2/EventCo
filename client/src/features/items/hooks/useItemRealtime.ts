@@ -18,7 +18,6 @@ export function useItemRealtime(eventId: string) {
 
     connection.on('ItemCreated', reloadItems)
     connection.on('ItemAssigned', reloadItems)
-    connection.on('ItemUnassigned', reloadItems)
     connection.on('ItemCategoryCorrected', reloadItems)
     connection.on('ItemDeleted', reloadItems)
 

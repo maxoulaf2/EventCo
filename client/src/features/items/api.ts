@@ -16,10 +16,6 @@ export function assignItem(eventId: string, itemId: string, userId: string): Pro
   return apiFetch(`/api/events/${eventId}/items/${itemId}/assign/${userId}`, { method: 'POST' })
 }
 
-export function unassignItem(eventId: string, itemId: string): Promise<void> {
-  return apiFetch(`/api/events/${eventId}/items/${itemId}/unassign`, { method: 'POST' })
-}
-
 export function getItemCategories(): Promise<ItemCategory[]> {
   return apiFetch<ItemCategory[]>('/api/item-categories')
 }
