@@ -20,6 +20,9 @@ export function useItemRealtime(eventId: string) {
     connection.on('ItemAssigned', reloadItems)
     connection.on('ItemCategoryCorrected', reloadItems)
     connection.on('ItemDeleted', reloadItems)
+    // Sondage de date : même connexion (une seule par page), mais c'est le détail de l'événement qui se recharge
+    // (options, votes, date retenue, présences).
+    connection.on('DatePollChanged', () => void queryClient.invalidateQueries({ queryKey: ['events', eventId] }))
 
     connection
       .start()

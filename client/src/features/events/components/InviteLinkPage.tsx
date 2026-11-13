@@ -5,6 +5,7 @@ import { RequestLoginCodeForm } from '../../auth/components/RequestLoginCodeForm
 import { useAppNavigate } from '../../../shared/hooks/useAppNavigate'
 import { useEventInvitePreview } from '../hooks/useEventInvitePreview'
 import { useJoinEventViaInviteLink } from '../hooks/useJoinEventViaInviteLink'
+import { DATE_UNDER_VOTE_LABEL } from '../types'
 
 function formatDate(iso: string): string {
   const date = new Date(iso)
@@ -101,7 +102,7 @@ function PreviewAndRequestLogin({ token }: { token: string }) {
         {preview.title}
       </h1>
       <p data-testid="invite-link-preview-date" className="mb-8 text-base text-ink/70">
-        {formatDate(preview.eventDate)}
+        {preview.eventDate ? formatDate(preview.eventDate) : DATE_UNDER_VOTE_LABEL}
       </p>
       <RequestLoginCodeForm eventInviteLinkToken={token} />
       <p className="mt-4.5 text-center text-[12.5px] text-ink/55">Première connexion = inscription.</p>

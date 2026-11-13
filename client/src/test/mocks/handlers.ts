@@ -132,6 +132,7 @@ export const handlers = [
         },
       ],
       inviteLinkToken: 'invite-token-1',
+      dateOptions: [],
     }),
   ),
 

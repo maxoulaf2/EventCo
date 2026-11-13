@@ -1,18 +1,49 @@
 import { apiFetch } from '../../shared/lib/api'
-import type { CreateEventInput, EventDetail, EventInvitePreview, MyEvent, ParticipationStatus } from './types'
+import type { CreateEventInput, DateOptionInput, EventDetail, EventInvitePreview, MyEvent, ParticipationStatus } from './types'
 
 export function getMyEvents(): Promise<MyEvent[]> {
   return apiFetch<MyEvent[]>('/api/events')
 }
 
+// Date et heure sont saisies en heure locale : `new Date` sans suffixe les interprète comme telles,
+// `toISOString` les convertit en instant UTC (sinon 16h saisi à Paris est affiché 18h).
+function toUtcIso(date: string, time?: string): string {
+  return new Date(`${date}T${time || '00:00'}`).toISOString()
+}
+
 export function createEvent(input: CreateEventInput): Promise<{ id: string }> {
-  const { eventTime, ...rest } = input
+  const { eventDate, eventTime, dateOptions, ...rest } = input
+  const when = dateOptions
+    ? { dateOptions: dateOptions.map((option) => toUtcIso(option.date, option.time)) }
+    : { eventDate: toUtcIso(eventDate!, eventTime) }
+
   return apiFetch<{ id: string }>('/api/events', {
     method: 'POST',
-    // Date et heure sont saisies en heure locale : `new Date` sans suffixe les interprète comme telles,
-    // `toISOString` les convertit en instant UTC (sinon 16h saisi à Paris est affiché 18h).
-    body: JSON.stringify({ ...rest, eventDate: new Date(`${input.eventDate}T${eventTime || '00:00'}`).toISOString() }),
+    body: JSON.stringify({ ...rest, ...when }),
   })
+}
+
+export function addDateOption(eventId: string, option: DateOptionInput): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/date-options`, {
+    method: 'POST',
+    body: JSON.stringify({ date: toUtcIso(option.date, option.time) }),
+  })
+}
+
+export function removeDateOption(eventId: string, dateOptionId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/date-options/${dateOptionId}`, { method: 'DELETE' })
+}
+
+export function voteForDateOption(eventId: string, dateOptionId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/date-options/${dateOptionId}/vote`, { method: 'PUT' })
+}
+
+export function withdrawDateVote(eventId: string, dateOptionId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/date-options/${dateOptionId}/vote`, { method: 'DELETE' })
+}
+
+export function chooseEventDate(eventId: string, dateOptionId: string): Promise<void> {
+  return apiFetch(`/api/events/${eventId}/date-options/${dateOptionId}/choose`, { method: 'POST' })
 }
 
 export function getEventById(eventId: string): Promise<EventDetail> {
