@@ -15,14 +15,12 @@ public sealed class CreateEventCommandHandler(
     {
         var now = dateTimeProvider.UtcNow;
         var inviteLinkToken = SecureTokenGenerator.GenerateUrlSafeToken();
-        var @event = Event.Create(
-            request.Title,
-            request.Description,
-            request.EventDate,
-            request.Location,
-            inviteLinkToken,
-            currentUserService.UserId!.Value,
-            now);
+        var userId = currentUserService.UserId!.Value;
+
+        // Date fixe ou sondage de date : l'un ou l'autre, garanti par CreateEventCommandValidator.
+        var @event = request.EventDate is { } eventDate
+            ? Event.Create(request.Title, request.Description, eventDate, request.Location, inviteLinkToken, userId, now)
+            : Event.CreateWithDatePoll(request.Title, request.Description, request.DateOptions!, request.Location, inviteLinkToken, userId, now);
 
         await eventRepository.ApplyAsync(@event, cancellationToken);
 

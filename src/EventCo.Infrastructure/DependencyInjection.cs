@@ -32,6 +32,7 @@ public static class DependencyInjection
 
         services.AddSignalR();
         services.AddSingleton<IItemRealtimeNotifier, ItemRealtimeNotifier>();
+        services.AddSingleton<IDatePollRealtimeNotifier, DatePollRealtimeNotifier>();
 
         services.AddScoped<LoggingEmailSender>();
         services.AddScoped<SmtpEmailSender>();

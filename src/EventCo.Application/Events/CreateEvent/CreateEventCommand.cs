@@ -5,5 +5,6 @@ namespace EventCo.Application.Events.CreateEvent;
 public sealed record CreateEventCommand(
     string Title,
     string? Description,
-    DateTime EventDate,
-    string? Location) : ICommand<CreateEventResult>;
+    DateTime? EventDate,
+    string? Location,
+    IReadOnlyList<DateTime>? DateOptions = null) : ICommand<CreateEventResult>;

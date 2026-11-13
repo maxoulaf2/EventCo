@@ -7,6 +7,5 @@ public sealed class UpdateEventCommandValidator : AbstractValidator<UpdateEventC
     public UpdateEventCommandValidator()
     {
         RuleFor(x => x.Title).NotEmpty();
-        RuleFor(x => x.EventDate).NotEmpty();
     }
 }
