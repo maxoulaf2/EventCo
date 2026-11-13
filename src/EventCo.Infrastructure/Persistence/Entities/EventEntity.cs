@@ -7,7 +7,7 @@ public class EventEntity
     public Guid Id { get; set; }
     public string Title { get; set; } = null!;
     public string? Description { get; set; }
-    public DateTime EventDate { get; set; }
+    public DateTime? EventDate { get; set; }
     public string? Location { get; set; }
     public string? ImageStorageKey { get; set; }
     public string InviteLinkToken { get; set; } = null!;
@@ -17,4 +17,5 @@ public class EventEntity
 
     public List<EventParticipantEntity> Participants { get; set; } = [];
     public List<EventItemEntity> Items { get; set; } = [];
+    public List<EventDateOptionEntity> DateOptions { get; set; } = [];
 }

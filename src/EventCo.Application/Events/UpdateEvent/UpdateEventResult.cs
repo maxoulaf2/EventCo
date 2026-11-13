@@ -4,7 +4,7 @@ public sealed record UpdateEventResult(
     Guid EventId,
     string Title,
     string? Description,
-    DateTime EventDate,
+    DateTime? EventDate,
     string? Location,
     string? ImageUrl,
     Guid CreatedByUserId,
