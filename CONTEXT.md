@@ -4,6 +4,24 @@ Co-organisation d'événements de groupe (repas, anniversaires, week-ends) : inv
 
 ## Langage
 
+### Sondage de date
+
+**Sondage de date** :
+La consultation des participants pour fixer la date d'un événement créé sans date. Il est ouvert tant que l'événement n'a pas de date, et se clôt définitivement quand un organisateur retient une option.
+_À éviter_ : poll, doodle, vote (un vote est la réponse d'une personne)
+
+**Option de date** :
+Une date et une heure de début proposées par un organisateur ou un co-organisateur dans un sondage de date.
+_À éviter_ : proposition, créneau, choix
+
+**Vote** :
+Le fait, pour un participant, d'indiquer qu'une option de date lui convient. Un participant peut voter pour plusieurs options.
+_À éviter_ : réponse, disponibilité
+
+**Date retenue** :
+L'option de date choisie par un organisateur à la clôture du sondage. Elle devient la date de l'événement.
+_À éviter_ : date gagnante (le meilleur score ne s'impose pas)
+
 ### Articles
 
 **Article** :

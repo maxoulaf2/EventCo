@@ -5,7 +5,7 @@ public sealed record GetMyEventsResult(IReadOnlyList<MyEventSummary> Events);
 public sealed record MyEventSummary(
     Guid EventId,
     string Title,
-    DateTime EventDate,
+    DateTime? EventDate,
     string? Location,
     Guid CreatedByUserId,
     string Status,

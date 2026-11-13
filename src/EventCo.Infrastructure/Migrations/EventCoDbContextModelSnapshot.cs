@@ -22,6 +22,39 @@ namespace EventCo.Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventDateOptionEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("EventDateOptions", (string)null);
+                });
+
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventDateVoteEntity", b =>
+                {
+                    b.Property<Guid>("DateOptionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("DateOptionId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("EventDateVotes", (string)null);
+                });
+
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -38,7 +71,7 @@ namespace EventCo.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
-                    b.Property<DateTime>("EventDate")
+                    b.Property<DateTime?>("EventDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ImageStorageKey")
@@ -231,6 +264,30 @@ namespace EventCo.Infrastructure.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventDateOptionEntity", b =>
+                {
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventEntity", null)
+                        .WithMany("DateOptions")
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventDateVoteEntity", b =>
+                {
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.EventDateOptionEntity", null)
+                        .WithMany("Votes")
+                        .HasForeignKey("DateOptionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
                     b.HasOne("EventCo.Infrastructure.Persistence.Entities.UserEntity", null)
@@ -275,8 +332,15 @@ namespace EventCo.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventDateOptionEntity", b =>
+                {
+                    b.Navigation("Votes");
+                });
+
             modelBuilder.Entity("EventCo.Infrastructure.Persistence.Entities.EventEntity", b =>
                 {
+                    b.Navigation("DateOptions");
+
                     b.Navigation("Items");
 
                     b.Navigation("Participants");

@@ -8,10 +8,16 @@ public class Event : Entity
 {
     private readonly List<EventParticipant> _participants = [];
     private readonly List<EventItem> _items = [];
+    private readonly List<EventDateOption> _dateOptions = [];
+
+    public const int MinDateOptions = 2;
+    public const int MaxDateOptions = 10;
 
     public string Title { get; private set; } = null!;
     public string? Description { get; private set; }
-    public DateTime EventDate { get; private set; }
+
+    // null tant que le sondage de date est ouvert ; les options restent en place après la clôture.
+    public DateTime? EventDate { get; private set; }
     public string? Location { get; private set; }
     public string? ImageStorageKey { get; private set; }
     public string InviteLinkToken { get; private set; } = null!;
@@ -21,8 +27,10 @@ public class Event : Entity
 
     public IReadOnlyCollection<EventParticipant> Participants => _participants.AsReadOnly();
     public IReadOnlyCollection<EventItem> Items => _items.AsReadOnly();
+    public IReadOnlyCollection<EventDateOption> DateOptions => _dateOptions.AsReadOnly();
+    public bool IsDatePollOpen => EventDate is null;
 
-    private Event(Guid id, string title, string? description, DateTime eventDate, string? location, string? imageStorageKey, string inviteLinkToken, Guid createdByUserId, EventStatus status, DateTime createdAt)
+    private Event(Guid id, string title, string? description, DateTime? eventDate, string? location, string? imageStorageKey, string inviteLinkToken, Guid createdByUserId, EventStatus status, DateTime createdAt)
         : base(id)
     {
         Title = title;
@@ -36,7 +44,13 @@ public class Event : Entity
         CreatedAt = createdAt;
     }
 
-    public static Event Create(string title, string? description, DateTime eventDate, string? location, string inviteLinkToken, Guid createdByUserId, DateTime now)
+    public static Event Create(string title, string? description, DateTime eventDate, string? location, string inviteLinkToken, Guid createdByUserId, DateTime now) =>
+        CreateCore(title, description, eventDate, [], location, inviteLinkToken, createdByUserId, now);
+
+    public static Event CreateWithDatePoll(string title, string? description, IEnumerable<DateTime> dateOptions, string? location, string inviteLinkToken, Guid createdByUserId, DateTime now) =>
+        CreateCore(title, description, eventDate: null, dateOptions, location, inviteLinkToken, createdByUserId, now);
+
+    private static Event CreateCore(string title, string? description, DateTime? eventDate, IEnumerable<DateTime> dateOptions, string? location, string inviteLinkToken, Guid createdByUserId, DateTime now)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException();
@@ -46,25 +60,41 @@ public class Event : Entity
         var creatorParticipant = new EventParticipant(@event.Id, createdByUserId, ParticipantRole.Organizer, now);
         @event._participants.Add(creatorParticipant);
 
+        // Les options sont insérées avec l'événement (EventCreatedDomainEvent) : pas d'event par option ici.
+        foreach (var date in dateOptions)
+            @event.AddDateOptionCore(date, now);
+
+        if (eventDate is null && @event._dateOptions.Count < MinDateOptions)
+            throw new DateOptionCountOutOfRangeException(@event.Id);
+
         @event.AddDomainEvent(new EventCreatedDomainEvent(@event.Id));
 
         return @event;
     }
 
     internal static Event Reconstitute(
-        Guid id, string title, string? description, DateTime eventDate, string? location, string? imageStorageKey, string inviteLinkToken,
+        Guid id, string title, string? description, DateTime? eventDate, string? location, string? imageStorageKey, string inviteLinkToken,
         Guid createdByUserId, EventStatus status, DateTime createdAt,
-        IEnumerable<EventParticipant> participants, IEnumerable<EventItem> items)
+        IEnumerable<EventParticipant> participants, IEnumerable<EventItem> items, IEnumerable<EventDateOption> dateOptions)
     {
         var @event = new Event(id, title, description, eventDate, location, imageStorageKey, inviteLinkToken, createdByUserId, status, createdAt);
         @event._participants.AddRange(participants);
         @event._items.AddRange(items);
+        @event._dateOptions.AddRange(dateOptions);
         return @event;
     }
 
-    public void UpdateDetails(Guid actingUserId, string title, string? description, DateTime eventDate, string? location)
+    // Pendant un sondage de date, eventDate doit rester null : la date ne se fixe qu'en retenant une option
+    // (cf. ChooseDate), seul chemin qui fait passer les votants en « Je viens ».
+    public void UpdateDetails(Guid actingUserId, string title, string? description, DateTime? eventDate, string? location)
     {
         EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+
+        if (IsDatePollOpen && eventDate is not null)
+            throw new EventDateUnderPollException(Id);
+
+        if (!IsDatePollOpen && eventDate is null)
+            throw new EventDateRequiredException(Id);
 
         if (string.IsNullOrWhiteSpace(title))
             throw new EventTitleEmptyException(Id);
@@ -174,6 +204,13 @@ public class Event : Entity
             throw new EventCreatorCannotBeRemovedException(Id, targetUserId);
 
         var participant = GetParticipant(targetUserId);
+
+        foreach (var option in _dateOptions)
+        {
+            if (option.RemoveVote(targetUserId))
+                AddDomainEvent(new DateVoteWithdrawnDomainEvent(Id, option.Id, targetUserId));
+        }
+
         _participants.Remove(participant);
         AddDomainEvent(new ParticipantRemovedDomainEvent(Id, participant.Id));
     }
@@ -241,6 +278,90 @@ public class Event : Entity
         AddDomainEvent(new ItemDeletedDomainEvent(Id, itemId));
     }
 
+    public EventDateOption AddDateOption(Guid actingUserId, DateTime date, DateTime now)
+    {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+        EnsureDatePollIsOpen();
+
+        var option = AddDateOptionCore(date, now);
+        AddDomainEvent(new DateOptionAddedDomainEvent(Id, option.Id));
+        return option;
+    }
+
+    public void RemoveDateOption(Guid actingUserId, Guid dateOptionId)
+    {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+        EnsureDatePollIsOpen();
+        var option = GetDateOption(dateOptionId);
+
+        if (_dateOptions.Count <= MinDateOptions)
+            throw new DateOptionCountOutOfRangeException(Id);
+
+        _dateOptions.Remove(option);
+        AddDomainEvent(new DateOptionRemovedDomainEvent(Id, dateOptionId));
+    }
+
+    public void VoteForDateOption(Guid actingUserId, Guid dateOptionId)
+    {
+        EnsureActingUserIsParticipant(actingUserId);
+        EnsureDatePollIsOpen();
+
+        if (GetDateOption(dateOptionId).AddVote(actingUserId))
+            AddDomainEvent(new DateVoteCastDomainEvent(Id, dateOptionId, actingUserId));
+    }
+
+    public void WithdrawDateVote(Guid actingUserId, Guid dateOptionId)
+    {
+        EnsureActingUserIsParticipant(actingUserId);
+        EnsureDatePollIsOpen();
+
+        if (GetDateOption(dateOptionId).RemoveVote(actingUserId))
+            AddDomainEvent(new DateVoteWithdrawnDomainEvent(Id, dateOptionId, actingUserId));
+    }
+
+    // Clôt définitivement le sondage. Voter pour la date retenue vaut « Je viens » ; ne pas avoir voté
+    // pour elle ne vaut pas refus, d'où les autres statuts laissés tels quels.
+    public void ChooseDate(Guid actingUserId, Guid dateOptionId, DateTime now)
+    {
+        EnsureActingUserIsCreatorOrOrganizer(actingUserId);
+        EnsureDatePollIsOpen();
+        var option = GetDateOption(dateOptionId);
+
+        if (option.Date <= now)
+            throw new DateOptionInThePastException(Id);
+
+        EventDate = option.Date;
+        AddDomainEvent(new EventDateChosenDomainEvent(Id));
+
+        foreach (var participant in _participants.Where(p => option.VoterUserIds.Contains(p.UserId) && p.ParticipationStatus != ParticipationStatus.Attending))
+        {
+            participant.ChangeParticipationStatus(ParticipationStatus.Attending);
+            AddDomainEvent(new ParticipantParticipationStatusChangedDomainEvent(Id, participant.Id));
+        }
+    }
+
+    private EventDateOption AddDateOptionCore(DateTime date, DateTime now)
+    {
+        if (date <= now)
+            throw new DateOptionInThePastException(Id);
+
+        if (_dateOptions.Any(o => o.Date == date))
+            throw new DateOptionDuplicateException(Id);
+
+        if (_dateOptions.Count >= MaxDateOptions)
+            throw new DateOptionCountOutOfRangeException(Id);
+
+        var option = new EventDateOption(Id, date);
+        _dateOptions.Add(option);
+        return option;
+    }
+
+    private void EnsureDatePollIsOpen()
+    {
+        if (!IsDatePollOpen)
+            throw new DatePollNotOpenException(Id);
+    }
+
     private void EnsureActingUserIsCreator(Guid actingUserId)
     {
         if (actingUserId != CreatedByUserId)
@@ -295,6 +416,10 @@ public class Event : Entity
     private EventParticipant GetParticipant(Guid userId) =>
         _participants.FirstOrDefault(p => p.UserId == userId)
         ?? throw new ParticipantNotFoundException(Id, userId);
+
+    private EventDateOption GetDateOption(Guid dateOptionId) =>
+        _dateOptions.FirstOrDefault(o => o.Id == dateOptionId)
+        ?? throw new DateOptionNotFoundException(Id, dateOptionId);
 
     private EventItem GetItem(Guid itemId) =>
         _items.FirstOrDefault(t => t.Id == itemId)

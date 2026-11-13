@@ -13,9 +13,12 @@ internal static class EventMapper
         var items = entity.Items.Select(t =>
             EventItem.Reconstitute(t.Id, t.EventId, t.Title, t.Quantity, t.Kind, t.AssignedToUserId, t.CorrectedCategory, t.CreatedByUserId, t.CreatedAt));
 
+        var dateOptions = entity.DateOptions.Select(o =>
+            EventDateOption.Reconstitute(o.Id, o.EventId, o.Date, o.Votes.Select(v => v.UserId)));
+
         return Event.Reconstitute(
             entity.Id, entity.Title, entity.Description, entity.EventDate, entity.Location, entity.ImageStorageKey, entity.InviteLinkToken,
-            entity.CreatedByUserId, entity.Status, entity.CreatedAt, participants, items);
+            entity.CreatedByUserId, entity.Status, entity.CreatedAt, participants, items, dateOptions);
     }
 
     public static EventEntity ToEntity(Event domain)
@@ -36,6 +39,7 @@ internal static class EventMapper
 
         entity.Participants.AddRange(domain.Participants.Select(ToEntity));
         entity.Items.AddRange(domain.Items.Select(ToEntity));
+        entity.DateOptions.AddRange(domain.DateOptions.Select(ToEntity));
 
         return entity;
     }
@@ -51,6 +55,14 @@ internal static class EventMapper
         Role = domain.Role,
         InvitedAt = domain.InvitedAt,
         ParticipationStatus = domain.ParticipationStatus,
+    };
+
+    internal static EventDateOptionEntity ToEntity(EventDateOption domain) => new()
+    {
+        Id = domain.Id,
+        EventId = domain.EventId,
+        Date = domain.Date,
+        Votes = domain.VoterUserIds.Select(userId => new EventDateVoteEntity { DateOptionId = domain.Id, UserId = userId }).ToList(),
     };
 
     internal static EventItemEntity ToEntity(EventItem domain) => new()

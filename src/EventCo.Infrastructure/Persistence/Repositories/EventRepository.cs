@@ -55,6 +55,22 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
                 case ItemDeletedDomainEvent e:
                     await DeleteItem(e.ItemId, cancellationToken);
                     break;
+                case EventDateChosenDomainEvent:
+                    await UpdateEventDate(@event, cancellationToken);
+                    break;
+                case DateOptionAddedDomainEvent e:
+                    await InsertDateOption(@event, e.DateOptionId, cancellationToken);
+                    break;
+                case DateOptionRemovedDomainEvent e:
+                    await DeleteDateOption(e.DateOptionId, cancellationToken);
+                    break;
+                case DateVoteCastDomainEvent e:
+                    await dbContext.Set<EventDateVoteEntity>().AddAsync(
+                        new EventDateVoteEntity { DateOptionId = e.DateOptionId, UserId = e.UserId }, cancellationToken);
+                    break;
+                case DateVoteWithdrawnDomainEvent e:
+                    await DeleteDateVote(e.DateOptionId, e.UserId, cancellationToken);
+                    break;
                 default:
                     throw new InvalidOperationException(
                         $"Domain event non géré par {nameof(EventRepository)} : {domainEvent.GetType().Name}.");
@@ -144,6 +160,38 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         dbContext.Remove(entity);
     }
 
+    private async Task UpdateEventDate(Event @event, CancellationToken cancellationToken)
+    {
+        var entity = await FindEventEntityAsync(@event.Id, cancellationToken);
+        entity.EventDate = @event.EventDate;
+    }
+
+    private async Task InsertDateOption(Event @event, Guid dateOptionId, CancellationToken cancellationToken)
+    {
+        var option = @event.DateOptions.Single(o => o.Id == dateOptionId);
+        await dbContext.Set<EventDateOptionEntity>().AddAsync(EventMapper.ToEntity(option), cancellationToken);
+    }
+
+    private async Task DeleteDateOption(Guid dateOptionId, CancellationToken cancellationToken)
+    {
+        // FK EventDateVotes -> EventDateOptions en Restrict : les votes partent explicitement avec l'option.
+        var votes = await dbContext.Set<EventDateVoteEntity>()
+            .Where(v => v.DateOptionId == dateOptionId)
+            .ToListAsync(cancellationToken);
+        dbContext.RemoveRange(votes);
+
+        var entity = await dbContext.Set<EventDateOptionEntity>().FindAsync([dateOptionId], cancellationToken)
+            ?? throw new InvalidOperationException($"EventDateOptionEntity {dateOptionId} introuvable.");
+        dbContext.Remove(entity);
+    }
+
+    private async Task DeleteDateVote(Guid dateOptionId, Guid userId, CancellationToken cancellationToken)
+    {
+        var entity = await dbContext.Set<EventDateVoteEntity>().FindAsync([dateOptionId, userId], cancellationToken)
+            ?? throw new InvalidOperationException($"EventDateVoteEntity {dateOptionId}/{userId} introuvable.");
+        dbContext.Remove(entity);
+    }
+
     // FindAsync résout depuis le ChangeTracker local sans requête SQL si l'entité est déjà suivie
     // (typiquement déjà chargée par un GetByIdAsync antérieur dans la même requête), sinon la charge.
     private async Task<EventEntity> FindEventEntityAsync(Guid eventId, CancellationToken cancellationToken) =>
@@ -172,6 +220,13 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
             .ToListAsync(cancellationToken);
         dbContext.RemoveRange(items);
 
+        var dateOptions = await dbContext.Set<EventDateOptionEntity>()
+            .Include(o => o.Votes)
+            .Where(o => o.EventId == @event.Id)
+            .ToListAsync(cancellationToken);
+        dbContext.RemoveRange(dateOptions.SelectMany(o => o.Votes));
+        dbContext.RemoveRange(dateOptions);
+
         var entity = await dbContext.Events.FirstAsync(e => e.Id == @event.Id, cancellationToken);
         dbContext.Events.Remove(entity);
     }
@@ -181,6 +236,7 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         var entity = await dbContext.Events
             .Include(e => e.Participants)
             .Include(e => e.Items)
+            .Include(e => e.DateOptions).ThenInclude(o => o.Votes)
             .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
 
         return entity is null ? null : EventMapper.ToDomain(entity);
@@ -191,6 +247,7 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         var entity = await dbContext.Events
             .Include(e => e.Participants)
             .Include(e => e.Items)
+            .Include(e => e.DateOptions).ThenInclude(o => o.Votes)
             .FirstOrDefaultAsync(e => e.InviteLinkToken == token, cancellationToken);
 
         return entity is null ? null : EventMapper.ToDomain(entity);
@@ -200,7 +257,8 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
     {
         var entities = await dbContext.Events
             .Include(e => e.Participants)
-            .OrderBy(e => e.EventDate)
+            .OrderBy(e => e.EventDate != null)
+            .ThenBy(e => e.EventDate)
             .ToListAsync(cancellationToken);
 
         return entities.Select(EventMapper.ToDomain).ToList();
@@ -211,7 +269,8 @@ internal sealed class EventRepository(EventCoDbContext dbContext, DomainEventCol
         var entities = await dbContext.Events
             .Include(e => e.Participants)
             .Where(e => e.Participants.Any(p => p.UserId == userId))
-            .OrderBy(e => e.EventDate)
+            .OrderBy(e => e.EventDate != null)
+            .ThenBy(e => e.EventDate)
             .ToListAsync(cancellationToken);
 
         return entities.Select(EventMapper.ToDomain).ToList();

@@ -70,7 +70,7 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | Id | Guid | |
 | Title | string | ex: "Repas de Noël" |
 | Description | string? | |
-| EventDate | DateTime | fixée à la création (pas de sondage au MVP) |
+| EventDate | DateTime? | fixée à la création, ou null tant qu'un sondage de date est ouvert (devient la date retenue à la clôture) |
 | Location | string? | texte libre pour le MVP |
 | CreatedByUserId | Guid | FK → User, le créateur |
 | Status | enum | `Draft`, `Planned`, `Completed`, `Cancelled` |
@@ -98,7 +98,21 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 | CorrectedCategory | enum? | `Aperitif`, `MainCourses`, `CheeseAndBread`, `Desserts`, `Drinks`, `Equipment`, `Other`. null = catégorie déduite de l'intitulé à la lecture (dictionnaire de mots-clés dans le Domain), cf. `docs/adr/0001-categorie-deduite-a-la-lecture.md` |
 | CreatedAt | DateTime | |
 
+**EventDateOption** (option de date d'un sondage de date)
+| Champ | Type | Notes |
+|---|---|---|
+| Id | Guid | |
+| EventId | Guid | FK |
+| Date | DateTime | date et heure de début proposées |
+
+**EventDateVote** (vote d'un participant pour une option de date)
+| Champ | Type | Notes |
+|---|---|---|
+| DateOptionId | Guid | FK, clé composée avec UserId |
+| UserId | Guid | FK → User |
+
 ### 3.2 Règles de gestion des rôles
+- **Sondage de date** : choisi à la création de l'événement uniquement, définitif une fois clos. Le créateur et les co-organisateurs proposent 2 à 10 options (futures, sans doublon ; ajout et suppression possibles, pas de modification) ; tous les participants votent pour les options qui leur conviennent, jusqu'à la clôture. Un organisateur clôt le sondage en retenant une option non passée : ses votants passent en `Attending`, les autres gardent leur statut.
 - Le **créateur** (`Event.CreatedByUserId`) a les droits ultimes : suppression de l'événement, gestion des rôles des autres participants, retrait de n'importe qui.
 - Un **co-organisateur** (`EventParticipant.Role = Organizer`) peut modifier les informations de l'événement, gérer les articles, inviter de nouveaux participants — mais ne peut pas supprimer l'événement ni retirer le créateur.
 - Un **participant** (`EventParticipant.Role = Participant`) peut consulter l'événement, s'auto-assigner des articles à prendre et ajouter ce qu'il apporte — mais pas d'article à prendre.
@@ -126,7 +140,8 @@ Un SaaS permettant d'organiser des événements de groupe (repas, anniversaires,
 - Commentaires / chat par événement
 
 ### Could have
-- Sondage de date/lieu (vote entre plusieurs options)
+- Sondage de date (vote entre plusieurs options de date, clôture par un organisateur)
+- Sondage de lieu (vote entre plusieurs options)
 - Budget partagé (suivi des dépenses, calcul de qui doit combien à qui)
 - Templates d'événements pré-remplis (ex: liste de courses type "Noël")
 - Photos partagées post-événement

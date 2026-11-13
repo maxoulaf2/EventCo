@@ -54,5 +54,10 @@ public class EventConfiguration : IEntityTypeConfiguration<EventEntity>
             .WithOne()
             .HasForeignKey(t => t.EventId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(e => e.DateOptions)
+            .WithOne()
+            .HasForeignKey(o => o.EventId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
