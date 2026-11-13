@@ -53,6 +53,7 @@ public sealed class InviteParticipantCommandHandler(
             user.Email.Value,
             $"Invitation à « {@event.Title} »",
             $"<p>Vous avez été invité(e) à l'événement « {encodedTitle} » sur EventCo.</p>"
+            + (@event.IsDatePollOpen ? "<p>La date est soumise au vote : indiquez les dates qui vous conviennent.</p>" : "")
             + $"<p><a href=\"{inviteLink}\">{inviteLink}</a></p>",
             cancellationToken);
 

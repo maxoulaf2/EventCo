@@ -1,6 +1,8 @@
 using EventCo.Api.Contracts.Events;
 using EventCo.Application.Common.Messaging;
+using EventCo.Application.Events.AddDateOption;
 using EventCo.Application.Events.AssignItem;
+using EventCo.Application.Events.ChooseEventDate;
 using EventCo.Application.Events.CreateEvent;
 using EventCo.Application.Events.CorrectItemCategory;
 using EventCo.Application.Events.CreateItem;
@@ -15,9 +17,12 @@ using EventCo.Application.Events.InviteParticipant;
 using EventCo.Application.Events.JoinEventViaInviteLink;
 using EventCo.Application.Events.PromoteToOrganizer;
 using EventCo.Application.Events.RegenerateEventInviteLink;
+using EventCo.Application.Events.RemoveDateOption;
 using EventCo.Application.Events.SetParticipationStatus;
 using EventCo.Application.Events.UpdateEvent;
 using EventCo.Application.Events.UpdateEventImage;
+using EventCo.Application.Events.VoteForDateOption;
+using EventCo.Application.Events.WithdrawDateVote;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,7 +54,7 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> Create(CreateEventRequest request, CancellationToken cancellationToken)
     {
         var result = await commandDispatcher.Send(
-            new CreateEventCommand(request.Title, request.Description, request.EventDate, request.Location),
+            new CreateEventCommand(request.Title, request.Description, request.EventDate, request.Location, request.DateOptions),
             cancellationToken);
 
         var response = new EventResponse(
@@ -90,7 +95,8 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
                 p.InvitedAt,
                 p.ParticipationStatus,
                 p.AvatarUrl)).ToList(),
-            result.InviteLinkToken);
+            result.InviteLinkToken,
+            result.DateOptions.Select(o => new EventDateOptionResponse(o.DateOptionId, o.Date, o.VoterUserIds)).ToList());
 
         return Ok(response);
     }
@@ -258,6 +264,46 @@ public sealed class EventsController(ICommandDispatcher commandDispatcher) : Con
     public async Task<IActionResult> DemoteParticipant(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         await commandDispatcher.Send(new DemoteToParticipantCommand(id, userId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/date-options")]
+    public async Task<IActionResult> AddDateOption(Guid id, AddDateOptionRequest request, CancellationToken cancellationToken)
+    {
+        var result = await commandDispatcher.Send(new AddDateOptionCommand(id, request.Date), cancellationToken);
+
+        return Created($"api/events/{id}", new EventDateOptionResponse(result.DateOptionId, result.Date, []));
+    }
+
+    [HttpDelete("{id:guid}/date-options/{dateOptionId:guid}")]
+    public async Task<IActionResult> RemoveDateOption(Guid id, Guid dateOptionId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new RemoveDateOptionCommand(id, dateOptionId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/date-options/{dateOptionId:guid}/vote")]
+    public async Task<IActionResult> VoteForDateOption(Guid id, Guid dateOptionId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new VoteForDateOptionCommand(id, dateOptionId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}/date-options/{dateOptionId:guid}/vote")]
+    public async Task<IActionResult> WithdrawDateVote(Guid id, Guid dateOptionId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new WithdrawDateVoteCommand(id, dateOptionId), cancellationToken);
+
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/date-options/{dateOptionId:guid}/choose")]
+    public async Task<IActionResult> ChooseDate(Guid id, Guid dateOptionId, CancellationToken cancellationToken)
+    {
+        await commandDispatcher.Send(new ChooseEventDateCommand(id, dateOptionId), cancellationToken);
 
         return NoContent();
     }

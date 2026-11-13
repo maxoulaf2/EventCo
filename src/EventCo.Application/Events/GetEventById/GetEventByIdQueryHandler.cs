@@ -55,6 +55,10 @@ public sealed class GetEventByIdQueryHandler(
             @event.Status.ToString(),
             @event.CreatedAt,
             participants,
-            inviteLinkToken);
+            inviteLinkToken,
+            @event.DateOptions
+                .OrderBy(o => o.Date)
+                .Select(o => new EventDateOptionSummary(o.Id, o.Date, o.VoterUserIds.ToList()))
+                .ToList());
     }
 }

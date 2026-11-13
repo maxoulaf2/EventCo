@@ -6,5 +6,5 @@ public sealed record UpdateEventCommand(
     Guid EventId,
     string Title,
     string? Description,
-    DateTime EventDate,
+    DateTime? EventDate,
     string? Location) : ICommand<UpdateEventResult>;

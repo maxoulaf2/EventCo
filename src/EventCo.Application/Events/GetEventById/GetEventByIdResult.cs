@@ -11,7 +11,10 @@ public sealed record GetEventByIdResult(
     string Status,
     DateTime CreatedAt,
     IReadOnlyList<EventParticipantSummary> Participants,
-    string? InviteLinkToken);
+    string? InviteLinkToken,
+    IReadOnlyList<EventDateOptionSummary> DateOptions);
+
+public sealed record EventDateOptionSummary(Guid DateOptionId, DateTime Date, IReadOnlyList<Guid> VoterUserIds);
 
 public sealed record EventParticipantSummary(
     Guid UserId,

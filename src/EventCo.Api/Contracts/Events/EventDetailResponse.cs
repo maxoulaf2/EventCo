@@ -11,4 +11,5 @@ public sealed record EventDetailResponse(
     string Status,
     DateTime CreatedAt,
     IReadOnlyList<EventParticipantResponse> Participants,
-    string? InviteLinkToken);
+    string? InviteLinkToken,
+    IReadOnlyList<EventDateOptionResponse> DateOptions);
