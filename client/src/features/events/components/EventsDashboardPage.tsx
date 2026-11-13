@@ -7,7 +7,7 @@ import { btnPrimary, btnSecondary } from '../../../shared/lib/ui'
 import { routes } from '../../../shared/lib/routes'
 import { useMyEvents } from '../hooks/useMyEvents'
 import { Tag } from '../../../shared/components/Tag'
-import type { MyEvent } from '../types'
+import { DATE_UNDER_VOTE_LABEL, type MyEvent } from '../types'
 
 function dateBadge(iso: string): { day: string; month: string } {
   const date = new Date(iso)
@@ -31,8 +31,10 @@ export function EventsDashboardPage() {
   }
 
   const now = Date.now()
-  const upcoming = events?.filter((event) => new Date(event.eventDate).getTime() >= now) ?? []
-  const past = events?.filter((event) => new Date(event.eventDate).getTime() < now) ?? []
+  // Un événement en cours de vote n'a pas de date : il n'est jamais « passé » (l'API le liste en premier).
+  const isPast = (event: MyEvent) => event.eventDate !== null && new Date(event.eventDate).getTime() < now
+  const upcoming = events?.filter((event) => !isPast(event)) ?? []
+  const past = events?.filter(isPast) ?? []
 
   return (
     <main data-testid="events-dashboard-page" className="mx-auto flex min-h-screen w-full max-w-lg flex-col bg-bg">
@@ -126,7 +128,7 @@ export function EventsDashboardPage() {
 }
 
 function EventCard({ event }: { event: MyEvent }) {
-  const { day, month } = dateBadge(event.eventDate)
+  const { day, month } = event.eventDate ? dateBadge(event.eventDate) : { day: '?', month: 'vote' }
 
   return (
     <li>
@@ -147,16 +149,23 @@ function EventCard({ event }: { event: MyEvent }) {
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0" />
                 <circle cx="12" cy="10" r="3" />
               </svg>
-              {event.location ?? formatDate(event.eventDate)}
+              {event.location ?? (event.eventDate ? formatDate(event.eventDate) : DATE_UNDER_VOTE_LABEL)}
             </div>
           </div>
         </div>
 
-        {event.role === 'Organizer' && (
+        {(event.role === 'Organizer' || event.eventDate === null) && (
           <div className="flex items-center gap-2.5">
-            <Tag variant="sage" className="ml-auto">
-              <span data-testid={`event-list-item-organizer-badge-${event.id}`}>Organisateur·ice</span>
-            </Tag>
+            {event.eventDate === null && (
+              <Tag variant="accent">
+                <span data-testid={`event-list-item-date-poll-badge-${event.id}`}>{DATE_UNDER_VOTE_LABEL}</span>
+              </Tag>
+            )}
+            {event.role === 'Organizer' && (
+              <Tag variant="sage" className="ml-auto">
+                <span data-testid={`event-list-item-organizer-badge-${event.id}`}>Organisateur·ice</span>
+              </Tag>
+            )}
           </div>
         )}
       </Link>

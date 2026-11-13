@@ -2,6 +2,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { ApiError } from '../../../shared/lib/api'
 import { routes } from '../../../shared/lib/routes'
 import { useAllEvents } from '../hooks/useAllEvents'
+import { DATE_UNDER_VOTE_LABEL } from '../../events/types'
 import type { AdminEventSummary } from '../types'
 
 function formatDate(iso: string): string {
@@ -86,7 +87,7 @@ function AdminEventCard({ event }: { event: AdminEventSummary }) {
       >
         <div className="font-heading text-[19px] sm:text-[21px]">{event.title}</div>
         <div className="text-[13px] text-ink/62">
-          {formatDate(event.eventDate)}
+          {event.eventDate ? formatDate(event.eventDate) : DATE_UNDER_VOTE_LABEL}
           {event.location && ` · ${event.location}`}
         </div>
         <div data-testid={`admin-event-list-item-participant-count-${event.id}`} className="text-[12.5px] text-ink/55">

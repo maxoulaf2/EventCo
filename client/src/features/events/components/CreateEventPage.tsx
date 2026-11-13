@@ -5,12 +5,27 @@ import { btnGhost, btnPrimary, fieldLabel, input, textarea } from '../../../shar
 import { routes } from '../../../shared/lib/routes'
 import { useCreateEvent } from '../hooks/useCreateEvent'
 import { useUpdateEventImage } from '../hooks/useUpdateEventImage'
+import type { DateOptionInput } from '../types'
 import { EventImageField, type SelectedEventImage } from './EventImageField'
+
+// Mêmes bornes que l'agrégat Event côté API (MinDateOptions / MaxDateOptions).
+const MIN_DATE_OPTIONS = 2
+const MAX_DATE_OPTIONS = 10
+
+const DATE_MODES = [
+  { value: 'fixed', label: 'Date fixe' },
+  { value: 'poll', label: 'Proposer plusieurs dates' },
+] as const
 
 export function CreateEventPage() {
   const [title, setTitle] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [eventTime, setEventTime] = useState('')
+  const [dateMode, setDateMode] = useState<'fixed' | 'poll'>('fixed')
+  const [dateOptions, setDateOptions] = useState<DateOptionInput[]>([
+    { date: '', time: '' },
+    { date: '', time: '' },
+  ])
   const [location, setLocation] = useState('')
   const [description, setDescription] = useState('')
   const [image, setImage] = useState<SelectedEventImage | null>(null)
@@ -32,6 +47,10 @@ export function CreateEventPage() {
     updateEventImage.mutate({ eventId, image: selectedImage.blob }, { onSuccess: () => toEvents() })
   }
 
+  function updateDateOption(index: number, change: Partial<DateOptionInput>) {
+    setDateOptions(dateOptions.map((option, i) => (i === index ? { ...option, ...change } : option)))
+  }
+
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -43,8 +62,7 @@ export function CreateEventPage() {
     createEvent.mutate(
       {
         title,
-        eventDate,
-        eventTime: eventTime || undefined,
+        ...(dateMode === 'poll' ? { dateOptions } : { eventDate, eventTime: eventTime || undefined }),
         location: location || undefined,
         description: description || undefined,
       },
@@ -106,36 +124,112 @@ export function CreateEventPage() {
               />
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="eventDate" className={fieldLabel}>
-                Date
-              </label>
-              <input
-                id="eventDate"
-                name="eventDate"
-                type="date"
-                required
-                value={eventDate}
-                onChange={(event) => setEventDate(event.target.value)}
-                data-testid="create-event-date-input"
-                className={input}
-              />
+            <div role="radiogroup" aria-label="Choix de la date" className="flex gap-2">
+              {DATE_MODES.map((mode) => (
+                <label
+                  key={mode.value}
+                  className={`inline-flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-full px-4 text-center text-[14px] transition-colors has-focus-visible:outline-2 has-focus-visible:outline-accent-600 ${
+                    dateMode === mode.value ? 'bg-accent-500 text-accent-900' : 'border border-border text-ink/70'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="dateMode"
+                    checked={dateMode === mode.value}
+                    onChange={() => setDateMode(mode.value)}
+                    data-testid={`create-event-date-mode-${mode.value}`}
+                    className="sr-only"
+                  />
+                  {mode.label}
+                </label>
+              ))}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="eventTime" className={fieldLabel}>
-                Heure <span className="text-ink/50">— optionnel</span>
-              </label>
-              <input
-                id="eventTime"
-                name="eventTime"
-                type="time"
-                value={eventTime}
-                onChange={(event) => setEventTime(event.target.value)}
-                data-testid="create-event-time-input"
-                className={input}
-              />
-            </div>
+            {dateMode === 'fixed' && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="eventDate" className={fieldLabel}>
+                    Date
+                  </label>
+                  <input
+                    id="eventDate"
+                    name="eventDate"
+                    type="date"
+                    required
+                    value={eventDate}
+                    onChange={(event) => setEventDate(event.target.value)}
+                    data-testid="create-event-date-input"
+                    className={input}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="eventTime" className={fieldLabel}>
+                    Heure <span className="text-ink/50">— optionnel</span>
+                  </label>
+                  <input
+                    id="eventTime"
+                    name="eventTime"
+                    type="time"
+                    value={eventTime}
+                    onChange={(event) => setEventTime(event.target.value)}
+                    data-testid="create-event-time-input"
+                    className={input}
+                  />
+                </div>
+              </>
+            )}
+
+            {dateMode === 'poll' && (
+              <div className="flex flex-col gap-2.5">
+                <p className={fieldLabel}>Dates proposées au vote — l&rsquo;heure est optionnelle</p>
+                {dateOptions.map((option, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      required
+                      aria-label={`Date proposée ${index + 1}`}
+                      value={option.date}
+                      onChange={(event) => updateDateOption(index, { date: event.target.value })}
+                      data-testid={`create-event-date-option-date-input-${index}`}
+                      className={`${input} min-w-0 flex-[3]`}
+                    />
+                    <input
+                      type="time"
+                      aria-label={`Heure de la date proposée ${index + 1}`}
+                      value={option.time}
+                      onChange={(event) => updateDateOption(index, { time: event.target.value })}
+                      data-testid={`create-event-date-option-time-input-${index}`}
+                      className={`${input} min-w-0 flex-[2]`}
+                    />
+                    {dateOptions.length > MIN_DATE_OPTIONS && (
+                      <button
+                        type="button"
+                        onClick={() => setDateOptions(dateOptions.filter((_, i) => i !== index))}
+                        aria-label={`Retirer la date proposée ${index + 1}`}
+                        data-testid={`create-event-date-option-remove-button-${index}`}
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink/70 transition-colors hover:bg-ink/5"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round">
+                          <path d="M18 6 6 18" />
+                          <path d="m6 6 12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {dateOptions.length < MAX_DATE_OPTIONS && (
+                  <button
+                    type="button"
+                    onClick={() => setDateOptions([...dateOptions, { date: '', time: '' }])}
+                    data-testid="create-event-date-option-add-button"
+                    className={`${btnGhost} self-start`}
+                  >
+                    Ajouter une date
+                  </button>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-col gap-1.5">
               <label htmlFor="location" className={fieldLabel}>

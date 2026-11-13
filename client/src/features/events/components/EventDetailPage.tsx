@@ -12,9 +12,11 @@ import { useDemoteParticipant } from '../hooks/useDemoteParticipant'
 import { useEventDetail } from '../hooks/useEventDetail'
 import { usePromoteParticipant } from '../hooks/usePromoteParticipant'
 import { useSetParticipationStatus } from '../hooks/useSetParticipationStatus'
+import { formatEventDate } from '../formatEventDate'
+import { DatePoll } from './DatePoll'
 import { InviteLinkShareBox } from './InviteLinkShareBox'
 import { InviteParticipantForm } from './InviteParticipantForm'
-import type { EventParticipant, ParticipationStatus } from '../types'
+import { DATE_UNDER_VOTE_LABEL, type EventParticipant, type ParticipationStatus } from '../types'
 
 const PARTICIPATION_STATUS_LABELS: Record<ParticipationStatus, string> = {
   Attending: 'Je viens !',
@@ -32,13 +34,6 @@ const PARTICIPATION_STATUS_TAG_VARIANT: Record<ParticipationStatus, 'sage' | 'ou
   Attending: 'sage',
   NotAttending: 'outline',
   Unknown: 'accent',
-}
-
-function formatDate(iso: string): string {
-  const date = new Date(iso)
-  const day = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
-  const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-  return `${day.charAt(0).toUpperCase()}${day.slice(1)} · ${time}`
 }
 
 export function EventDetailPage() {
@@ -202,7 +197,9 @@ export function EventDetailPage() {
                         <path d="M3 10h18" />
                       </svg>
                     </span>
-                    {formatDate(event.eventDate)}
+                    <span data-testid="event-detail-date">
+                      {event.eventDate ? formatEventDate(event.eventDate) : DATE_UNDER_VOTE_LABEL}
+                    </span>
                   </div>
                   {event.location && (
                     <div className="flex items-center gap-2.5 text-[15px]">
@@ -223,7 +220,17 @@ export function EventDetailPage() {
                   </p>
                 )}
 
-                {!isCreator && isParticipant && currentParticipant && (
+                {event.eventDate === null && (
+                  <DatePoll
+                    event={event}
+                    currentUserId={currentUser?.userId}
+                    canVote={isParticipant}
+                    canManage={isCreatorOrOrganizer}
+                  />
+                )}
+
+                {/* Pendant le sondage de date, on vote : la présence ne se demande qu'une fois la date connue. */}
+                {event.eventDate !== null && !isCreator && isParticipant && currentParticipant && (
                   <div className="mt-4 max-w-xs">
                     <label
                       htmlFor="event-detail-participation-status-select"
